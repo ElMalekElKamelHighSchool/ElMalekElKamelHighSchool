@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم | مدرسة الملك الكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-950 min-h-screen text-white p-6">
+        <h2 class="text-2xl font-black mb-10 text-yellow-500">لوحة المستشار</h2>
+        <nav class="space-y-4">
+            <button onclick="showTab('info')" class="w-full text-right p-3 hover:bg-blue-800 rounded">📝 تعريف المدرسة</button>
+            <button onclick="showTab('teachers')" class="w-full text-right p-3 hover:bg-blue-800 rounded">👨‍🏫 إدارة المعلمين</button>
+            <button onclick="showTab('students')" class="w-full text-right p-3 hover:bg-blue-800 rounded">🎓 إدارة الطلاب</button>
+            <button onclick="showTab('reports')" class="w-full text-right p-3 hover:bg-blue-800 rounded">📊 تقارير عامة</button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-10">
+        <!-- Tab: Info -->
+        <div id="tab-info" class="tab-content bg-white p-8 rounded-xl shadow">
+            <h3 class="text-2xl font-bold mb-4">تعديل التعريف بالمدرسة</h3>
+            <textarea id="aboutInput" class="w-full h-40 border p-4 rounded-lg mb-4" placeholder="اكتب هنا كلمة الإدارة والتعريف..."></textarea>
+            <button id="saveInfo" class="bg-blue-900 text-white px-8 py-2 rounded">حفظ التعديلات</button>
+        </div>
+
+        <!-- Tab: Teachers -->
+        <div id="tab-teachers" class="tab-content hidden bg-white p-8 rounded-xl shadow">
+            <h3 class="text-2xl font-bold mb-4">إضافة معلم جديد</h3>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <input type="text" id="tName" placeholder="اسم المعلم" class="border p-2 rounded">
+                <input type="email" id="tEmail" placeholder="الإيميل" class="border p-2 rounded">
+                <select id="tSubject" class="border p-2 rounded">
+                    <option value="math">رياضيات</option>
+                    <option value="physics">فيزياء</option>
+                    <option value="admin_posts">مسؤول نشر جداول</option>
+                </select>
+                <button id="addTeacherBtn" class="bg-green-600 text-white rounded">إنشاء حساب معلم</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { db, doc, setDoc, updateDoc } from './config.js';
+
+        // وظيفة حفظ تعريف المدرسة
+        document.getElementById('saveInfo').onclick = async () => {
+            const text = document.getElementById('aboutInput').value;
+            await setDoc(doc(db, "settings", "school_info"), { text: text });
+            alert("تم تحديث معلومات المدرسة بنجاح!");
+        };
+    </script>
+</body>
+</html>
