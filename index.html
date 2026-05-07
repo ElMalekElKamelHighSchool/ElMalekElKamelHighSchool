@@ -3,197 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملك الكامل الثانوية العسكرية | حلم الأجيال</title>
+    <title>بوابة الملك الكامل | حلم الأجيال</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; }
-        .hero-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #000 100%); }
-        .news-ticker { background: #b91c1c; white-space: nowrap; overflow: hidden; position: relative; }
-        .ticker-content { display: inline-block; animation: ticker 30s linear infinite; }
-        @keyframes ticker { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        :root { --primary: #1e3a8a; --accent: #f59e0b; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .hero-title { text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .ticker-container { background: #991b1b; white-space: nowrap; overflow: hidden; height: 45px; display: flex; align-items: center; }
+        .ticker-text { display: inline-block; animation: ticker 40s linear infinite; font-weight: 700; color: white; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        .schedule-table table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 1.1rem; }
+        .schedule-table th { background: var(--primary); color: white; padding: 15px; border: 1px solid #ddd; }
+        .schedule-table td { background: white; padding: 15px; border: 1px solid #ddd; text-align: center; font-weight: 600; }
+        .schedule-table tr:nth-child(even) td { background: #f1f5f9; }
+        @media print { .no-print { display: none; } body { background: white; } }
     </style>
 </head>
 <body>
 
-    <div class="news-ticker text-white py-2 z-[100] sticky top-0 shadow-lg border-b-2 border-yellow-500">
-        <div class="ticker-content" id="tickerContainer">
-            <span class="mx-10 font-bold">✨ مرحباً بكم في بوابة الملك الكامل التعليمية - حلم الأجيال ✨</span>
+    <div class="ticker-container no-print sticky top-0 z-[100] shadow-xl">
+        <div class="bg-yellow-500 text-blue-900 px-6 h-full flex items-center font-black z-10 shadow-lg">عاجل</div>
+        <div class="ticker-text" id="mainTicker">
+            أهلاً بكم في المنصة الرسمية لمدرسة الملك الكامل الثانوية بالمنصورة - حلم الأجيال .. تابعونا لمعرفة آخر الجداول والنتائج
         </div>
     </div>
 
-    <header class="bg-white py-4 shadow-md border-b">
-        <div class="container mx-auto px-6 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="bg-blue-900 text-white p-3 rounded-lg">
-                    <h1 class="text-2xl font-black leading-none">الملك الكامل</h1>
-                    <p class="text-[10px] text-yellow-400 font-bold tracking-widest uppercase">حلم الأجيال</p>
+    <nav class="glass border-b border-gray-200 py-6 sticky top-[45px] z-50">
+        <div class="container mx-auto px-8 flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <div class="h-16 w-16 bg-blue-900 rounded-2xl flex items-center justify-center shadow-2xl rotate-3">
+                    <span class="text-white text-3xl font-black">K</span>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-black text-blue-900 tracking-tight">الملك الكامل <span class="text-red-600">الثانوية</span></h1>
+                    <p class="text-sm font-bold text-yellow-600 tracking-[0.3em] uppercase">حلم الأجيال - المنصورة</p>
                 </div>
             </div>
-            <nav class="hidden md:flex gap-8 font-bold text-gray-700 uppercase text-sm">
-                <a href="#news" class="hover:text-blue-900">الجريدة</a>
-                <a href="#schedules" class="hover:text-blue-900">الجداول</a>
-                <a href="results.html" class="text-red-600">النتائج</a>
-                <a href="#contact" class="hover:text-blue-900">تواصل معنا</a>
-                <a href="dashboard.html" class="bg-gray-100 px-4 py-1 rounded"><i class="fas fa-lock ml-1"></i> الإدارة</a>
-            </nav>
-        </div>
-    </header>
-
-    <section class="hero-gradient text-white py-20">
-        <div class="container mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
-            <div class="animate-pulse">
-                <h2 class="text-5xl font-black mb-6 leading-tight">صناعة قادة <span class="text-yellow-400">المستقبل</span> بالانضباط والعلم</h2>
-                <p class="text-lg opacity-80 mb-8">الموقع الرسمي لمدرسة الملك الكامل الثانوية العسكرية بنين بالمنصورة - قلب الدقهلية التعليمي.</p>
-                <div class="flex gap-4">
-                    <a href="#schedules" class="bg-yellow-500 text-blue-900 px-8 py-3 rounded-full font-black">جداول الحصص</a>
-                    <a href="results.html" class="border-2 border-white px-8 py-3 rounded-full font-black">النتائج الدراسية</a>
-                </div>
-            </div>
-            <div class="hidden md:block">
-                <img src="https://via.placeholder.com/600x400/1e3a8a/FFFFFF?text=King+Kamel+School" class="rounded-3xl shadow-2xl border-4 border-white/20">
+            <div class="hidden lg:flex items-center gap-10 font-bold text-gray-600">
+                <a href="#news" class="hover:text-blue-900 transition-colors">الجريدة</a>
+                <a href="#schedules" class="hover:text-blue-900 transition-colors">الجداول</a>
+                <a href="results.html" class="px-6 py-2 bg-red-600 text-white rounded-full shadow-lg hover:scale-105 transition-transform">النتائج</a>
+                <a href="dashboard.html" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" class="w-6"></a>
             </div>
         </div>
-    </section>
+    </nav>
 
-    <section id="news" class="py-20 container mx-auto px-6">
-        <div class="flex justify-between items-end mb-12">
-            <div>
-                <h3 class="text-4xl font-black text-blue-900">جريدة المدرسة</h3>
-                <p class="text-gray-500 mt-2">تابع آخر الأخبار والفعاليات والقرارات الرسمية</p>
-            </div>
+    <section class="relative h-[80vh] flex items-center justify-center overflow-hidden bg-slate-900">
+        <div class="absolute inset-0 opacity-40">
+            <img src="https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=1470" class="w-full h-full object-cover">
         </div>
-        <div class="grid md:grid-cols-3 gap-8" id="newsGrid">
-            </div>
-    </section>
-
-    <section id="schedules" class="py-20 bg-gray-200">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-12">
-                <h3 class="text-4xl font-black text-blue-900">منصة الجداول الذكية</h3>
-                <p class="text-gray-600 mt-2">عرض متطور لجداول الحصص والمعلمين مع إمكانية التحميل</p>
-            </div>
-            
-            <div class="flex justify-center gap-4 mb-10 overflow-x-auto py-2">
-                <button onclick="renderTable('grade1')" class="bg-white border-2 border-blue-900 text-blue-900 px-8 py-3 rounded-xl font-black hover:bg-blue-900 hover:text-white transition">الصف الأول</button>
-                <button onclick="renderTable('grade2')" class="bg-white border-2 border-blue-900 text-blue-900 px-8 py-3 rounded-xl font-black hover:bg-blue-900 hover:text-white transition">الصف الثاني</button>
-                <button onclick="renderTable('grade3')" class="bg-white border-2 border-blue-900 text-blue-900 px-8 py-3 rounded-xl font-black hover:bg-blue-900 hover:text-white transition">الصف الثالث</button>
-            </div>
-
-            <div id="tableWrapper" class="bg-white p-8 rounded-3xl shadow-2xl hidden relative">
-                <div class="flex justify-end mb-4 gap-2 no-print">
-                    <button onclick="downloadPDF()" class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold"><i class="fas fa-file-pdf ml-2"></i> تحميل PDF</button>
-                </div>
-                <div id="printableArea">
-                    <div id="tableContent"></div>
-                </div>
+        <div class="relative text-center text-white px-6 animate__animated animate__fadeInUp">
+            <h2 class="text-7xl font-black hero-title mb-6">نبني الرجال.. نصنع <span class="text-yellow-500">المستقبل</span></h2>
+            <p class="text-2xl font-light max-w-3xl mx-auto leading-relaxed opacity-90">مدرسة الملك الكامل ليست مجرد صرح تعليمي، بل هي منارة الانضباط والتفوق العلمي بمحافظة الدقهلية.</p>
+            <div class="mt-12 flex justify-center gap-6">
+                <a href="#schedules" class="bg-blue-600 px-10 py-4 rounded-2xl font-black text-xl shadow-2xl hover:bg-blue-700 transition">استعرض الجداول</a>
+                <a href="#news" class="bg-white/10 backdrop-blur-md border border-white/30 px-10 py-4 rounded-2xl font-black text-xl hover:bg-white/20 transition">آخر الأخبار</a>
             </div>
         </div>
     </section>
 
-    <footer id="contact" class="bg-blue-950 text-white py-16">
-        <div class="container mx-auto px-6 grid md:grid-cols-3 gap-12 border-b border-white/10 pb-12">
-            <div>
-                <h4 class="text-2xl font-black mb-6">الملك الكامل.. حلم الأجيال</h4>
-                <p class="opacity-70 leading-relaxed text-sm">مؤسسة تعليمية عريقة تهدف إلى بناء جيل من الرجال المتعلمين والمنضبطين لخدمة الوطن والمجتمع.</p>
+    <section id="news" class="py-32 bg-white">
+        <div class="container mx-auto px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20">
+                <div class="max-w-2xl">
+                    <span class="text-red-600 font-black tracking-widest uppercase text-sm italic">المركز الإعلامي</span>
+                    <h3 class="text-5xl font-black text-blue-950 mt-4 leading-tight">جريدة حلم الأجيال الرقمية</h3>
+                </div>
             </div>
-            <div>
-                <h4 class="text-xl font-bold mb-6">تواصل معنا</h4>
-                <p class="mb-2"><i class="fas fa-map-marker-alt ml-2 text-yellow-500"></i> المنصورة، الدقهلية، مصر</p>
-                <p class="mb-2"><i class="fas fa-phone ml-2 text-yellow-500"></i> 050XXXXXXX</p>
+
+            <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-12" id="newsContainer">
+                </div>
+        </div>
+    </section>
+
+    <section id="schedules" class="py-32 bg-slate-50 relative border-t">
+        <div class="container mx-auto px-8">
+            <div class="text-center mb-20">
+                <h3 class="text-5xl font-black text-blue-900 mb-6 italic">منصة الجداول الأكاديمية</h3>
+                <div class="h-2 w-24 bg-yellow-500 mx-auto rounded-full"></div>
             </div>
-            <div>
-                <h4 class="text-xl font-bold mb-6">روابط سريعة</h4>
-                <div class="flex flex-col gap-2 opacity-70">
-                    <a href="results.html">نتائج الطلاب</a>
-                    <a href="#schedules">الجداول الدراسية</a>
-                    <a href="dashboard.html">لوحة التحكم</a>
+
+            <div class="flex flex-wrap justify-center gap-6 mb-16 no-print">
+                <button onclick="renderTable('grade1')" class="px-12 py-5 bg-white border-2 border-blue-900 text-blue-900 rounded-2xl font-black text-xl hover:bg-blue-900 hover:text-white transition shadow-xl">الصف الأول الثانوي</button>
+                <button onclick="renderTable('grade2')" class="px-12 py-5 bg-white border-2 border-blue-900 text-blue-900 rounded-2xl font-black text-xl hover:bg-blue-900 hover:text-white transition shadow-xl">الصف الثاني الثانوي</button>
+                <button onclick="renderTable('grade3')" class="px-12 py-5 bg-white border-2 border-blue-900 text-blue-900 rounded-2xl font-black text-xl hover:bg-blue-900 hover:text-white transition shadow-xl">الصف الثالث الثانوي</button>
+            </div>
+
+            <div id="tableParent" class="hidden animate__animated animate__fadeIn">
+                <div class="bg-white p-12 rounded-[3rem] shadow-2xl border border-gray-100 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-10 no-print">
+                        <span class="bg-blue-100 text-blue-900 px-6 py-2 rounded-full font-black">جاهز للطباعة والتحميل</span>
+                        <div class="flex gap-4">
+                            <button onclick="window.print()" class="bg-gray-800 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-black"><img src="https://cdn-icons-png.flaticon.com/512/446/446991.png" class="w-5 invert"> طباعة</button>
+                            <button onclick="exportPDF()" class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-700 shadow-lg shadow-red-200"><img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" class="w-5 invert"> تحميل PDF</button>
+                        </div>
+                    </div>
+                    
+                    <div id="captureArea" class="p-4">
+                        <div class="text-center mb-12">
+                            <h2 class="text-4xl font-black text-blue-900 mb-2">جدول المحاضرات والحصص الدراسية</h2>
+                            <p class="text-gray-500 font-bold" id="tableGradeName"></p>
+                        </div>
+                        <div id="tableHTML" class="schedule-table overflow-x-auto"></div>
+                    </div>
                 </div>
             </div>
         </div>
-        <p class="text-center mt-10 text-xs opacity-50 font-bold uppercase tracking-widest">جميع الحقوق محفوظة &copy; 2026</p>
+    </section>
+
+    <footer class="bg-blue-950 text-white py-24">
+        <div class="container mx-auto px-8 grid lg:grid-cols-4 gap-16">
+            <div class="lg:col-span-2">
+                <h4 class="text-3xl font-black mb-8 italic">الملك الكامل.. حلم الأجيال</h4>
+                <p class="text-blue-200 text-lg leading-relaxed max-w-md">نحن هنا لنقدم أفضل تجربة تعليمية رقمية لطلابنا. المنصة تدار بالكامل من قبل إدارة المدرسة لضمان دقة المعلومات والنتائج.</p>
+            </div>
+            <div>
+                <h5 class="text-xl font-bold mb-8 text-yellow-500">روابط سريعة</h5>
+                <ul class="space-y-4 text-blue-100 font-bold">
+                    <li><a href="#" class="hover:text-white">بوابة نتائج الطلاب</a></li>
+                    <li><a href="#" class="hover:text-white">جدول امتحانات الشهر</a></li>
+                    <li><a href="dashboard.html" class="hover:text-white text-gray-400">دخول الإدارة</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-xl font-bold mb-8 text-yellow-500">تواصل معنا</h5>
+                <p class="text-blue-100">المنصورة - شارع الجيش</p>
+                <p class="text-blue-100 mt-2">إدارة شرق المنصورة التعليمية</p>
+                <div class="mt-6 flex gap-4">
+                    <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-blue-600 cursor-pointer transition"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" class="w-5 invert"></div>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script>
-        function loadWebsite() {
-            const articles = JSON.parse(localStorage.getItem('kamel_articles')) || [];
-            const ticker = document.getElementById('tickerContainer');
-            const grid = document.getElementById('newsGrid');
+        // دالة عرض المقالات من الـ LocalStorage
+        function displayNews() {
+            const articles = JSON.parse(localStorage.getItem('king_articles')) || [];
+            const container = document.getElementById('newsContainer');
+            const ticker = document.getElementById('mainTicker');
 
-            // شريط الأخبار
             if(articles.length > 0) {
-                ticker.innerHTML = articles.map(a => `<span class="mx-10 font-bold">📢 ${a.title}</span>`).join('');
-            }
-
-            // الجريدة
-            grid.innerHTML = articles.map((art, idx) => `
-                <div class="card-hover bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="${art.image || 'https://via.placeholder.com/400x250'}" class="w-full h-full object-cover">
-                        <span class="absolute top-4 right-4 bg-yellow-500 text-blue-900 px-3 py-1 rounded-full text-xs font-black">${art.category}</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col">
-                        <h4 class="text-xl font-bold mb-4 text-blue-900">${art.title}</h4>
-                        <p class="text-gray-500 text-sm leading-relaxed mb-6">${art.desc.substring(0, 100)}...</p>
-                        ${art.video ? `<div class="mb-4 aspect-video bg-black rounded-lg overflow-hidden">
-                            <iframe class="w-full h-full" src="${art.video.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>
-                        </div>` : ''}
-                        <div class="mt-auto pt-4 border-t flex justify-between items-center text-xs text-gray-400">
-                            <span><i class="fas fa-calendar ml-1"></i> ${art.date}</span>
-                            <button onclick="viewArticle(${idx})" class="text-blue-600 font-bold">اقرأ المزيد</button>
+                ticker.innerHTML = articles.map(a => ` • ${a.title} • `).join(' ');
+                container.innerHTML = articles.map((art, index) => `
+                    <div class="group bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col h-full animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
+                        <div class="relative h-72 overflow-hidden">
+                            <img src="${art.image || 'https://via.placeholder.com/600x400'}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                            <span class="absolute bottom-6 right-6 bg-yellow-500 text-blue-900 px-4 py-1 rounded-full font-black text-xs">${art.tag}</span>
+                        </div>
+                        <div class="p-10 flex-1 flex flex-col">
+                            <h4 class="text-2xl font-black text-blue-950 mb-6 leading-snug group-hover:text-blue-700 transition-colors">${art.title}</h4>
+                            <p class="text-gray-500 leading-relaxed font-semibold mb-8 line-clamp-3">${art.content}</p>
+                            ${art.video ? `<div class="mb-6 rounded-2xl overflow-hidden shadow-lg border-2 border-gray-100"><iframe class="w-full aspect-video" src="${art.video.replace('watch?v=', 'embed/')}"></iframe></div>` : ''}
+                            <div class="mt-auto pt-6 border-t border-gray-50 flex justify-between items-center">
+                                <span class="text-xs font-bold text-gray-400 italic">${art.date}</span>
+                                <a href="#" class="text-blue-600 font-black flex items-center gap-2 hover:gap-4 transition-all">إقرأ المزيد <span class="text-xl">←</span></a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                container.innerHTML = `<p class="col-span-full text-center text-gray-400 font-bold py-20 italic">لا توجد مقالات منشورة حالياً..</p>`;
+            }
         }
 
+        // دالة عرض الجداول المرفوعة
         function renderTable(grade) {
-            const schedules = JSON.parse(localStorage.getItem('kamel_schedules')) || {};
-            const wrapper = document.getElementById('tableWrapper');
-            const content = document.getElementById('tableContent');
+            const schedules = JSON.parse(localStorage.getItem('king_schedules')) || {};
+            const parent = document.getElementById('tableParent');
+            const htmlBox = document.getElementById('tableHTML');
+            const nameBox = document.getElementById('tableGradeName');
 
             if(schedules[grade]) {
-                wrapper.classList.remove('hidden');
-                content.innerHTML = `
-                    <div class="text-center mb-8">
-                        <h2 class="text-3xl font-black text-blue-900 underline">جداول الصف الدراسي المختارة</h2>
-                        <p class="font-bold text-red-600 mt-2">تحتوي الصفحة على: جدول الحصص الأسبوعي + جدول المعلمين</p>
-                    </div>
-                    <div class="space-y-12">
-                        <div class="overflow-x-auto shadow-sm rounded-xl">
-                            <h4 class="p-4 bg-blue-900 text-white font-bold rounded-t-xl"><i class="fas fa-clock ml-2"></i> أولاً: توزيع الحصص الدراسية</h4>
-                            <div class="table-styled">${schedules[grade].lessons}</div>
+                parent.classList.remove('hidden');
+                nameBox.innerText = grade === 'grade1' ? 'الصف الأول الثانوي' : grade === 'grade2' ? 'الصف الثاني الثانوي' : 'الصف الثالث الثانوي';
+                htmlBox.innerHTML = `
+                    <div class="space-y-16">
+                        <div>
+                            <div class="flex items-center gap-4 mb-6"><div class="h-8 w-2 bg-blue-900 rounded-full"></div><h5 class="text-2xl font-black">توزيع الحصص الأسبوعي</h5></div>
+                            ${schedules[grade].lessons}
                         </div>
-                        <div class="overflow-x-auto shadow-sm rounded-xl border-t-4 border-yellow-500">
-                            <h4 class="p-4 bg-gray-800 text-white font-bold rounded-t-xl"><i class="fas fa-user-tie ml-2"></i> ثانياً: جدول معلمي الصف</h4>
-                            <div class="table-styled">${schedules[grade].teachers}</div>
+                        <div class="pt-16 border-t-2 border-dashed border-gray-200">
+                            <div class="flex items-center gap-4 mb-6"><div class="h-8 w-2 bg-yellow-500 rounded-full"></div><h5 class="text-2xl font-black">بيانات السادة المعلمين والمواد</h5></div>
+                            ${schedules[grade].teachers}
                         </div>
                     </div>
                 `;
-                // تحسين شكل الجداول المستوردة
-                content.querySelectorAll('table').forEach(t => t.className = "w-full border-collapse bg-white text-center");
-                content.querySelectorAll('td, th').forEach(el => el.className = "border p-4 text-sm font-bold border-gray-300");
+                window.scrollTo({ top: parent.offsetTop - 100, behavior: 'smooth' });
             } else {
-                alert("لم يتم رفع جداول لهذا الصف بعد.");
+                alert("لم يتم رفع جداول لهذا الصف بعد من قبل الإدارة.");
             }
         }
 
-        function downloadPDF() {
-            const element = document.getElementById('printableArea');
+        function exportPDF() {
+            const element = document.getElementById('captureArea');
             html2pdf().from(element).set({
                 margin: 10,
-                filename: 'جدول_الملك_الكامل.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
+                filename: 'جدول_الملك_الكامل_الرسمي.pdf',
+                html2canvas: { scale: 3 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
             }).save();
         }
 
-        window.onload = loadWebsite;
+        window.onload = displayNews;
     </script>
 </body>
 </html>
