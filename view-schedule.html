@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الجدول الرسمي | الملك الكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; padding: 20px; background: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 2px solid #000; padding: 12px; text-align: center; font-weight: bold; font-size: 14px; }
+        th { background: #f3f4f6; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="no-print mb-8 flex justify-between bg-blue-900 text-white p-4 rounded-xl">
+        <span>عرض نسخة الطباعة النهائية</span>
+        <button onclick="window.print()" class="bg-white text-blue-900 px-4 py-1 rounded font-bold">إبدأ الطباعة الآن</button>
+    </div>
+
+    <div class="border-4 border-black p-6">
+        <div class="flex justify-between items-center border-b-4 border-black pb-6 mb-6">
+            <div class="text-right">
+                <p>مديرية التربية والتعليم بالدقهلية</p>
+                <p>إدارة شرق المنصورة التعليمية</p>
+                <p class="font-black text-xl">مدرسة الملك الكامل العسكرية بنين</p>
+            </div>
+            <img src="https://i.ibb.co/VYBqDDR/1778149653479.jpg" class="h-24">
+            <div class="text-center">
+                <h1 id="grade-title" class="text-2xl font-black underline">جدول الحصص الأسبوعي</h1>
+                <p id="update-date" class="text-sm italic"></p>
+            </div>
+        </div>
+
+        <div id="lessons-target"></div>
+        <div class="mt-10" id="teachers-target"></div>
+
+        <div class="grid grid-cols-3 mt-16 text-center font-black gap-4">
+            <div>
+                <p>رئيس الكنترول</p>
+                <p class="mt-6" id="sign-control">........</p>
+            </div>
+            <div>
+                <p>وكيل شؤون الطلاب</p>
+                <p class="mt-6" id="sign-vice">........</p>
+            </div>
+            <div>
+                <p>مدير المدرسة</p>
+                <p class="mt-6" id="sign-principal">........</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { /* ... ضع بياناتك هنا ... */ };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const grade = urlParams.get('grade') || 'grade1';
+
+        async function loadContent() {
+            // جلب الجدول
+            const doc = await db.collection('schedules').doc(grade).get();
+            if(doc.exists) {
+                document.getElementById('grade-title').innerText = "جدول حصص " + (grade === 'grade1' ? 'الصف الأول' : grade === 'grade2' ? 'الصف الثاني' : 'الصف الثالث');
+                document.getElementById('lessons-target').innerHTML = doc.data().lessons;
+                document.getElementById('teachers-target').innerHTML = `
+                    <h3 class="bg-gray-200 p-2 font-black mb-2 border-2 border-black">قائمة السادة معلمي المواد</h3>
+                    ${doc.data().teachers}
+                `;
+                document.getElementById('update-date').innerText = "آخر تحديث: " + doc.data().updatedAt;
+            }
+
+            // جلب التوقيعات
+            const sig = await db.collection('settings').doc('signatures').get();
+            if(sig.exists) {
+                document.getElementById('sign-control').innerText = sig.data().control;
+                document.getElementById('sign-vice').innerText = sig.data().vice;
+                document.getElementById('sign-principal').innerText = sig.data().principal;
+            }
+        }
+        loadContent();
+    </script>
+</body>
+</html>
