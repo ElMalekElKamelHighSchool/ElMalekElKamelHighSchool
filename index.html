@@ -2,56 +2,179 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدرسة الملك الكامل الثانوية العسكرية بنين</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Cairo', sans-serif; }</style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .ticker-wrap { width: 100%; overflow: hidden; background-color: #dc2626; color: white; display: flex; align-items: center; }
+        .ticker-move { display: inline-block; white-space: nowrap; animation: ticker 20s linear infinite; padding-left: 100%; }
+        @keyframes ticker { 0% { transform: translate3d(100%, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        /* حماية الفيديو لمنع النقرات الخارجية قدر الإمكان */
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 1rem; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+    </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-blue-900 text-white sticky top-0 z-50 shadow-2xl p-4">
+
+    <div class="ticker-wrap h-10 text-sm font-bold shadow-md relative z-50">
+        <div class="bg-yellow-500 text-blue-900 h-full px-4 flex items-center absolute right-0 z-10">
+            <i class="fas fa-bell ml-2 animate-pulse"></i> عاجل ومهم
+        </div>
+        <div class="ticker-move" id="news-ticker">
+            <span class="mx-8">🌟 تعلن إدارة المدرسة عن بدء تسليم الكتب المدرسية للصف الأول الثانوي الأسبوع القادم.</span>
+            <span class="mx-8">🏆 تهنئة خاصة للطالب أحمد محمد لحصوله على المركز الأول في مسابقة العباقرة.</span>
+            <span class="mx-8">📅 تم رفع جداول الحصص الدراسية الجديدة للفصل الدراسي الثاني.</span>
+        </div>
+    </div>
+
+    <nav class="bg-blue-900 text-white sticky top-0 z-40 shadow-2xl p-4">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <img src="https://via.placeholder.com/50" class="rounded-full border-2 border-yellow-500">
+                <img src="https://via.placeholder.com/60/FFD700/000000?text=Logo" alt="شعار المدرسة" class="rounded-full border-2 border-yellow-500 shadow-lg">
                 <div>
-                    <h1 class="text-xl font-bold">الملك الكامل الثانوية العسكرية</h1>
-                    <p class="text-xs text-yellow-400">إدارة شرق المنصورة التعليمية</p>
+                    <h1 class="text-2xl font-black tracking-wide">الملك الكامل العسكرية</h1>
+                    <p class="text-sm text-yellow-400 font-semibold"><i class="fas fa-map-marker-alt"></i> المنصورة - إدارة شرق التعليمية</p>
                 </div>
             </div>
-            <div class="hidden md:flex gap-6 font-semibold">
-                <a href="#about" class="hover:text-yellow-400">عن المدرسة</a>
-                <a href="#achievements" class="hover:text-yellow-400">الإنجازات</a>
-                <a href="login.html" class="bg-yellow-500 text-blue-900 px-6 py-2 rounded-full hover:bg-white transition">دخول المنصة</a>
+            <div class="hidden md:flex gap-6 font-bold items-center">
+                <a href="#about" class="hover:text-yellow-400 transition">الرئيسية</a>
+                <a href="#schedules" class="hover:text-yellow-400 transition">الجداول الدراسية</a>
+                <a href="#videos" class="hover:text-yellow-400 transition">المركز الإعلامي</a>
+                <a href="results.html" class="bg-red-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-red-700 transition">
+                    <i class="fas fa-graduation-cap ml-1"></i> نتائج الطلاب
+                </a>
+                <a href="dashboard.html" class="bg-yellow-500 text-blue-900 px-5 py-2 rounded-lg shadow-md hover:bg-white transition">
+                    <i class="fas fa-cogs ml-1"></i> الإدارة
+                </a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="h-[70vh] bg-cover bg-center flex items-center justify-center text-white relative" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://via.placeholder.com/1200x600');">
-        <div class="text-center animate-bounce">
-            <h2 class="text-5xl font-black mb-6">صناعة الرجال.. وقادة المستقبل</h2>
-            <p class="text-2xl opacity-90">مرحباً بكم في الصرح التعليمي الأول بمحافظة الدقهلية</p>
+    <header class="h-[60vh] bg-cover bg-center flex items-center justify-center text-white relative shadow-inner" style="background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200');">
+        <div class="text-center transform transition duration-500 hover:scale-105">
+            <h2 class="text-5xl md:text-6xl font-black mb-6 text-yellow-400 drop-shadow-2xl">صناعة الرجال.. وقادة المستقبل</h2>
+            <p class="text-2xl md:text-3xl opacity-95 mb-8 font-semibold">الصرح التعليمي العسكري الأول بمحافظة الدقهلية</p>
+            <a href="#schedules" class="bg-blue-600 border-2 border-blue-500 text-white px-8 py-3 rounded-full text-lg font-bold hover:bg-blue-700 transition shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                استعرض الجداول الآن <i class="fas fa-arrow-down mr-2"></i>
+            </a>
         </div>
     </header>
 
-    <!-- About Section (بيانات ديناميكية من الأدمن) -->
-    <section id="about" class="py-20 container mx-auto px-6">
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-            <div id="school-info">
-                <h3 class="text-3xl font-bold text-blue-900 mb-6">كلمة إدارة المدرسة</h3>
-                <p class="text-gray-700 leading-relaxed text-lg" id="aboutText">جاري تحميل التعريف بالمدرسة...</p>
+    <section id="schedules" class="py-20 container mx-auto px-6">
+        <div class="text-center mb-12">
+            <h3 class="text-4xl font-black text-blue-900 mb-4"><i class="fas fa-calendar-alt text-yellow-500"></i> الجداول الدراسية</h3>
+            <p class="text-gray-600 text-lg">اختر الصف الدراسي لعرض الجدول الخاص بك</p>
+        </div>
+        
+        <div class="flex justify-center gap-4 mb-8">
+            <button onclick="showSchedule('g1')" class="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition focus:ring-4 focus:ring-yellow-300">الصف الأول الثانوي</button>
+            <button onclick="showSchedule('g2')" class="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition focus:ring-4 focus:ring-yellow-300">الصف الثاني الثانوي</button>
+            <button onclick="showSchedule('g3')" class="bg-blue-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-yellow-500 hover:text-blue-900 transition focus:ring-4 focus:ring-yellow-300">الصف الثالث الثانوي</button>
+        </div>
+
+        <div id="schedule-container" class="bg-white rounded-2xl shadow-xl p-6 border-t-4 border-yellow-500 overflow-x-auto hidden">
+            <h4 id="schedule-title" class="text-2xl font-bold text-center text-blue-800 mb-6"></h4>
+            <table class="w-full text-center border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-700">
+                        <th class="border p-3">اليوم</th>
+                        <th class="border p-3">الحصة الأولى</th>
+                        <th class="border p-3">الحصة الثانية</th>
+                        <th class="border p-3">الحصة الثالثة</th>
+                        <th class="border p-3">الحصة الرابعة</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-body">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="videos" class="bg-gray-200 py-20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-black text-blue-900 mb-4"><i class="fas fa-play-circle text-red-600"></i> المركز الإعلامي</h3>
+                <p class="text-gray-600 text-lg">شاهد أحدث الفعاليات والأنشطة المدرسية</p>
             </div>
-            <div class="bg-blue-900 h-64 rounded-2xl shadow-2xl flex items-center justify-center text-white">
-                <span class="text-xl">فيديو تعريفي للمدرسة</span>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-4 rounded-2xl shadow-lg border-b-4 border-blue-900">
+                    <div class="video-container shadow-inner">
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1" title="فيديو تعريفي" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <h4 class="text-xl font-bold mt-4 text-gray-800">طابور العرض العسكري</h4>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-lg border-b-4 border-blue-900">
+                    <div class="video-container shadow-inner">
+                        <iframe src="https://www.youtube.com/embed/tgbNymZ7vqY?rel=0&modestbranding=1" title="تكريم الأوائل" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <h4 class="text-xl font-bold mt-4 text-gray-800">حفل تكريم أوائل الطلبة</h4>
+                </div>
             </div>
         </div>
     </section>
 
-    <script type="module">
-        import { db, doc, getDoc } from './config.js';
-        // جلب بيانات التعريف التي وضعها الأدمن
-        const info = await getDoc(doc(db, "settings", "school_info"));
-        if(info.exists()) document.getElementById('aboutText').innerText = info.data().text;
+    <footer class="bg-blue-950 text-gray-300 py-10 border-t-4 border-yellow-500">
+        <div class="container mx-auto px-6 text-center md:text-right grid md:grid-cols-3 gap-8">
+            <div>
+                <h4 class="text-2xl font-bold text-white mb-4">عن المدرسة</h4>
+                <p class="text-sm leading-relaxed">مدرسة الملك الكامل الثانوية العسكرية بنين. رائدة التعليم العسكري والانضباط بمحافظة الدقهلية، تهدف لبناء جيل واعٍ ومثقف.</p>
+            </div>
+            <div>
+                <h4 class="text-2xl font-bold text-white mb-4">روابط سريعة</h4>
+                <ul class="space-y-2">
+                    <li><a href="results.html" class="hover:text-yellow-400"><i class="fas fa-caret-left"></i> بوابة النتائج</a></li>
+                    <li><a href="#" class="hover:text-yellow-400"><i class="fas fa-caret-left"></i> تواصل معنا</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-2xl font-bold text-white mb-4">العنوان</h4>
+                <p><i class="fas fa-map-marker-alt text-yellow-500 mr-2"></i> جمهورية مصر العربية - محافظة الدقهلية</p>
+                <p class="mt-2 text-xl font-bold text-yellow-400">المنصورة - إدارة شرق</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // بيانات وهمية للعرض (في الواقع سيتم جلبها من لوحة التحكم)
+        const schedules = {
+            g1: { title: "جدول الصف الأول الثانوي", data: [
+                ["الأحد", "لغة عربية", "رياضيات", "فيزياء", "لغة إنجليزية"],
+                ["الإثنين", "كيمياء", "أحياء", "تاريخ", "لغة فرنسية"]
+            ]},
+            g2: { title: "جدول الصف الثاني الثانوي", data: [
+                ["الأحد", "رياضيات تطبيقية", "لغة عربية", "فيزياء", "كيمياء"],
+                ["الإثنين", "لغة إنجليزية", "تطبيقات رياضية", "لغة عربية", "حاسب آلي"]
+            ]},
+            g3: { title: "جدول الصف الثالث الثانوي", data: [
+                ["الأحد", "لغة عربية", "لغة أجنبية أولى", "فيزياء", "تفاضل"],
+                ["الإثنين", "كيمياء", "ديناميكا", "لغة عربية", "لغة أجنبية ثانية"]
+            ]}
+        };
+
+        function showSchedule(grade) {
+            const container = document.getElementById('schedule-container');
+            const title = document.getElementById('schedule-title');
+            const body = document.getElementById('schedule-body');
+            
+            container.classList.remove('hidden');
+            title.innerText = schedules[grade].title;
+            
+            let rowsHtml = '';
+            schedules[grade].data.forEach(row => {
+                rowsHtml += `<tr class="border-b hover:bg-blue-50 transition">
+                    <td class="p-3 font-bold text-blue-900 border-l">${row[0]}</td>
+                    <td class="p-3 border-l">${row[1]}</td>
+                    <td class="p-3 border-l">${row[2]}</td>
+                    <td class="p-3 border-l">${row[3]}</td>
+                    <td class="p-3">${row[4]}</td>
+                </tr>`;
+            });
+            body.innerHTML = rowsHtml;
+        }
     </script>
 </body>
 </html>
