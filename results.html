@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة النتائج | الملك الكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="bg-blue-900 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-graduation-cap text-3xl text-yellow-500"></i>
+                <h1 class="text-xl font-black">بوابة نتائج الطلاب</h1>
+            </div>
+            <a href="index.html" class="text-yellow-400 hover:text-white font-bold transition"><i class="fas fa-home"></i> العودة للمدرسة</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg border-t-8 border-blue-900">
+            <div class="text-center mb-8">
+                <img src="https://via.placeholder.com/80/FFD700/000000?text=Logo" class="mx-auto rounded-full mb-4 shadow">
+                <h2 class="text-2xl font-black text-gray-800">مدرسة الملك الكامل العسكرية</h2>
+                <p class="text-gray-500">إدارة شرق المنصورة التعليمية</p>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">رقم الجلوس</label>
+                    <div class="relative">
+                        <i class="fas fa-id-card absolute right-4 top-4 text-gray-400 text-lg"></i>
+                        <input type="number" id="seatNumber" placeholder="أدخل رقم الجلوس المكون من 5 أرقام" class="w-full border-2 border-gray-300 p-3 pr-12 rounded-xl focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 text-lg">
+                    </div>
+                </div>
+
+                <button onclick="getResults()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-lg hover:bg-blue-700 transition shadow-lg flex justify-center items-center gap-2">
+                    عرض النتيجة <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div id="resultCard" class="mt-8 hidden animate-fade-in bg-gray-50 p-6 rounded-2xl border-2 border-green-500">
+                <h3 class="text-center text-xl font-bold text-green-600 mb-4 border-b pb-2"><i class="fas fa-check-circle"></i> ناجح ومنقول</h3>
+                <table class="w-full text-right text-gray-800 font-semibold">
+                    <tr class="border-b"><td class="py-2 text-gray-500">اسم الطالب:</td><td class="py-2" id="res-name">---</td></tr>
+                    <tr class="border-b"><td class="py-2 text-gray-500">الصف:</td><td class="py-2" id="res-grade">---</td></tr>
+                    <tr><td class="py-2 text-gray-500">المجموع الكلي:</td><td class="py-2 text-xl font-black text-blue-900" id="res-score">---</td></tr>
+                </table>
+                <button onclick="window.print()" class="mt-4 w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-black transition"><i class="fas fa-print"></i> طباعة النتيجة</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-blue-950 text-white text-center py-4 text-sm">
+        جميع الحقوق محفوظة &copy; مدرسة الملك الكامل الثانوية العسكرية بنين بالمنصورة
+    </footer>
+
+    <script>
+        function getResults() {
+            const seatNum = document.getElementById('seatNumber').value;
+            if(!seatNum || seatNum.length < 3) {
+                Swal.fire({ icon: 'error', title: 'خطأ', text: 'يرجى إدخال رقم جلوس صحيح!' });
+                return;
+            }
+
+            // محاكاة تحميل
+            Swal.fire({
+                title: 'جاري البحث...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            // محاكاة جلب البيانات بعد ثانية
+            setTimeout(() => {
+                Swal.close();
+                document.getElementById('resultCard').classList.remove('hidden');
+                document.getElementById('res-name').innerText = "طالب افتراضي لتجربة النظام";
+                document.getElementById('res-grade').innerText = "الصف الأول الثانوي";
+                document.getElementById('res-score').innerText = "285 / 300 (95%)";
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
