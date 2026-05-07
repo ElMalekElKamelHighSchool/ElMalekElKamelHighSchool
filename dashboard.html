@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | مدرسة الملك الكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- الهيدر -->
+    <nav class="bg-blue-900 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-black">منصة الملك الكامل</h1>
+            <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-4 py-1 rounded-lg text-sm transition">خروج</button>
+        </div>
+    </nav>
+
+    <!-- محتوى الصفحة -->
+    <div class="container mx-auto mt-10 p-4">
+        <div class="bg-white rounded-2xl shadow-md p-6 border-r-8 border-blue-900">
+            <h2 class="text-2xl font-bold text-gray-800">أهلاً بك يا <span id="userName" class="text-blue-900">...</span></h2>
+            <p class="text-gray-500 mt-2">مرحباً بك في مدرسة الملك الكامل الثانوية العسكرية.</p>
+        </div>
+
+        <!-- أزرار سريعة -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div class="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition cursor-pointer border-b-4 border-yellow-500">
+                <h3 class="font-bold text-lg text-blue-900">النتائج والاختبارات</h3>
+                <p class="text-sm text-gray-500 mt-1">عرض درجاتك في المواد المختلفة.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition cursor-pointer border-b-4 border-green-500">
+                <h3 class="font-bold text-lg text-blue-900">المحاضرات المسجلة</h3>
+                <p class="text-sm text-gray-500 mt-1">مشاهدة شروحات المستشار والمدرسين.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition cursor-pointer border-b-4 border-red-500">
+                <h3 class="font-bold text-lg text-blue-900">جدول الحصص</h3>
+                <p class="text-sm text-gray-500 mt-1">متابعة مواعيدك اليومية.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        // التأكد من هوية المستخدم وجلب بياناته
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    document.getElementById('userName').innerText = userDoc.data().fullName;
+                }
+            } else {
+                // إذا حاول الدخول للصفحة وهو ليس مسجل، يتم طرده لصفحة الدخول
+                window.location.href = 'login.html';
+            }
+        });
+
+        // زر تسجيل الخروج
+        document.getElementById('logoutBtn').onclick = () => {
+            signOut(auth).then(() => {
+                window.location.href = 'login.html';
+            });
+        };
+    </script>
+</body>
+</html>
