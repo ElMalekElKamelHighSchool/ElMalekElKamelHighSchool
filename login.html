@@ -2,67 +2,50 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دخول المنصة | مدرسة الملك الكامل الثانوية العسكرية</title>
+    <title>دخول المنصة | مدرسة الملك الكامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Cairo', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-    </style>
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
 <body class="bg-gradient-to-br from-blue-900 via-blue-800 to-black min-h-screen flex items-center justify-center p-4">
 
-    <!-- كارت تسجيل الدخول -->
-    <div class="glass w-full max-w-md p-8 rounded-3xl shadow-2xl border border-blue-700/30">
-        <div class="text-center mb-10">
+    <div class="bg-white/95 backdrop-blur w-full max-w-md p-8 rounded-3xl shadow-2xl border border-white/20">
+        <div class="text-center mb-8">
             <h1 class="text-3xl font-black text-blue-900 mb-2">منصة المستشار</h1>
-            <p class="text-gray-600 font-bold">مدرسة الملك الكامل الثانوية العسكرية</p>
-            <div class="h-1 w-20 bg-yellow-500 mx-auto mt-4 rounded-full"></div>
+            <p class="text-gray-600 font-bold">تسجيل الدخول المباشر</p>
         </div>
 
         <form id="loginForm" class="space-y-5">
-            <div>
-                <label class="block text-sm font-bold text-blue-900 mb-1">البريد الإلكتروني (Gmail)</label>
-                <input type="email" id="email" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-blue-900 outline-none transition" placeholder="example@gmail.com" required>
-            </div>
+            <input type="email" id="email" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-blue-900 outline-none transition" placeholder="البريد الإلكتروني" required>
+            <input type="password" id="pass" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-blue-900 outline-none transition" placeholder="كلمة المرور" required>
             
-            <div>
-                <label class="block text-sm font-bold text-blue-900 mb-1">كلمة المرور</label>
-                <input type="password" id="pass" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-blue-900 outline-none transition" placeholder="••••••••" required>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-900 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transform hover:scale-[1.02] transition-all shadow-lg">
+            <button type="submit" class="w-full bg-blue-900 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg">
                 دخول للمنصة الآن
             </button>
         </form>
 
         <div class="mt-8 text-center border-t pt-6">
-            <p class="text-gray-600 mb-2">ليس لديك حساب في المدرسة؟</p>
             <a href="signup.html" class="inline-block bg-yellow-500 text-blue-900 font-black px-8 py-2 rounded-full hover:bg-yellow-400 transition shadow-md">
                 إنشاء حساب جديد
             </a>
         </div>
     </div>
 
-    <!-- Firebase Logic -->
     <script type="module">
         import { auth, db } from './config.js';
         import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-        // 1. الفحص التلقائي: لو مسجل دخوله يدخل علطول
+        // فحص الدخول التلقائي
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    redirectUser(userData.role);
+                    redirectUser(userDoc.data().role);
                 }
             }
         });
 
-        // 2. معالجة نموذج تسجيل الدخول
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -72,31 +55,22 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
 
-                // التحقق من تفعيل الإيميل
-                if (user.emailVerified) {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        redirectUser(userDoc.data().role);
-                    }
+                // جلب البيانات من Firestore والدخول فوراً بدون تفعيل إيميل
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    redirectUser(userDoc.data().role);
                 } else {
-                    alert("⚠️ برجاء تفعيل حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني أولاً.");
-                    auth.signOut();
+                    alert("⚠️ الحساب موجود ولكن لا توجد بيانات مسجلة في Firestore.");
                 }
             } catch (error) {
-                console.error(error);
-                alert("❌ خطأ: تأكد من الإيميل وكلمة المرور، أو أن الحساب مسجل بالفعل.");
+                alert("❌ فشل الدخول: تأكد من الإيميل وكلمة المرور.");
             }
         };
 
-        // وظيفة التوجيه بناءً على الدور (Role)
         function redirectUser(role) {
-            if (role === 'admin') {
-                window.location.href = 'admin-dashboard.html';
-            } else if (role === 'teacher') {
-                window.location.href = 'teacher-portal.html';
-            } else {
-                window.location.href = 'dashboard.html'; // صفحة الطالب وولي الأمر
-            }
+            if (role === 'admin') window.location.href = 'admin-dashboard.html';
+            else if (role === 'teacher') window.location.href = 'teacher-portal.html';
+            else window.location.href = 'dashboard.html';
         }
     </script>
 </body>
