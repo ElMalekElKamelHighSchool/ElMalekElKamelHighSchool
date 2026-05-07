@@ -2,35 +2,69 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>طباعة الجدول الرسمي</title>
+    <title>طباعة الجدول الرسمي | الملك الكامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; padding: 20px; background: white; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; border: 2px solid black; }
-        th, td { border: 1px solid black; padding: 12px; text-align: center; font-weight: bold; }
-        th { background: #f0f0f0; color: #001f3f; }
-        @media print { .no-print { display: none; } }
+        body { font-family: 'Cairo', sans-serif; padding: 0; background: #f3f4f6; }
+        .print-page { background: white; width: 210mm; min-height: 297mm; padding: 15mm; margin: 10px auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 2px solid black; font-size: 14px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; font-weight: bold; }
+        th { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; }
+        @media print { 
+            body { background: white; padding: 0; }
+            .no-print { display: none; } 
+            .print-page { margin: 0; box-shadow: none; width: 100%; height: 100%; }
+        }
     </style>
 </head>
 <body>
-    <div class="no-print bg-blue-900 text-white p-4 mb-6 flex justify-between rounded-lg">
-        <span>معاينة الجدول الدراسي</span>
-        <button onclick="window.print()" class="bg-yellow-500 text-black px-4 py-1 rounded font-bold">طباعة الجدول <i class="fas fa-print"></i></button>
+    <div class="no-print bg-blue-900 text-white p-4 mb-6 flex justify-between items-center shadow-lg">
+        <span class="font-bold">مُعاينة الجدول قبل الطباعة</span>
+        <button onclick="window.print()" class="bg-yellow-500 text-black px-6 py-2 rounded-full font-black hover:bg-yellow-400 transition">
+            طباعة الجدول الآن <i class="fas fa-print mr-2"></i>
+        </button>
     </div>
 
-    <div class="text-center border-4 border-double border-black p-6">
-        <h1 class="text-2xl font-black mb-2">مدرسة الملك الكامل الثانوية العسكرية بنين</h1>
-        <h2 id="gradeTitle" class="text-xl font-bold text-red-700 mb-6 underline"></h2>
-        
-        <div id="tableContainer"></div>
-
-        <div class="grid grid-cols-3 mt-12 text-center font-bold">
-            <div>يعتمد،، مدير المدرسة</div>
-            <div>وكيل شؤون الطلاب</div>
-            <div>رئيس الكنترول</div>
+    <div class="print-page border-[6px] border-double border-black">
+        <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
+            <div class="text-right text-sm font-bold">
+                <p>وزارة التربية والتعليم</p>
+                <p>مديرية التربية والتعليم بالدقهلية</p>
+                <p>إدارة غرب المنصورة التعليمية</p>
+            </div>
+            <div class="text-center">
+                <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-20 mx-auto mb-2">
+                <h1 class="text-lg font-black">مدرسة الملك الكامل الثانوية العسكرية</h1>
+            </div>
+            <div class="text-left text-sm font-bold">
+                <p>جدول العام الدراسي</p>
+                <p>2025 / 2026</p>
+            </div>
         </div>
+
+        <h2 id="gradeTitle" class="text-2xl font-black text-center mb-6 underline decoration-double"></h2>
+        
+        <div id="tableContainer" class="min-h-[400px]"></div>
+
+        <div class="grid grid-cols-3 mt-16 text-center font-bold text-sm gap-4">
+            <div class="border-t border-black pt-2">
+                <p class="mb-6">رئيس الكنترول</p>
+                <p id="sign-control">.................</p>
+            </div>
+            <div class="border-t border-black pt-2">
+                <p class="mb-6">وكيل شؤون الطلاب</p>
+                <p id="sign-agent">.................</p>
+            </div>
+            <div class="border-t border-black pt-2">
+                <p class="mb-6">مدير المدرسة</p>
+                <p id="sign-manager" class="text-blue-900">.................</p>
+            </div>
+        </div>
+        
+        <p class="text-[10px] mt-20 text-gray-400 text-center italic">طُبع بواسطة المنصة الإلكترونية الرسمية للمدرسة</p>
     </div>
 
     <script>
@@ -48,17 +82,26 @@
         const params = new URLSearchParams(window.location.search);
         const grade = params.get('grade');
 
-        async function load() {
-            const doc = await db.collection('schedules').doc(grade).get();
-            if(doc.exists) {
-                const data = doc.data();
-                document.getElementById('gradeTitle').innerText = "جدول حصص " + (grade === 'grade1' ? 'الصف الأول' : grade === 'grade2' ? 'الصف الثاني' : 'الصف الثالث');
-                document.getElementById('tableContainer').innerHTML = data.lessons;
+        async function loadContent() {
+            // 1. جلب الجدول
+            const tableDoc = await db.collection('schedules').doc(grade).get();
+            if(tableDoc.exists) {
+                document.getElementById('gradeTitle').innerText = "جدول حصص " + (grade === 'grade1' ? 'الصف الأول الثانوي' : grade === 'grade2' ? 'الصف الثاني الثانوي' : 'الصف الثالث الثانوي');
+                document.getElementById('tableContainer').innerHTML = tableDoc.data().lessons;
             } else {
-                document.body.innerHTML = "<h1>عذراً، الجدول غير متاح حالياً</h1>";
+                document.body.innerHTML = "<h1 class='text-center mt-20 font-bold'>عذراً، هذا الجدول غير متاح حالياً</h1>";
+            }
+
+            // 2. جلب أسماء الإدارة للتوقيعات
+            const settingsDoc = await db.collection('settings').doc('school_info').get();
+            if(settingsDoc.exists) {
+                const s = settingsDoc.data();
+                document.getElementById('sign-manager').innerText = "أ / " + (s.manager || "................");
+                document.getElementById('sign-agent').innerText = "أ / " + (s.agent || "................");
+                document.getElementById('sign-control').innerText = "أ / " + (s.control || "................");
             }
         }
-        load();
+        loadContent();
     </script>
 </body>
 </html>
