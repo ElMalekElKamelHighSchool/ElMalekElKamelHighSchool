@@ -3,151 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملك الكامل الثانوية العسكرية | حلم الأجيال</title>
+    <title>الملك الكامل الثانوية العسكرية | الصرح التعليمي الأول</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;600;900&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
-        :root { --primary: #001f3f; --accent: #c5a059; --danger: #8b0000; }
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; overflow-x: hidden; }
+        :root { --king-blue: #001f3f; --king-gold: #b49248; --king-red: #8b0000; }
+        body { font-family: 'Cairo', sans-serif; background-color: #fcfcfc; color: #1a1a1a; }
         .fancy-header { font-family: 'Reem Kufi', sans-serif; }
         
-        .img-container { position: relative; width: 100%; height: 250px; overflow: hidden; background: #e2e8f0; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-        .news-card:hover img { transform: scale(1.1); }
-        
-        .news-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 24px; background: white; border: 1px solid rgba(0,0,0,0.05); }
-        .news-card:hover { transform: translateY(-12px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
-        
-        .ticker-bg { background: linear-gradient(90deg, #8b0000 0%, #3a0000 100%); border-bottom: 2px solid #c5a059; }
-        .btn-main { transition: all 0.3s; position: relative; overflow: hidden; }
-        .btn-main:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        
-        /* تزيين اسم المستشار - الشهيص */
-        .consultant-mark { 
-            background: linear-gradient(to right, #c5a059, #fff, #c5a059);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            text-shadow: 0 0 10px rgba(197, 160, 89, 0.5);
-            letter-spacing: 1px;
-            animation: shine 3s infinite linear;
-            background-size: 200% auto;
+        /* تصميم الكروت الاحترافي */
+        .news-card { 
+            background: white; 
+            border-radius: 20px; 
+            border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes shine { to { background-position: 200% center; } }
+        .news-card:hover { 
+            transform: translateY(-15px); 
+            box-shadow: 0 25px 50px rgba(0,31,63,0.1);
+        }
+
+        .img-wrapper { 
+            position: relative; 
+            height: 240px; 
+            overflow: hidden; 
+            border-radius: 20px 20px 0 0;
+        }
+        .img-wrapper img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            transition: transform 0.8s ease;
+        }
+        .news-card:hover img { transform: scale(1.08); }
+
+        /* شريط الأخبار العصري */
+        .ticker-wrap { background: var(--king-blue); border-bottom: 3px solid var(--king-gold); }
+        
+        /* بصمة المستشار الثابتة والفخمة */
+        .consultant-badge {
+            background: #00152b;
+            color: #b49248;
+            padding: 5px 20px;
+            border-radius: 12px;
+            font-weight: 900;
+            border: 1px solid rgba(180, 146, 72, 0.3);
+            display: inline-block;
+        }
+
+        /* أزرار مخصصة */
+        .btn-royal {
+            background: linear-gradient(135deg, var(--king-blue) 0%, #003366 100%);
+            transition: all 0.4s ease;
+        }
+        .btn-royal:hover { background: var(--king-gold); color: white !important; }
+        
+        .line-accent { height: 4px; width: 60px; background: var(--king-gold); border-radius: 2px; }
     </style>
 </head>
 <body>
 
-    <div class="ticker-bg text-white py-2 overflow-hidden sticky top-0 z-[100] no-print shadow-xl">
-        <div class="flex items-center">
-            <div class="bg-yellow-600 px-6 py-1 font-black z-10 shadow-lg whitespace-nowrap animate__animated animate__flash animate__infinite italic">عاجل</div>
-            <marquee id="tickerText" class="font-bold py-1 text-lg" scrollamount="7">.. جاري جلب آخر مستجدات الصرح العسكري ..</marquee>
+    <div class="ticker-wrap text-white py-3 sticky top-0 z-[100] shadow-2xl">
+        <div class="container mx-auto px-4 flex items-center">
+            <span class="bg-red-600 px-4 py-1 rounded-lg text-sm font-black ml-4 animate__animated animate__pulse animate__infinite">النشرة</span>
+            <marquee id="tickerText" scrollamount="6" class="font-semibold italic">.. الصرح العسكري يرحب بكم .. جاري تحديث البيانات ..</marquee>
         </div>
     </div>
 
-    <header class="bg-white border-b-8 border-double border-blue-900 py-8 px-4 md:px-16 shadow-sm">
-        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="text-center md:text-right animate__animated animate__fadeInRight">
-                <p class="text-blue-900 font-bold text-sm tracking-widest mb-1">جمهورية مصر العربية - مديرية الدقهلية</p>
-                <h1 class="text-5xl md:text-7xl font-black text-blue-900 fancy-header tracking-tighter">الملك الكامل <span class="text-red-700">العسكرية</span></h1>
-                <p class="text-xl text-yellow-600 font-bold mt-2 italic"><i class="fas fa-star ml-2"></i> مدرسة حلم الأجيال - منذ 1965 م <i class="fas fa-star mr-2"></i></p>
+    <header class="bg-white py-10 border-b">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-right space-y-2">
+                <h2 class="text-sm font-bold text-gray-400 tracking-[0.2em]">وزارة التربية والتعليم</h2>
+                <h1 class="text-5xl md:text-6xl font-black text-[#001f3f] fancy-header">الملك الكامل <span class="text-red-700">العسكرية</span></h1>
+                <div class="line-accent mt-2"></div>
             </div>
-            <div class="flex flex-col items-center gap-6 animate__animated animate__fadeInLeft">
-                <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-28 md:h-36 shadow-2xl rounded-2xl border-4 border-white transform hover:rotate-3 transition duration-500" alt="شعار المدرسة">
-                <nav class="flex flex-wrap justify-center gap-6 font-black text-blue-950 no-print">
-                    <a href="#news" class="hover:text-red-700 flex items-center gap-2"><i class="fas fa-newspaper"></i> الجريدة</a>
-                    <a href="#schedules" class="hover:text-red-700 flex items-center gap-2"><i class="fas fa-calendar-alt"></i> الجداول</a>
-                    <a href="results.html" class="hover:text-red-700 flex items-center gap-2 text-blue-700"><i class="fas fa-history"></i> تاريخ المدرسة</a>
-                    <a href="admin.html" class="text-gray-300 hover:text-blue-900"><i class="fas fa-user-shield"></i></a>
+            
+            <div class="mt-8 md:mt-0 flex flex-col items-center">
+                <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-32 drop-shadow-2xl transform hover:scale-110 transition duration-500">
+                <nav class="mt-6 flex gap-8 font-black text-xs text-blue-900 uppercase tracking-widest">
+                    <a href="#news" class="hover:text-red-700 transition">الجريدة</a>
+                    <a href="#schedules" class="hover:text-red-700 transition">الجداول</a>
+                    <a href="results.html" class="hover:text-red-700 transition">التاريخ</a>
+                    <a href="admin.html" class="opacity-30 hover:opacity-100"><i class="fas fa-lock"></i></a>
                 </nav>
             </div>
         </div>
     </header>
 
-    <section class="py-10 bg-gray-100 border-b">
-        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="student-result.html" class="btn-main bg-blue-900 text-white p-6 rounded-2xl flex items-center justify-between group shadow-lg">
-                <div class="text-right">
-                    <h4 class="text-2xl font-black">نتائج الطلاب</h4>
-                    <p class="text-blue-200 text-sm">عرض نتائج امتحانات العام الدراسي</p>
+    <section class="py-12 bg-[#f8f9fa]">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <a href="student-result.html" class="group bg-white p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all border-b-4 border-blue-900">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="text-2xl font-black text-blue-900">النتائج</h4>
+                        <p class="text-gray-400 font-bold text-sm mt-1">بوابة الاستعلام الذكي</p>
+                    </div>
+                    <i class="fas fa-file-invoice text-4xl text-gray-100 group-hover:text-blue-900 transition"></i>
                 </div>
-                <i class="fas fa-id-card-alt text-4xl opacity-50 group-hover:opacity-100 transition"></i>
             </a>
 
-            <a href="teacher-portal.html" class="btn-main bg-red-700 text-white p-6 rounded-2xl flex items-center justify-between group shadow-lg">
-                <div class="text-right">
-                    <h4 class="text-2xl font-black">بوابة المعلمون</h4>
-                    <p class="text-red-200 text-sm">المنصة الخاصة بهيئة التدريس</p>
+            <a href="teacher-portal.html" class="group bg-white p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all border-b-4 border-red-700">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="text-2xl font-black text-red-700">المعلمون</h4>
+                        <p class="text-gray-400 font-bold text-sm mt-1">منصة الكادر التعليمي</p>
+                    </div>
+                    <i class="fas fa-user-tie text-4xl text-gray-100 group-hover:text-red-700 transition"></i>
                 </div>
-                <i class="fas fa-chalkboard-teacher text-4xl opacity-50 group-hover:opacity-100 transition"></i>
             </a>
 
-            <a href="#schedules" class="btn-main bg-yellow-600 text-white p-6 rounded-2xl flex items-center justify-between group shadow-lg">
-                <div class="text-right">
-                    <h4 class="text-2xl font-black">تحميل الجداول</h4>
-                    <p class="text-yellow-100 text-sm">جداول الحصص والامتحانات المعتمدة</p>
+            <a href="#schedules" class="group bg-white p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all border-b-4 border-yellow-600">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="text-2xl font-black text-yellow-600">الجداول</h4>
+                        <p class="text-gray-400 font-bold text-sm mt-1">التوقيتات الرسمية</p>
+                    </div>
+                    <i class="fas fa-clock text-4xl text-gray-100 group-hover:text-yellow-600 transition"></i>
                 </div>
-                <i class="fas fa-file-pdf text-4xl opacity-50 group-hover:opacity-100 transition"></i>
             </a>
         </div>
     </section>
 
     <main id="news" class="py-20 container mx-auto px-6">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
-            <div class="flex items-center gap-4">
-                <div class="h-16 w-3 bg-red-700 rounded-full"></div>
-                <div>
-                    <h3 class="text-4xl font-black text-blue-900 fancy-header">مركز الأخبار</h3>
-                    <p class="text-gray-500 font-bold">آخر مستجدات مدرسة الملك الكامل العسكرية</p>
-                </div>
-            </div>
-            <div class="bg-blue-100 text-blue-900 px-6 py-2 rounded-full font-bold text-sm">
-                المقالات النشطة: <span id="newsCount">0</span>
-            </div>
+        <div class="mb-16">
+            <h3 class="text-4xl font-black text-blue-900 mb-2">الجريدة الرسمية</h3>
+            <p class="text-gray-400 font-bold">تغطية حصرية لفعاليات حلم الأجيال</p>
+            <div class="line-accent mt-4"></div>
         </div>
-        
-        <div id="newsGrid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
-        </div>
+
+        <div id="newsGrid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-12">
+            </div>
     </main>
 
-    <section id="schedules" class="py-24 bg-blue-950 text-white relative overflow-hidden text-center">
-        <h3 class="text-5xl font-black fancy-header mb-4 text-yellow-500">شؤون الطلاب والجداول</h3>
-        <div class="flex flex-wrap justify-center gap-6 mt-10">
-            <button onclick="viewSchedule('grade1')" class="bg-white text-blue-900 px-10 py-5 rounded-2xl font-black hover:bg-yellow-500 transition-all text-xl shadow-2xl"><i class="fas fa-user-graduate"></i> الصف الأول</button>
-            <button onclick="viewSchedule('grade2')" class="bg-white text-blue-900 px-10 py-5 rounded-2xl font-black hover:bg-yellow-500 transition-all text-xl shadow-2xl"><i class="fas fa-user-graduate"></i> الصف الثاني</button>
-            <button onclick="viewSchedule('grade3')" class="bg-white text-blue-900 px-10 py-5 rounded-2xl font-black hover:bg-yellow-500 transition-all text-xl shadow-2xl"><i class="fas fa-user-graduate"></i> الصف الثالث</button>
+    <section id="schedules" class="py-24 bg-[#001f3f] text-white rounded-t-[50px] overflow-hidden text-center">
+        <div class="container mx-auto px-6">
+            <h3 class="text-5xl font-black mb-12 fancy-header text-yellow-500">الجداول المعتمدة</h3>
+            <div class="flex flex-wrap justify-center gap-8">
+                <button onclick="viewSchedule('grade1')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الأول الثانوي</button>
+                <button onclick="viewSchedule('grade2')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الثاني الثانوي</button>
+                <button onclick="viewSchedule('grade3')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الثالث الثانوي</button>
+            </div>
         </div>
     </section>
 
-    <footer class="bg-white border-t-8 border-blue-900 pt-16 pb-8 relative">
+    <footer class="bg-white pt-20 pb-10 border-t">
         <div class="container mx-auto px-6 text-center">
-            <div class="mb-8">
-                <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-20 mx-auto grayscale opacity-50 mb-4">
-                <h4 class="text-2xl font-black text-blue-900 mb-2">مدرسة الملك الكامل الثانوية العسكرية بنين</h4>
-            </div>
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6 text-gray-600 font-black border-t pt-8">
-                <p>جميع الحقوق محفوظة © 2026 مدرسة الملك الكامل</p>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8 border-b pb-12">
+                <p class="font-bold text-gray-500">
+                    جميع الحقوق محفوظة © <span id="currentYear"></span> مدرسة الملك الكامل العسكرية
+                </p>
                 
-                <div class="text-lg">
-                    أنشئ بواسطة <span class="consultant-mark text-3xl">المستشار</span> 
-                    <i class="fas fa-crown text-yellow-600 ml-1"></i>
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 font-black">Developed By</span>
+                    <div class="consultant-badge">المستشار</div>
                 </div>
 
-                <div class="flex gap-6 text-3xl text-blue-900">
-                    <a href="https://facebook.com/YOUR_PAGE" target="_blank"><i class="fab fa-facebook hover:text-blue-600 transition"></i></a>
-                    <a href="https://youtube.com/YOUR_CHANNEL" target="_blank"><i class="fab fa-youtube hover:text-red-600 transition"></i></a>
-                    <a href="mailto:info@school.com"><i class="fas fa-envelope hover:text-yellow-600 transition"></i></a>
+                <div class="flex gap-8 text-2xl text-blue-900">
+                    <a href="https://facebook.com/YOUR_LINK" target="_blank" class="hover:text-blue-600 transition-all transform hover:scale-125"><i class="fab fa-facebook"></i></a>
+                    <a href="https://youtube.com/YOUR_LINK" target="_blank" class="hover:text-red-600 transition-all transform hover:scale-125"><i class="fab fa-youtube"></i></a>
+                    <a href="mailto:contact@school.com" class="hover:text-yellow-600 transition-all transform hover:scale-125"><i class="fas fa-envelope"></i></a>
                 </div>
             </div>
+            <p class="mt-8 text-[12px] text-gray-300 font-bold italic">لا يسمح بنسخ المحتوى دون إذن مسبق من الإدارة</p>
         </div>
     </footer>
 
     <script>
+        // تحديث السنة تلقائياً
+        document.getElementById('currentYear').innerText = new Date().getFullYear();
+
         const firebaseConfig = {
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
             authDomain: "hazoma-60ed2.firebaseapp.com",
@@ -162,25 +191,28 @@
         db.collection('articles').orderBy('createdAt', 'desc').onSnapshot(snap => {
             const grid = document.getElementById('newsGrid');
             const ticker = document.getElementById('tickerText');
-            document.getElementById('newsCount').innerText = snap.size;
             let tickerItems = " .. ";
             grid.innerHTML = '';
             
-            snap.docs.forEach((doc, index) => {
+            snap.docs.forEach((doc) => {
                 const a = doc.data();
-                const hasImage = a.image && a.image.trim() !== "";
-                tickerItems += ` 🚨 ${a.title} 🚨 .. `;
+                const hasImg = a.image && a.image.trim() !== "";
+                tickerItems += ` • ${a.title} • `;
 
                 grid.innerHTML += `
-                    <article class="news-card overflow-hidden shadow-lg animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
-                        ${hasImage ? `<div class="img-container"><img src="${a.image}"></div>` : `<div class="h-2 w-full bg-blue-900"></div>`}
+                    <article class="news-card animate__animated animate__fadeIn">
+                        ${hasImg ? `<div class="img-wrapper"><img src="${a.image}" loading="lazy"></div>` : `<div class="h-4 bg-blue-900 rounded-t-20"></div>`}
                         <div class="p-8">
-                            <span class="text-red-700 font-bold text-xs uppercase tracking-widest">${a.tag || 'خبر عاجل'}</span>
-                            <h4 class="text-2xl font-black text-blue-900 my-3 leading-tight">${a.title}</h4>
-                            <p class="text-gray-500 text-sm mb-6 line-clamp-2">${a.desc}</p>
-                            <div class="flex justify-between items-center border-t pt-4">
-                                <span class="text-gray-400 text-xs">${a.date}</span>
-                                <a href="article.html?id=${doc.id}" class="bg-blue-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition">اقرأ المزيد</a>
+                            <div class="flex items-center gap-2 mb-4 text-[10px] font-black text-red-700 uppercase">
+                                <span class="w-2 h-2 bg-red-700 rounded-full"></span> ${a.tag || 'أخبار'}
+                            </div>
+                            <h4 class="text-2xl font-black text-blue-900 mb-4 leading-snug h-16 overflow-hidden">${a.title}</h4>
+                            <p class="text-gray-400 text-sm mb-6 line-clamp-2 font-semibold">${a.desc}</p>
+                            <div class="flex justify-between items-center pt-6 border-t border-gray-50">
+                                <span class="text-gray-300 text-[10px] font-bold"><i class="far fa-calendar-alt ml-1"></i> ${a.date}</span>
+                                <a href="article.html?id=${doc.id}" class="text-blue-900 font-black text-sm flex items-center gap-2 hover:gap-4 transition-all">
+                                    التفاصيل <i class="fas fa-chevron-left"></i>
+                                </a>
                             </div>
                         </div>
                     </article>
