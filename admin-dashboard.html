@@ -2,53 +2,31 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم | مدرسة الملك الكامل</title>
+    <title>لوحة الإدارة | المستشار</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-100 flex">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-blue-950 min-h-screen text-white p-6">
-        <h2 class="text-2xl font-black mb-10 text-yellow-500">لوحة المستشار</h2>
-        <nav class="space-y-4">
-            <button onclick="showTab('info')" class="w-full text-right p-3 hover:bg-blue-800 rounded">📝 تعريف المدرسة</button>
-            <button onclick="showTab('teachers')" class="w-full text-right p-3 hover:bg-blue-800 rounded">👨‍🏫 إدارة المعلمين</button>
-            <button onclick="showTab('students')" class="w-full text-right p-3 hover:bg-blue-800 rounded">🎓 إدارة الطلاب</button>
-            <button onclick="showTab('reports')" class="w-full text-right p-3 hover:bg-blue-800 rounded">📊 تقارير عامة</button>
-        </nav>
-    </aside>
-
-    <main class="flex-1 p-10">
-        <!-- Tab: Info -->
-        <div id="tab-info" class="tab-content bg-white p-8 rounded-xl shadow">
-            <h3 class="text-2xl font-bold mb-4">تعديل التعريف بالمدرسة</h3>
-            <textarea id="aboutInput" class="w-full h-40 border p-4 rounded-lg mb-4" placeholder="اكتب هنا كلمة الإدارة والتعريف..."></textarea>
-            <button id="saveInfo" class="bg-blue-900 text-white px-8 py-2 rounded">حفظ التعديلات</button>
-        </div>
-
-        <!-- Tab: Teachers -->
-        <div id="tab-teachers" class="tab-content hidden bg-white p-8 rounded-xl shadow">
-            <h3 class="text-2xl font-bold mb-4">إضافة معلم جديد</h3>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <input type="text" id="tName" placeholder="اسم المعلم" class="border p-2 rounded">
-                <input type="email" id="tEmail" placeholder="الإيميل" class="border p-2 rounded">
-                <select id="tSubject" class="border p-2 rounded">
-                    <option value="math">رياضيات</option>
-                    <option value="physics">فيزياء</option>
-                    <option value="admin_posts">مسؤول نشر جداول</option>
-                </select>
-                <button id="addTeacherBtn" class="bg-green-600 text-white rounded">إنشاء حساب معلم</button>
-            </div>
-        </div>
-    </main>
+<body class="bg-slate-900 text-white font-['Cairo']">
+    <nav class="bg-black p-4 flex justify-between border-b border-yellow-500">
+        <h1 class="text-xl font-black text-yellow-500 italic">لوحة تحكم المستشار (ADMIN)</h1>
+        <button id="logoutBtn" class="bg-red-600 px-4 py-1 rounded-lg">تسجيل الخروج</button>
+    </nav>
+    <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a href="admin-results.html" class="bg-blue-800 p-10 rounded-3xl text-center hover:scale-105 transition shadow-2xl">رفع النتائج</a>
+        <a href="teacher-portal.html" class="bg-green-800 p-10 rounded-3xl text-center hover:scale-105 transition shadow-2xl">إدارة المدرسين</a>
+        <div class="bg-gray-800 p-10 rounded-3xl text-center opacity-50">إعدادات المنصة</div>
+    </div>
 
     <script type="module">
-        import { db, doc, setDoc, updateDoc } from './config.js';
+        import { auth } from './config.js';
+        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
-        // وظيفة حفظ تعريف المدرسة
-        document.getElementById('saveInfo').onclick = async () => {
-            const text = document.getElementById('aboutInput').value;
-            await setDoc(doc(db, "settings", "school_info"), { text: text });
-            alert("تم تحديث معلومات المدرسة بنجاح!");
+        onAuthStateChanged(auth, (user) => {
+            if (!user || !user.email.endsWith('@admin.com')) { window.location.href = 'login.html'; }
+        });
+
+        document.getElementById('logoutBtn').onclick = () => {
+            signOut(auth).then(() => { window.location.href = 'index.html'; });
         };
     </script>
 </body>
