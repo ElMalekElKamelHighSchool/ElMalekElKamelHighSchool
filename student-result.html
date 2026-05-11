@@ -89,15 +89,25 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // فحص وجود ID في الرابط عند تحميل الصفحة
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('id');
+            if (studentId) {
+                document.getElementById('secretInput').value = studentId;
+                getFinalResult(studentId);
+            }
+        };
+
         // وظيفة البحث التلقائي
         let searchTimeout;
         function autoSearch(val) {
             clearTimeout(searchTimeout);
-            if (val.length >= 4) { // يبحث تلقائياً إذا كان الكود 4 أرقام أو أكثر
+            if (val.length >= 4) { 
                 document.getElementById('loadingMsg').classList.remove('hidden');
                 searchTimeout = setTimeout(() => {
                     getFinalResult(val);
-                }, 500); // تأخير بسيط للتأكد من توقف المستخدم عن الكتابة
+                }, 500); 
             }
         }
 
@@ -105,6 +115,7 @@
             const inputVal = passedVal || document.getElementById('secretInput').value.trim();
             if(!inputVal) return;
 
+            document.getElementById('loadingMsg').classList.remove('hidden');
             let data = null;
             const grades = ['1sec', '2sec', '3sec'];
 
@@ -202,7 +213,7 @@
                         <button onclick="window.print()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl">
                             <i class="fas fa-print"></i> طباعة الشهادة الرسمية
                         </button>
-                        <button onclick="location.reload()" class="w-full text-gray-400 text-sm font-bold hover:text-red-500 transition-all">
+                        <button onclick="location.replace(location.pathname)" class="w-full text-gray-400 text-sm font-bold hover:text-red-500 transition-all">
                             إغلاق وحذف الكود
                         </button>
                     </div>
@@ -228,3 +239,4 @@
     </script>
 </body>
 </html>
+
