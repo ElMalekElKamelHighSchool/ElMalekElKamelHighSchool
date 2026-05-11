@@ -14,7 +14,6 @@
         body { font-family: 'Cairo', sans-serif; background: #0f172a; min-height: 100vh; margin: 0; padding: 20px; color: #1e293b; }
         .result-card { background: white; border-radius: 24px; overflow: hidden; position: relative; }
         
-        /* تأثيرات جمالية للخلفية */
         .bg-pattern {
             background-color: #0f172a;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-opacity='0.05'%3E%3Cpath fill='%23ffffff' d='M50 50L100 0H0L50 50Z'/%3E%3C/g%3E%3C/svg%3E");
@@ -46,8 +45,14 @@
 </head>
 <body class="bg-pattern flex flex-col items-center">
 
+    <!-- زر الصفحة الرئيسية -->
+    <a href="index.html" class="no-print self-start mb-4 flex items-center gap-2 text-white bg-slate-700/50 hover:bg-slate-600 px-5 py-2 rounded-full transition-all border border-slate-600">
+        <i class="fas fa-home"></i>
+        <span>الرئيسية</span>
+    </a>
+
     <!-- العنوان العلوي والبحث -->
-    <div class="max-w-xl w-full text-center no-print mb-10 mt-6">
+    <div class="max-w-xl w-full text-center no-print mb-10 mt-2">
         <h1 class="text-4xl md:text-5xl font-black mb-8 shimmer-text tracking-tight">مدرسة الملك الكامل الثانوية</h1>
         
         <div class="bg-slate-800/80 backdrop-blur-md p-8 rounded-[32px] border border-slate-700 shadow-2xl">
@@ -55,11 +60,13 @@
             <div class="relative mb-6">
                 <i class="fas fa-fingerprint absolute right-5 top-1/2 -translate-y-1/2 text-yellow-500 text-xl"></i>
                 <input id="secretInput" type="text" placeholder="أدخل الكود السري للطالب" 
+                       oninput="autoSearch(this.value)"
                        class="w-full p-5 pr-14 rounded-2xl text-black text-center font-black text-2xl outline-none focus:ring-4 ring-yellow-500/40 transition-all border-none">
             </div>
             <button onclick="getFinalResult()" class="w-full bg-yellow-500 text-blue-950 p-5 rounded-2xl font-black text-xl hover:bg-yellow-400 transform active:scale-95 transition-all shadow-xl flex items-center justify-center gap-3">
                 <i class="fas fa-search-plus"></i> كشف النتيجة
             </button>
+            <p id="loadingMsg" class="hidden text-yellow-500 mt-4 animate-pulse font-bold">جاري جلب النتيجة...</p>
         </div>
     </div>
 
@@ -71,7 +78,6 @@
     </div>
 
     <script>
-        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
             authDomain: "hazoma-60ed2.firebaseapp.com",
@@ -83,118 +89,132 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        async function getFinalResult() {
-            const inputVal = document.getElementById('secretInput').value.trim();
-            if(!inputVal) return alert("يرجى إدخال كود الطالب أولاً");
+        // وظيفة البحث التلقائي
+        let searchTimeout;
+        function autoSearch(val) {
+            clearTimeout(searchTimeout);
+            if (val.length >= 4) { // يبحث تلقائياً إذا كان الكود 4 أرقام أو أكثر
+                document.getElementById('loadingMsg').classList.remove('hidden');
+                searchTimeout = setTimeout(() => {
+                    getFinalResult(val);
+                }, 500); // تأخير بسيط للتأكد من توقف المستخدم عن الكتابة
+            }
+        }
+
+        async function getFinalResult(passedVal) {
+            const inputVal = passedVal || document.getElementById('secretInput').value.trim();
+            if(!inputVal) return;
 
             let data = null;
             const grades = ['1sec', '2sec', '3sec'];
 
-            for (let g of grades) {
-                const doc = await db.collection(`results_${g}`).doc(inputVal).get();
-                if (doc.exists) {
-                    data = doc.data();
-                    break;
+            try {
+                for (let g of grades) {
+                    const doc = await db.collection(`results_${g}`).doc(inputVal).get();
+                    if (doc.exists) {
+                        data = doc.data();
+                        break;
+                    }
                 }
-            }
 
-            if(!data) return alert("عذراً، هذا الكود غير مسجل حالياً.");
+                document.getElementById('loadingMsg').classList.add('hidden');
 
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 }, colors: ['#fbbf24', '#1e3a8a'] });
-            
-            const display = document.getElementById('resultDisplay');
-            const content = document.getElementById('resultContent');
-            display.classList.remove('hidden');
+                if(!data) {
+                    if(!passedVal) alert("عذراً، هذا الكود غير مسجل حالياً.");
+                    return;
+                }
 
-            // 1. تعريف مصفوفات الترتيب
-            const personalInfo = ['رقم الجلوس', 'الإسم', 'الفصل', 'شعبة الطالب', 'حالة الطالب'];
-            const summaries = ['المجموع', 'المجموع بالحروف', 'النسبة المئوية', 'التقدير'];
-            
-            const allKeys = Object.keys(data);
-            const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
-
-            // بناء رأس الشهادة
-            let html = `
-                <div class="flex justify-between items-center mb-8 pb-6 border-b-2 border-gray-100">
-                    <div class="text-right">
-                        <h2 class="text-2xl font-black text-blue-900 leading-tight">مدرسة الملك الكامل<br><span class="text-sm text-gray-400 font-bold">بنين - الثانوية العسكرية</span></h2>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mb-2 mx-auto">
-                            <i class="fas fa-graduation-cap text-white text-3xl"></i>
-                        </div>
-                        <span class="text-[10px] font-black text-gray-400 block uppercase">Official Result</span>
-                    </div>
-                </div>
+                confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 }, colors: ['#fbbf24', '#1e3a8a'] });
                 
-                <div class="space-y-1.5">
-            `;
+                const display = document.getElementById('resultDisplay');
+                const content = document.getElementById('resultContent');
+                display.classList.remove('hidden');
 
-            // 2. عرض البيانات الشخصية أولاً
-            personalInfo.forEach(key => {
-                const val = data[key] || data['الاسم']; // معالجة اختلاف مسمى الإسم
-                if(val && key !== 'الإسم' || (key === 'الإسم' && (data['الإسم'] || data['الاسم']))) {
-                    html += renderRow(key, val, "bg-blue-50/50 border-blue-100 font-bold");
-                }
-            });
+                const personalInfo = ['رقم الجلوس', 'الإسم', 'الفصل', 'شعبة الطالب', 'حالة الطالب'];
+                const summaries = ['المجموع', 'المجموع بالحروف', 'النسبة المئوية', 'التقدير'];
+                
+                const allKeys = Object.keys(data);
+                const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
 
-            // فاصل بسيط
-            html += `<div class="h-4"></div><p class="text-xs font-black text-blue-300 mb-2 mr-2 uppercase tracking-widest">بيان الدرجات التفصيلي</p>`;
-
-            // 3. عرض المواد الدراسية (كل ما هو عربي وغير موجود في القوائم الأخرى)
-            allKeys.forEach(key => {
-                if(isArabic(key) && !personalInfo.includes(key) && !summaries.includes(key) && key !== 'الاسم') {
-                    html += renderRow(key, data[key], "bg-white border-gray-50");
-                }
-            });
-
-            // 4. عرض النتائج النهائية (المجموع والتقدير)
-            html += `<div class="h-6"></div>`;
-            summaries.forEach(key => {
-                if(data[key]) {
-                    const isTotal = key === 'المجموع' || key === 'النسبة المئوية';
-                    const rowClass = isTotal 
-                        ? "bg-yellow-50 border-yellow-200 text-blue-900 transform scale-[1.02] shadow-sm ring-1 ring-yellow-200" 
-                        : "bg-slate-50 border-slate-200";
-                    
-                    html += `
-                        <div class="flex justify-between items-center p-5 px-6 rounded-2xl border-b mb-2 ${rowClass}">
-                            <span class="font-black text-gray-700">${key}</span>
-                            <span class="font-black ${isTotal ? 'text-2xl text-orange-600' : 'text-lg'}">${data[key]}</span>
-                        </div>
-                    `;
-                }
-            });
-
-            html += `
-                </div>
-
-                <div class="mt-12 text-center pt-8 border-t-2 border-dashed border-gray-100">
-                    <p class="text-blue-900 font-black text-xl">تهانينا القلبية بدوام النجاح والتفوق</p>
-                    <p class="text-gray-400 text-xs mt-3 font-bold">اعتمدت النتيجة إلكترونياً بواسطة إدارة المدرسة</p>
-                    <div class="mt-6 flex justify-between items-center px-4">
+                let html = `
+                    <div class="flex justify-between items-center mb-8 pb-6 border-b-2 border-gray-100">
                         <div class="text-right">
-                           <span class="text-[10px] text-gray-400 block font-bold uppercase tracking-tighter">Developed by</span>
-                           <span class="text-sm font-black text-blue-800">Hazem Salem</span>
+                            <h2 class="text-2xl font-black text-blue-900 leading-tight">مدرسة الملك الكامل<br><span class="text-sm text-gray-400 font-bold">بنين - الثانوية العسكرية</span></h2>
                         </div>
-                        <div class="w-12 h-12 opacity-20">
-                            <i class="fas fa-shield-alt text-4xl"></i>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mb-2 mx-auto">
+                                <i class="fas fa-graduation-cap text-white text-3xl"></i>
+                            </div>
+                            <span class="text-[10px] font-black text-gray-400 block uppercase">Official Result</span>
                         </div>
                     </div>
-                </div>
+                    <div class="space-y-1.5">
+                `;
 
-                <div class="mt-10 flex flex-col gap-3 no-print">
-                    <button onclick="window.print()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl">
-                        <i class="fas fa-print"></i> طباعة الشهادة الرسمية
-                    </button>
-                    <button onclick="location.reload()" class="w-full text-gray-400 text-sm font-bold hover:text-red-500 transition-all">
-                        إغلاق وحذف الكود
-                    </button>
-                </div>
-            `;
+                personalInfo.forEach(key => {
+                    const val = data[key] || data['الاسم'];
+                    if(val && (key !== 'الإسم' || (key === 'الإسم' && (data['الإسم'] || data['الاسم'])))) {
+                        html += renderRow(key, val, "bg-blue-50/50 border-blue-100 font-bold");
+                    }
+                });
 
-            content.innerHTML = html;
-            display.scrollIntoView({ behavior: 'smooth' });
+                html += `<div class="h-4"></div><p class="text-xs font-black text-blue-300 mb-2 mr-2 uppercase tracking-widest">بيان الدرجات التفصيلي</p>`;
+
+                allKeys.forEach(key => {
+                    if(isArabic(key) && !personalInfo.includes(key) && !summaries.includes(key) && key !== 'الاسم') {
+                        html += renderRow(key, data[key], "bg-white border-gray-50");
+                    }
+                });
+
+                html += `<div class="h-6"></div>`;
+                summaries.forEach(key => {
+                    if(data[key]) {
+                        const isTotal = key === 'المجموع' || key === 'النسبة المئوية';
+                        const rowClass = isTotal 
+                            ? "bg-yellow-50 border-yellow-200 text-blue-900 transform scale-[1.02] shadow-sm ring-1 ring-yellow-200" 
+                            : "bg-slate-50 border-slate-200";
+                        
+                        html += `
+                            <div class="flex justify-between items-center p-5 px-6 rounded-2xl border-b mb-2 ${rowClass}">
+                                <span class="font-black text-gray-700">${key}</span>
+                                <span class="font-black ${isTotal ? 'text-2xl text-orange-600' : 'text-lg'}">${data[key]}</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                html += `
+                    </div>
+                    <div class="mt-12 text-center pt-8 border-t-2 border-dashed border-gray-100">
+                        <p class="text-blue-900 font-black text-xl">تهانينا القلبية بدوام النجاح والتفوق</p>
+                        <p class="text-gray-400 text-xs mt-3 font-bold">اعتمدت النتيجة إلكترونياً بواسطة إدارة المدرسة</p>
+                        <div class="mt-6 flex justify-between items-center px-4">
+                            <div class="text-right">
+                               <span class="text-[10px] text-gray-400 block font-bold uppercase tracking-tighter">Developed by</span>
+                               <span class="text-sm font-black text-blue-800">Hazem Salem</span>
+                            </div>
+                            <div class="w-12 h-12 opacity-20">
+                                <i class="fas fa-shield-alt text-4xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-10 flex flex-col gap-3 no-print">
+                        <button onclick="window.print()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl">
+                            <i class="fas fa-print"></i> طباعة الشهادة الرسمية
+                        </button>
+                        <button onclick="location.reload()" class="w-full text-gray-400 text-sm font-bold hover:text-red-500 transition-all">
+                            إغلاق وحذف الكود
+                        </button>
+                    </div>
+                `;
+
+                content.innerHTML = html;
+                display.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loadingMsg').classList.add('hidden');
+            }
         }
 
         function renderRow(label, value, classes) {
