@@ -11,41 +11,89 @@
     <style>
         body { font-family: 'Cairo', sans-serif; background: #f1f5f9; }
         
-        /* تحسين عرض محتوى المقال */
         .article-content { 
-            line-height: 2; 
-            font-size: 1.15rem; 
+            line-height: 1.8; 
+            font-size: 1.1rem; 
             color: #1e293b; 
             white-space: pre-wrap; 
-            word-wrap: break-word;
         }
 
-        /* تنسيقات الطباعة */
+        /* تنسيقات الطباعة الاحترافية (الجريدة) */
         @media print {
-            .no-print { display: none !important; }
-            body { background: white !important; padding: 0 !important; }
-            .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
-            .bg-white { box-shadow: none !important; padding: 0 !important; }
-            #imgBox { box-shadow: none !important; margin-bottom: 20px !important; }
-            #artImg { 
-                max-height: none !important; 
-                width: 100% !important; 
-                height: auto !important; 
-                object-fit: contain !important; 
-                border-radius: 10px !important;
+            @page { 
+                size: portrait; 
+                margin: 1cm; 
             }
-            .article-content { font-size: 12pt; color: black; }
-            #print-footer { display: block !important; }
-            @page { margin: 1.5cm; }
+            
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            
+            .container { 
+                max-width: 100% !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+            }
+
+            #mainContent { 
+                display: block !important; 
+                box-shadow: none !important;
+            }
+
+            .bg-white { 
+                box-shadow: none !important; 
+                border: none !important; 
+                padding: 0 !important;
+            }
+
+            /* تصغير الصورة في الطباعة لتناسب صفحة واحدة */
+            #imgBox { 
+                display: flex !important;
+                justify-content: center;
+                margin-bottom: 15px !important;
+                box-shadow: none !important;
+            }
+            
+            #artImg { 
+                max-height: 250px !important; /* حجم صغير ومناسب للطباعة */
+                width: auto !important; 
+                border-radius: 8px !important;
+                border: 1px solid #ddd;
+            }
+
+            #artTitle { 
+                font-size: 24pt !important; 
+                color: black !important; 
+                margin-bottom: 10px !important;
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
+            }
+
+            .article-content { 
+                font-size: 11pt !important; 
+                color: black !important; 
+                line-height: 1.6;
+            }
+
+            #print-footer { 
+                display: block !important; 
+                position: relative;
+                bottom: 0;
+                width: 100%;
+                text-align: center;
+                border-top: 1px solid #000;
+                margin-top: 30px;
+                padding-top: 10px;
+            }
         }
 
-        /* منع قص الصورة في العرض العادي */
+        /* تنسيق الصورة في العرض العادي */
         #artImg {
             width: 100%;
             height: auto;
-            max-height: 70vh; /* لا يتعدى 70% من طول الشاشة */
-            object-fit: contain; /* يضمن ظهور الصورة كاملة دون قص */
-            background: #f8fafc;
+            max-height: 60vh;
+            object-fit: contain;
+            background: #fff;
         }
     </style>
 </head>
@@ -57,66 +105,68 @@
             <a href="index.html" class="flex items-center gap-2 font-black hover:text-yellow-500 transition">
                 <i class="fas fa-arrow-right"></i> العودة للرئيسية
             </a>
-            <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-10 rounded">
+            <span class="font-bold text-sm md:text-base">المركز الإعلامي - الملك الكامل</span>
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 py-10 max-w-4xl">
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- شاشة التحميل -->
         <div id="loading" class="text-center py-20 no-print">
             <div class="animate-spin inline-block w-12 h-12 border-4 border-blue-900 border-t-transparent rounded-full"></div>
-            <p class="mt-4 font-bold text-blue-900">جاري تحميل المقال...</p>
+            <p class="mt-4 font-bold text-blue-900">جاري تحميل الخبر...</p>
         </div>
 
         <article id="mainContent" class="hidden animate__animated animate__fadeIn">
-            <!-- صندوق الصورة - معدل ليظهر الصورة كاملة -->
-            <div id="imgBox" class="rounded-3xl overflow-hidden shadow-2xl mb-8 hidden border border-gray-100">
-                <img id="artImg" alt="صورة المقال">
+            <!-- ترويسة رسمية تظهر فقط في الطباعة -->
+            <div class="hidden print:block text-center mb-6 border-b-4 border-double border-black pb-4">
+                <h2 class="text-2xl font-black">مدرسة الملك الكامل الثانوية العسكرية</h2>
+                <p class="text-sm font-bold">بوابة الأخبار الرسمية - عدد (2026)</p>
+                <div class="flex justify-between text-xs mt-2 font-bold px-4">
+                    <span id="print-date-top"></span>
+                    <span>نسخة للطباعة</span>
+                </div>
             </div>
 
-            <div class="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-50">
-                <div class="flex items-center gap-3 mb-6">
-                    <span id="artTag" class="bg-red-700 text-white px-4 py-1 rounded-full text-xs font-black"></span>
+            <!-- صندوق الصورة -->
+            <div id="imgBox" class="rounded-3xl overflow-hidden shadow-xl mb-6 hidden">
+                <img id="artImg" alt="صورة الخبر">
+            </div>
+
+            <div class="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-4">
+                    <span id="artTag" class="bg-red-700 text-white px-3 py-1 rounded-md text-xs font-black uppercase"></span>
                     <span id="artDate" class="text-gray-400 text-sm font-bold"></span>
                 </div>
                 
-                <h1 id="artTitle" class="text-3xl md:text-5xl font-black text-blue-900 mb-8 leading-tight"></h1>
+                <h1 id="artTitle" class="text-2xl md:text-4xl font-black text-blue-900 mb-6 leading-tight"></h1>
                 
-                <div id="artDesc" class="article-content"></div>
+                <div id="artDesc" class="article-content mb-10"></div>
 
-                <!-- تذييل المقال - أزرار تختفي عند الطباعة -->
-                <div class="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center no-print">
-                    <button onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2 rounded-xl font-bold transition flex items-center gap-2">
-                        <i class="fas fa-print"></i> طباعة الخبر
+                <!-- أزرار تختفي عند الطباعة -->
+                <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center no-print">
+                    <button onclick="window.print()" class="bg-blue-900 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-800 transition flex items-center gap-2">
+                        <i class="fas fa-print"></i> طباعة الخبر فوراً
                     </button>
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm font-bold text-gray-500">شارك الخبر:</span>
-                        <a id="shareFB" href="#" target="_blank" class="text-blue-600 text-2xl hover:scale-110 transition"><i class="fab fa-facebook"></i></a>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold text-gray-500">مشاركة:</span>
+                        <a id="shareFB" href="#" target="_blank" class="text-blue-600 text-xl"><i class="fab fa-facebook"></i></a>
                     </div>
                 </div>
 
-                <!-- حقوق التطوير - تظهر فقط عند الطباعة أو أسفل الصفحة -->
-                <div id="print-footer" class="mt-10 pt-6 border-t-2 border-dashed border-gray-200 flex justify-between items-center">
-                    <div class="text-right">
-                        <p class="text-blue-900 font-black text-sm">مدرسة الملك الكامل الثانوية العسكرية</p>
-                        <p class="text-gray-400 text-[10px] font-bold uppercase">Official Media Center</p>
-                    </div>
-                    <div class="text-left">
-                        <span class="text-[10px] text-gray-400 block font-bold uppercase">Developed by</span>
-                        <span class="text-sm font-black text-blue-800">Hazem Salem</span>
-                    </div>
+                <!-- تذييل يظهر في الطباعة فقط -->
+                <div id="print-footer" class="hidden print:block">
+                    <p class="font-black text-sm">جميع الحقوق محفوظة © مدرسة الملك الكامل - 2026</p>
+                    <p class="text-[10px] text-gray-500 mt-1">طُبعت هذه المادة من البوابة الإلكترونية الرسمية للمدرسة</p>
                 </div>
             </div>
         </article>
     </main>
 
-    <!-- فوتر الموقع - يختفي عند الطباعة -->
-    <footer class="text-center py-10 text-gray-400 font-bold no-print">
-        <p>جميع الحقوق محفوظة © مدرسة الملك الكامل - 2026</p>
+    <footer class="text-center py-6 text-gray-400 font-bold no-print">
+        <p>مدرسة الملك الكامل العسكرية - جميع الحقوق محفوظة 2026</p>
     </footer>
 
     <script>
-        // إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
             authDomain: "hazoma-60ed2.firebaseapp.com",
@@ -128,7 +178,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // جلب معرف المقال من الرابط
         const urlParams = new URLSearchParams(window.location.search);
         const articleId = urlParams.get('id');
 
@@ -137,52 +186,37 @@
             
             try {
                 const doc = await db.collection('articles').doc(articleId).get();
-                
                 if(!doc.exists) { 
-                    document.getElementById('loading').innerHTML = `
-                        <div class="text-red-500 font-black text-xl">المقال غير موجود أو تم حذفه</div>
-                        <a href="index.html" class="text-blue-600 underline mt-4 block">العودة للرئيسية</a>
-                    `;
+                    document.getElementById('loading').innerHTML = "الخبر غير موجود";
                     return; 
                 }
                 
                 const a = doc.data();
-                
-                // تعبئة البيانات في الصفحة
-                document.title = a.title + " | الملك الكامل";
+                document.title = a.title;
                 document.getElementById('artTitle').innerText = a.title;
-                document.getElementById('artTag').innerText = a.tag || 'خبر';
-                document.getElementById('artDate').innerText = a.date || '';
+                document.getElementById('artTag').innerText = a.tag || 'خبر عاجل';
+                document.getElementById('artDate').innerText = a.date;
+                document.getElementById('print-date-top').innerText = "تاريخ النشر: " + a.date;
                 document.getElementById('artDesc').innerText = a.desc;
 
-                // معالجة الصورة
                 if(a.image && a.image.trim() !== "") {
-                    const imgElement = document.getElementById('artImg');
-                    imgElement.src = a.image;
-                    
-                    // الانتظار حتى تحميل الصورة لضمان عدم حدوث مشاكل في الأبعاد
-                    imgElement.onload = () => {
-                        document.getElementById('imgBox').classList.remove('hidden');
-                    };
+                    const img = document.getElementById('artImg');
+                    img.src = a.image;
+                    img.onload = () => document.getElementById('imgBox').classList.remove('hidden');
                 }
 
-                // إظهار المحتوى وإخفاء شاشة التحميل
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('mainContent').classList.remove('hidden');
-                
-                // تحديث رابط المشاركة
                 document.getElementById('shareFB').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
 
             } catch (error) {
-                console.error("Error fetching article:", error);
-                document.getElementById('loading').innerHTML = `<p class="text-red-600 font-bold">حدث خطأ أثناء الاتصال بقاعدة البيانات</p>`;
+                console.error(error);
+                document.getElementById('loading').innerHTML = "خطأ في تحميل البيانات";
             }
         }
-
         loadArticle();
     </script>
-    
-    <!-- الروابط الخارجية للمكتبات -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </body>
