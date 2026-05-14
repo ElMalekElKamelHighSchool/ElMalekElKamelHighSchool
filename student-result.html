@@ -41,6 +41,10 @@
             -webkit-text-fill-color: transparent;
         }
         @keyframes shimmer { to { background-position: -200% 0; } }
+
+        .coming-soon-gradient {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
     </style>
 </head>
 <body class="bg-pattern flex flex-col items-center">
@@ -52,14 +56,14 @@
     </a>
 
     <!-- العنوان العلوي والبحث -->
-    <div class="max-w-xl w-full text-center no-print mb-10 mt-2">
+    <div id="searchSection" class="max-w-xl w-full text-center no-print mb-10 mt-2">
         <h1 class="text-4xl md:text-5xl font-black mb-8 shimmer-text tracking-tight">مدرسة الملك الكامل الثانوية</h1>
         
-        <div class="bg-slate-800/80 backdrop-blur-md p-8 rounded-[32px] border border-slate-700 shadow-2xl">
+        <div id="mainSearchBox" class="bg-slate-800/80 backdrop-blur-md p-8 rounded-[32px] border border-slate-700 shadow-2xl">
             <p class="text-blue-200 mb-6 font-bold">بوابة الاستعلام عن نتائج الطلاب 2026</p>
             <div class="relative mb-6">
                 <i class="fas fa-fingerprint absolute right-5 top-1/2 -translate-y-1/2 text-yellow-500 text-xl"></i>
-                <input id="secretInput" type="text" placeholder="أدخل الكود السري للطالب" 
+                <input id="secretInput" type="text" placeholder="أدخل الكود السري أو رقم الجلوس" 
                        oninput="autoSearch(this.value)"
                        class="w-full p-5 pr-14 rounded-2xl text-black text-center font-black text-2xl outline-none focus:ring-4 ring-yellow-500/40 transition-all border-none">
             </div>
@@ -68,6 +72,20 @@
             </button>
             <p id="loadingMsg" class="hidden text-yellow-500 mt-4 animate-pulse font-bold">جاري جلب النتيجة...</p>
         </div>
+
+        <!-- واجهة "ترقبوا" تظهر فقط إذا كانت قاعدة البيانات فارغة -->
+        <div id="comingSoonBox" class="hidden bg-slate-800/90 backdrop-blur-xl p-10 rounded-[40px] border-2 border-dashed border-yellow-500/30 shadow-2xl">
+            <div class="w-24 h-24 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-clock-rotate-left text-yellow-500 text-5xl animate-spin-slow"></i>
+            </div>
+            <h2 class="text-3xl font-black text-white mb-4">ترقبوا النتائج قريباً</h2>
+            <p class="text-slate-400 leading-relaxed font-bold">تجري الآن عمليات المراجعة والاعتماد النهائي للنتائج. سيتم فتح باب الاستعلام فور رفعها مباشرة.</p>
+            <div class="mt-8 flex justify-center gap-2">
+                <span class="w-3 h-3 bg-yellow-500 rounded-full animate-bounce"></span>
+                <span class="w-3 h-3 bg-yellow-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-3 h-3 bg-yellow-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            </div>
+        </div>
     </div>
 
     <!-- كارت النتيجة البروفيشنال -->
@@ -75,6 +93,18 @@
         <div id="resultContent" class="p-8 md:p-12">
             <!-- سيتم حقن البيانات هنا -->
         </div>
+    </div>
+
+    <!-- كارت "غير موجود" المنسق -->
+    <div id="notFoundCard" class="hidden w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-2xl border-b-8 border-red-500">
+        <div class="text-red-500 mb-4">
+            <i class="fas fa-circle-exclamation text-6xl"></i>
+        </div>
+        <h3 class="text-2xl font-black text-slate-800 mb-2">عذراً، رقم الجلوس غير موجود</h3>
+        <p class="text-slate-500 font-bold mb-6">تأكد من كتابة الكود بشكل صحيح، أو انتظر "ترقبوا" رفع باقي النتائج.</p>
+        <button onclick="resetSearch()" class="bg-slate-100 text-slate-600 px-8 py-3 rounded-xl font-black hover:bg-slate-200 transition-all">
+            محاولة مرة أخرى
+        </button>
     </div>
 
     <script>
@@ -89,8 +119,30 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // فحص وجود ID في الرابط عند تحميل الصفحة
-        window.onload = function() {
+        // دالة تحويل الأرقام الهندية إلى عربية (1234)
+        function normalizeNumerals(str) {
+            const hindiDigits = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g];
+            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            for (let i = 0; i < 10; i++) {
+                str = str.replace(hindiDigits[i], englishDigits[i]);
+            }
+            return str;
+        }
+
+        // فحص حالة قاعدة البيانات عند الفتح
+        window.onload = async function() {
+            try {
+                // نختبر وجود ولو مستند واحد في أي من المجموعات
+                const test1 = await db.collection('results_1sec').limit(1).get();
+                const test2 = await db.collection('results_2sec').limit(1).get();
+                const test3 = await db.collection('results_3sec').limit(1).get();
+
+                if (test1.empty && test2.empty && test3.empty) {
+                    document.getElementById('mainSearchBox').classList.add('hidden');
+                    document.getElementById('comingSoonBox').classList.remove('hidden');
+                }
+            } catch (e) { console.error("Database check failed", e); }
+
             const urlParams = new URLSearchParams(window.location.search);
             const studentId = urlParams.get('id');
             if (studentId) {
@@ -99,23 +151,30 @@
             }
         };
 
-        // وظيفة البحث التلقائي
         let searchTimeout;
         function autoSearch(val) {
             clearTimeout(searchTimeout);
-            if (val.length >= 4) { 
+            // تحويل الأرقام فورياً أثناء الكتابة للعرض
+            const normalized = normalizeNumerals(val);
+            if (normalized.length >= 4) { 
                 document.getElementById('loadingMsg').classList.remove('hidden');
                 searchTimeout = setTimeout(() => {
-                    getFinalResult(val);
+                    getFinalResult(normalized);
                 }, 500); 
             }
         }
 
         async function getFinalResult(passedVal) {
-            const inputVal = passedVal || document.getElementById('secretInput').value.trim();
+            let inputVal = passedVal || document.getElementById('secretInput').value.trim();
             if(!inputVal) return;
 
+            // تحويل المدخلات لضمان البحث بالأرقام القياسية
+            inputVal = normalizeNumerals(inputVal);
+
             document.getElementById('loadingMsg').classList.remove('hidden');
+            document.getElementById('notFoundCard').classList.add('hidden');
+            document.getElementById('resultDisplay').classList.add('hidden');
+
             let data = null;
             const grades = ['1sec', '2sec', '3sec'];
 
@@ -131,10 +190,12 @@
                 document.getElementById('loadingMsg').classList.add('hidden');
 
                 if(!data) {
-                    if(!passedVal) alert("عذراً، هذا الكود غير مسجل حالياً.");
+                    document.getElementById('notFoundCard').classList.remove('hidden');
+                    document.getElementById('notFoundCard').scrollIntoView({ behavior: 'smooth' });
                     return;
                 }
 
+                // إذا وجدت النتيجة
                 confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 }, colors: ['#fbbf24', '#1e3a8a'] });
                 
                 const display = document.getElementById('resultDisplay');
@@ -213,7 +274,7 @@
                         <button onclick="window.print()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl">
                             <i class="fas fa-print"></i> طباعة الشهادة الرسمية
                         </button>
-                        <button onclick="location.replace(location.pathname)" class="w-full text-gray-400 text-sm font-bold hover:text-red-500 transition-all">
+                        <button onclick="resetSearch()" class="w-full text-gray-400 text-sm font-bold hover:text-red-500 transition-all">
                             إغلاق وحذف الكود
                         </button>
                     </div>
@@ -225,6 +286,7 @@
             } catch (error) {
                 console.error(error);
                 document.getElementById('loadingMsg').classList.add('hidden');
+                alert("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً");
             }
         }
 
@@ -236,7 +298,13 @@
                 </div>
             `;
         }
+
+        function resetSearch() {
+            document.getElementById('secretInput').value = '';
+            document.getElementById('resultDisplay').classList.add('hidden');
+            document.getElementById('notFoundCard').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>
-
