@@ -16,19 +16,22 @@
         @media print { 
             body { background: white; padding: 0; }
             .no-print { display: none; } 
-            .print-page { margin: 0; box-shadow: none; width: 100%; height: 100%; }
+            .print-page { margin: 0; box-shadow: none; width: 100%; height: 100%; border: none; }
         }
     </style>
 </head>
 <body>
+    <!-- شريط التحكم العلوي (يختفي عند الطباعة) -->
     <div class="no-print bg-blue-900 text-white p-4 mb-6 flex justify-between items-center shadow-lg">
-        <span class="font-bold">مُعاينة الجدول قبل الطباعة</span>
+        <span class="font-bold">مُعاينة الجدول قبل الطباعة (نسخة رسمية)</span>
         <button onclick="window.print()" class="bg-yellow-500 text-black px-6 py-2 rounded-full font-black hover:bg-yellow-400 transition">
             طباعة الجدول الآن <i class="fas fa-print mr-2"></i>
         </button>
     </div>
 
+    <!-- الصفحة الورقية -->
     <div class="print-page border-[6px] border-double border-black">
+        <!-- الترويسة الرسمية -->
         <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
             <div class="text-right text-sm font-bold">
                 <p>وزارة التربية والتعليم</p>
@@ -45,10 +48,13 @@
             </div>
         </div>
 
-        <h2 id="gradeTitle" class="text-2xl font-black text-center mb-6 underline decoration-double"></h2>
+        <!-- عنوان الصف الدراسي -->
+        <h2 id="gradeTitle" class="text-2xl font-black text-center mb-6 underline decoration-double">جاري تحميل العنوان...</h2>
         
+        <!-- مكان عرض الجدول القادم من Firebase -->
         <div id="tableContainer" class="min-h-[400px]"></div>
 
+        <!-- منطقة التوقيعات -->
         <div class="grid grid-cols-3 mt-16 text-center font-bold text-sm gap-4">
             <div class="border-t border-black pt-2">
                 <p class="mb-6">رئيس الكنترول</p>
@@ -60,14 +66,15 @@
             </div>
             <div class="border-t border-black pt-2">
                 <p class="mb-6">مدير المدرسة</p>
-                <p id="sign-manager" class="text-blue-900">.................</p>
+                <p id="sign-manager" class="text-blue-900 font-black">.................</p>
             </div>
         </div>
         
-        <p class="text-[10px] mt-20 text-gray-400 text-center italic">طُبع بواسطة المنصة الإلكترونية الرسمية للمدرسة</p>
+        <p class="text-[10px] mt-20 text-gray-400 text-center italic">طُبع بواسطة المنصة الإلكترونية الرسمية للمدرسة - نظام الملك الكامل الذكي</p>
     </div>
 
     <script>
+        // إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
             authDomain: "hazoma-60ed2.firebaseapp.com",
@@ -79,28 +86,58 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // الحصول على متغير الصف من الرابط (URL)
         const params = new URLSearchParams(window.location.search);
         const grade = params.get('grade');
 
         async function loadContent() {
-            // 1. جلب الجدول
-            const tableDoc = await db.collection('schedules').doc(grade).get();
-            if(tableDoc.exists) {
-                document.getElementById('gradeTitle').innerText = "جدول حصص " + (grade === 'grade1' ? 'الصف الأول الثانوي' : grade === 'grade2' ? 'الصف الثاني الثانوي' : 'الصف الثالث الثانوي');
-                document.getElementById('tableContainer').innerHTML = tableDoc.data().lessons;
-            } else {
-                document.body.innerHTML = "<h1 class='text-center mt-20 font-bold'>عذراً، هذا الجدول غير متاح حالياً</h1>";
-            }
+            try {
+                // 1. جلب بيانات الجدول ورئيس الكنترول الخاص بالصف
+                const tableDoc = await db.collection('schedules').doc(grade).get();
+                
+                if(tableDoc.exists) {
+                    const tableData = tableDoc.data();
+                    
+                    // تحديد مسمى الصف
+                    const gradeNames = {
+                        'grade1': 'الصف الأول الثانوي',
+                        'grade2': 'الصف الثاني الثانوي',
+                        'grade3': 'الصف الثالث الثانوي'
+                    };
+                    
+                    document.getElementById('gradeTitle').innerText = "جدول حصص " + (gradeNames[grade] || "الصف الدراسي");
+                    
+                    // وضع كود الجدول HTML في الحاوية
+                    document.getElementById('tableContainer').innerHTML = tableData.lessons;
 
-            // 2. جلب أسماء الإدارة للتوقيعات
-            const settingsDoc = await db.collection('settings').doc('school_info').get();
-            if(settingsDoc.exists) {
-                const s = settingsDoc.data();
-                document.getElementById('sign-manager').innerText = "أ / " + (s.manager || "................");
-                document.getElementById('sign-agent').innerText = "أ / " + (s.agent || "................");
-                document.getElementById('sign-control').innerText = "أ / " + (s.control || "................");
+                    // وضع اسم رئيس الكنترول الخاص بهذا الصف (إذا وجد في مستند الجدول)
+                    if(tableData.control_name) {
+                        document.getElementById('sign-control').innerText = "أ / " + tableData.control_name;
+                    }
+                } else {
+                    document.body.innerHTML = "<div class='text-center mt-20'><h1 class='text-2xl font-bold'>عذراً، هذا الجدول غير متاح حالياً</h1><p>تأكد من رفع الجدول من لوحة التحكم</p></div>";
+                    return;
+                }
+
+                // 2. جلب باقي أسماء الإدارة (المدير والوكيل) من الإعدادات العامة
+                const settingsDoc = await db.collection('settings').doc('school_info').get();
+                if(settingsDoc.exists) {
+                    const s = settingsDoc.data();
+                    document.getElementById('sign-manager').innerText = "أ / " + (s.manager || "................");
+                    document.getElementById('sign-agent').innerText = "أ / " + (s.agent || "................");
+                    
+                    // إذا لم يكن هناك اسم رئيس كنترول مخصص في ملف الجدول، استخدم الاسم العام من الإعدادات
+                    if (!document.getElementById('sign-control').innerText.includes("أ /")) {
+                        document.getElementById('sign-control').innerText = "أ / " + (s.control || "................");
+                    }
+                }
+
+            } catch (error) {
+                console.error("خطأ في جلب البيانات:", error);
             }
         }
+
+        // تشغيل الدالة عند تحميل الصفحة
         loadContent();
     </script>
 </body>
