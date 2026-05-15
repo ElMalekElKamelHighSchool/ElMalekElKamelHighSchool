@@ -2,79 +2,150 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>طباعة الجدول الرسمي | الملك الكامل</title>
+    <title>الجدول الرسمي | مدرسة الملك الكامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Cairo', sans-serif; padding: 0; background: #f3f4f6; }
-        .print-page { background: white; width: 210mm; min-height: 297mm; padding: 15mm; margin: 10px auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 2px solid black; font-size: 14px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: center; font-weight: bold; }
-        th { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; }
+        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; padding: 20px 0; }
+        
+        /* تصميم الصفحة الورقية */
+        .print-page { 
+            background: white; 
+            width: 210mm; 
+            min-height: 297mm; 
+            padding: 20mm; 
+            margin: 0 auto; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+            position: relative;
+            border: 8px double #001f3f;
+        }
+
+        /* تنسيق الجداول القادمة من Excel لتصبح جميلة */
+        #tableContainer table { 
+            width: 100% !important; 
+            border-collapse: collapse !important; 
+            margin: 20px 0 !important;
+            font-size: 14px;
+        }
+        #tableContainer th, #tableContainer td { 
+            border: 1px solid #000 !important; 
+            padding: 10px !important; 
+            text-align: center !important; 
+            font-weight: bold !important;
+        }
+        #tableContainer tr:nth-child(even) { background-color: #f9f9f9; }
+        #tableContainer th { 
+            background-color: #001f3f !important; 
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0, 0, 0, 0.03);
+            pointer-events: none;
+            white-space: nowrap;
+            font-weight: 900;
+        }
+
         @media print { 
             body { background: white; padding: 0; }
             .no-print { display: none; } 
-            .print-page { margin: 0; box-shadow: none; width: 100%; height: 100%; border: none; }
+            .print-page { margin: 0; box-shadow: none; width: 100%; border: 4px double #000; }
+            #tableContainer th { background-color: #eeeeee !important; color: black !important; }
         }
     </style>
 </head>
 <body>
-    <!-- شريط التحكم العلوي (يختفي عند الطباعة) -->
-    <div class="no-print bg-blue-900 text-white p-4 mb-6 flex justify-between items-center shadow-lg">
-        <span class="font-bold">مُعاينة الجدول قبل الطباعة (نسخة رسمية)</span>
-        <button onclick="window.print()" class="bg-yellow-500 text-black px-6 py-2 rounded-full font-black hover:bg-yellow-400 transition">
-            طباعة الجدول الآن <i class="fas fa-print mr-2"></i>
+
+    <!-- شريط التحكم العلوي -->
+    <div class="no-print max-w-[210mm] mx-auto bg-white p-4 mb-6 rounded-xl shadow-md flex justify-between items-center border-b-4 border-blue-900">
+        <div>
+            <h3 class="font-black text-blue-900 flex items-center gap-2">
+                <i class="fas fa-file-pdf"></i> معاينة المستند الرسمي
+            </h3>
+            <p class="text-xs text-gray-500 font-bold">يرجى التأكد من البيانات قبل الطباعة</p>
+        </div>
+        <button onclick="window.print()" class="bg-blue-900 text-white px-8 py-3 rounded-lg font-black hover:bg-blue-800 transition flex items-center gap-2">
+            <i class="fas fa-print"></i> طباعة الآن
         </button>
     </div>
 
-    <!-- الصفحة الورقية -->
-    <div class="print-page border-[6px] border-double border-black">
-        <!-- الترويسة الرسمية -->
-        <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
-            <div class="text-right text-sm font-bold">
+    <!-- الصفحة الرسمية -->
+    <div class="print-page">
+        <div class="watermark">الملك الكامل</div>
+
+        <!-- الهيدر الرسمي -->
+        <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-8">
+            <div class="text-right text-[12px] font-bold leading-relaxed">
                 <p>وزارة التربية والتعليم</p>
                 <p>مديرية التربية والتعليم بالدقهلية</p>
                 <p>إدارة شرق المنصورة التعليمية</p>
             </div>
             <div class="text-center">
-                <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-20 mx-auto mb-2">
-                <h1 class="text-lg font-black">مدرسة الملك الكامل الثانوية العسكرية</h1>
+                <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-24 mx-auto mb-2">
+                <h1 class="text-xl font-black text-blue-900">مدرسة الملك الكامل الثانوية العسكرية</h1>
             </div>
-            <div class="text-left text-sm font-bold">
-                <p>جدول العام الدراسي</p>
+            <div class="text-left text-[12px] font-bold">
+                <p>العام الدراسي</p>
                 <p>2025 / 2026</p>
+                <p id="printDate"></p>
             </div>
         </div>
 
-        <!-- عنوان الصف الدراسي -->
-        <h2 id="gradeTitle" class="text-2xl font-black text-center mb-6 underline decoration-double">جاري تحميل العنوان...</h2>
+        <!-- عنوان الجدول -->
+        <div class="text-center mb-8">
+            <h2 id="mainTitle" class="text-3xl font-black underline decoration-double inline-block pb-2">جاري التحميل...</h2>
+        </div>
         
-        <!-- مكان عرض الجدول القادم من Firebase -->
-        <div id="tableContainer" class="min-h-[400px]"></div>
+        <!-- الحاوية الديناميكية للجدول -->
+        <div id="tableContainer" class="min-h-[500px]">
+            <div class="flex flex-col items-center justify-center py-20 text-gray-300">
+                <i class="fas fa-spinner fa-spin text-5xl mb-4"></i>
+                <p class="font-bold">جاري سحب البيانات من السيرفر...</p>
+            </div>
+        </div>
 
-        <!-- منطقة التوقيعات -->
-        <div class="grid grid-cols-3 mt-16 text-center font-bold text-sm gap-4">
-            <div class="border-t border-black pt-2">
-                <p class="mb-6">رئيس الكنترول</p>
-                <p id="sign-control">.................</p>
+        <!-- منطقة التوقيعات الذكية -->
+        <div id="signatureArea" class="grid grid-cols-3 mt-20 text-center font-bold text-[14px] gap-10">
+            <!-- خانة رئيس الكنترول (تظهر فقط إذا وجد اسم) -->
+            <div id="controlSection" class="hidden">
+                <p class="mb-10 underline">رئيس الكنترول</p>
+                <p id="sign-control" class="text-lg">.................</p>
             </div>
-            <div class="border-t border-black pt-2">
-                <p class="mb-6">وكيل شؤون الطلاب</p>
-                <p id="sign-agent">.................</p>
+
+            <!-- خانة وكيل الشؤون (دائمة) -->
+            <div>
+                <p class="mb-10 underline">وكيل شؤون الطلاب</p>
+                <p id="sign-agent" class="text-lg">.................</p>
             </div>
-            <div class="border-t border-black pt-2">
-                <p class="mb-6">مدير المدرسة</p>
-                <p id="sign-manager" class="text-blue-900 font-black">.................</p>
+
+            <!-- خانة المدير (دائمة) -->
+            <div>
+                <p class="mb-10 underline">مدير المدرسة</p>
+                <p id="sign-manager" class="text-blue-900 font-black text-lg">.................</p>
             </div>
         </div>
         
-        <p class="text-[10px] mt-20 text-gray-400 text-center italic">طُبع بواسطة المنصة الإلكترونية الرسمية للمدرسة - نظام الملك الكامل الذكي</p>
+        <!-- الفوتر -->
+        <div class="absolute bottom-10 left-0 right-0 text-center">
+            <p class="text-[10px] text-gray-400 italic">هذا المستند معتمد وصادر عن المنصة الإلكترونية الرسمية للمدرسة - نظام الملك الكامل الذكي</p>
+        </div>
     </div>
 
     <script>
-        // إعدادات Firebase
+        // 1. إعداد التاريخ
+        document.getElementById('printDate').innerText = "بتاريخ: " + new Date().toLocaleDateString('ar-EG');
+
+        // 2. Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
             authDomain: "hazoma-60ed2.firebaseapp.com",
@@ -86,59 +157,71 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // الحصول على متغير الصف من الرابط (URL)
+        // 3. تحليل الرابط
         const params = new URLSearchParams(window.location.search);
-        const grade = params.get('grade');
+        const grade = params.get('grade'); // grade1, grade2, grade3
+        const type = params.get('type');   // lessons, exams
 
-        async function loadContent() {
+        async function fetchTable() {
+            if(!grade || !type) {
+                document.body.innerHTML = "<h1 class='text-center mt-20 font-bold'>خطأ: رابط غير صالح</h1>";
+                return;
+            }
+
+            // تحديد المعرف كما في صفحة الكنترول (grade1_exams)
+            const docId = `${grade}_${type}`;
+            
             try {
-                // 1. جلب بيانات الجدول ورئيس الكنترول الخاص بالصف
-                const tableDoc = await db.collection('schedules').doc(grade).get();
+                // جلب بيانات الجدول
+                const tableDoc = await db.collection('schedules').doc(docId).get();
                 
                 if(tableDoc.exists) {
-                    const tableData = tableDoc.data();
+                    const data = tableDoc.data();
                     
-                    // تحديد مسمى الصف
-                    const gradeNames = {
-                        'grade1': 'الصف الأول الثانوي',
-                        'grade2': 'الصف الثاني الثانوي',
-                        'grade3': 'الصف الثالث الثانوي'
-                    };
+                    // تحديث العنوان
+                    const gradeName = { 'grade1': 'الصف الأول', 'grade2': 'الصف الثاني', 'grade3': 'الصف الثالث' }[grade];
+                    const typeName = type === 'lessons' ? 'جدول الحصص الأسبوعي' : 'جدول الامتحانات الرسمية';
+                    document.getElementById('mainTitle').innerText = `${typeName} - ${gradeName}`;
                     
-                    document.getElementById('gradeTitle').innerText = "جدول حصص " + (gradeNames[grade] || "الصف الدراسي");
-                    
-                    // وضع كود الجدول HTML في الحاوية
-                    document.getElementById('tableContainer').innerHTML = tableData.lessons;
+                    // عرض الجدول
+                    document.getElementById('tableContainer').innerHTML = data.lessons;
 
-                    // وضع اسم رئيس الكنترول الخاص بهذا الصف (إذا وجد في مستند الجدول)
-                    if(tableData.control_name) {
-                        document.getElementById('sign-control').innerText = "أ / " + tableData.control_name;
+                    // معالجة رئيس الكنترول
+                    if(data.control_name && data.control_name.trim() !== "") {
+                        document.getElementById('controlSection').classList.remove('hidden');
+                        document.getElementById('sign-control').innerText = "أ / " + data.control_name;
+                        // تغيير تقسيم الشبكة ليكون 3 أعمدة
+                        document.getElementById('signatureArea').classList.replace('grid-cols-2', 'grid-cols-3');
+                    } else {
+                        // إذا لم يوجد رئيس كنترول، اجعل التوقيعات عمودين فقط (مدير ووكيل)
+                        document.getElementById('signatureArea').classList.replace('grid-cols-3', 'grid-cols-2');
+                        document.getElementById('controlSection').remove();
                     }
                 } else {
-                    document.body.innerHTML = "<div class='text-center mt-20'><h1 class='text-2xl font-bold'>عذراً، هذا الجدول غير متاح حالياً</h1><p>تأكد من رفع الجدول من لوحة التحكم</p></div>";
-                    return;
+                    document.getElementById('tableContainer').innerHTML = `
+                        <div class="text-center py-20 border-2 border-dashed border-gray-200 rounded-3xl">
+                            <i class="fas fa-exclamation-triangle text-amber-500 text-5xl mb-4"></i>
+                            <h2 class="text-2xl font-bold text-gray-700">هذا الجدول غير متاح حالياً</h2>
+                            <p class="text-gray-400">يرجى مراجعة إدارة المدرسة أو المحاولة لاحقاً</p>
+                        </div>
+                    `;
                 }
 
-                // 2. جلب باقي أسماء الإدارة (المدير والوكيل) من الإعدادات العامة
+                // جلب أسماء الإدارة العامة (المدير والوكيل)
                 const settingsDoc = await db.collection('settings').doc('school_info').get();
                 if(settingsDoc.exists) {
                     const s = settingsDoc.data();
                     document.getElementById('sign-manager').innerText = "أ / " + (s.manager || "................");
                     document.getElementById('sign-agent').innerText = "أ / " + (s.agent || "................");
-                    
-                    // إذا لم يكن هناك اسم رئيس كنترول مخصص في ملف الجدول، استخدم الاسم العام من الإعدادات
-                    if (!document.getElementById('sign-control').innerText.includes("أ /")) {
-                        document.getElementById('sign-control').innerText = "أ / " + (s.control || "................");
-                    }
                 }
 
             } catch (error) {
-                console.error("خطأ في جلب البيانات:", error);
+                console.error("Error:", error);
+                alert("حدث خطأ أثناء جلب البيانات");
             }
         }
 
-        // تشغيل الدالة عند تحميل الصفحة
-        loadContent();
+        fetchTable();
     </script>
 </body>
 </html>
