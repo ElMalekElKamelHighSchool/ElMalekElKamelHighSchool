@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="Vd5DDHqzDSdfnqsnUS6f1rsGmrQ3RZic9IkQfepKkRQ" />
     
-    <!-- التعديل هنا لضمان ظهور الاسم الرسمي في نتائج البحث -->
+    <!-- أيقونة الموقع (الشعار بدل الكرة الأرضية) -->
+    <link rel="icon" type="image/png" href="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg">
+    <link rel="apple-touch-icon" href="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg">
+
     <title>مدرسة الملك الكامل الثانوية العسكرية</title>
     <meta name="description" content="الموقع الرسمي لمدرسة الملك الكامل الثانوية العسكرية بالمنصورة. استعلام عن النتائج، جداول الامتحانات، وآخر أخبار المدرسة.">
-    <meta name="keywords" content="مدرسة الملك الكامل الثانوية العسكرية, مدرسة الملك الكامل, نتائج مدرسة الملك الكامل, بوابة الملك الكامل, المستشار حازم سالم, مدرسة الملك الكامل بالمنصورة">
+    <meta name="keywords" content="مدرسة الملك الكامل الثانوية العسكرية, مدرسة الملك الكامل, نتائج مدرسة الملك الكامل, بوابة الملك الكامل,  حازم سالم, مدرسة الملك الكامل بالمنصورة">
     <meta name="author" content="المستشار حازم سالم">
 
     <script type="application/ld+json">
@@ -31,9 +34,10 @@
 
     <style>
         :root { --king-blue: #001f3f; --king-gold: #b49248; --king-red: #8b0000; }
-        body { font-family: 'Cairo', sans-serif; background-color: #fcfcfc; color: #1a1a1a; }
+        body { font-family: 'Cairo', sans-serif; background-color: #fcfcfc; color: #1a1a1a; scroll-behavior: smooth; }
         .fancy-header { font-family: 'Reem Kufi', sans-serif; }
         
+        /* News Card Style */
         .news-card { 
             background: white; 
             border-radius: 20px; 
@@ -79,13 +83,41 @@
         .btn-royal {
             background: linear-gradient(135deg, var(--king-blue) 0%, #003366 100%);
             transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
         }
         .btn-royal:hover { background: var(--king-gold); color: white !important; }
         
         .line-accent { height: 4px; width: 60px; background: var(--king-gold); border-radius: 2px; }
+
+        /* Modal Styles for Schedule Selection */
+        #scheduleModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
     </style>
 </head>
 <body>
+
+    <!-- شريط التاريخ العلوي -->
+    <div class="bg-gray-100 py-2 border-b text-[12px] font-bold text-blue-900">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <div id="hijriDate" class="flex items-center gap-2">
+                <i class="fas fa-moon text-yellow-600"></i>
+                <span>جاري تحميل التاريخ الهجري...</span>
+            </div>
+            <div id="gregorianDate" class="flex items-center gap-2">
+                <span>جاري تحميل التاريخ الميلادي...</span>
+                <i class="fas fa-calendar-day text-blue-800"></i>
+            </div>
+        </div>
+    </div>
 
     <div class="ticker-wrap text-white py-3 sticky top-0 z-[100] shadow-2xl">
         <div class="container mx-auto px-4 flex items-center">
@@ -104,71 +136,103 @@
             
             <div class="mt-8 md:mt-0 flex flex-col items-center">
                 <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-32 drop-shadow-2xl transform hover:scale-110 transition duration-500" alt="شعار مدرسة الملك الكامل">
-                <nav class="mt-6 flex gap-8 font-black text-xs text-blue-900 uppercase tracking-widest">
+                <nav class="mt-6 flex flex-wrap justify-center gap-6 font-black text-xs text-blue-900 uppercase tracking-widest">
                     <a href="#news" class="hover:text-red-700 transition">الجريدة</a>
                     <a href="#schedules" class="hover:text-red-700 transition">الجداول</a>
                     <a href="results.html" class="hover:text-red-700 transition">التاريخ</a>
+                    <a href="seat-numbers.html" class="text-red-600 hover:text-blue-900 transition underline decoration-double">أرقام الجلوس</a>
                     <a href="admin.html" class="opacity-30 hover:opacity-100"><i class="fas fa-lock"></i></a>
                 </nav>
             </div>
         </div>
     </header>
 
+    <!-- أقسام الخدمات السريعة -->
     <section class="py-12 bg-[#f8f9fa]">
-        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <a href="student-result.html" class="group bg-white p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all border-b-4 border-blue-900">
+        <div class="container mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <a href="student-result.html" class="group bg-white p-6 rounded-[25px] shadow-sm hover:shadow-xl transition-all border-b-4 border-blue-900">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h4 class="text-2xl font-black text-blue-900">النتائج</h4>
-                        <p class="text-gray-400 font-bold text-sm mt-1">بوابة الاستعلام الذكي</p>
+                        <h4 class="text-xl font-black text-blue-900">النتائج</h4>
+                        <p class="text-gray-400 font-bold text-[10px] mt-1">بوابة الاستعلام الذكي</p>
                     </div>
-                    <i class="fas fa-file-invoice text-4xl text-gray-100 group-hover:text-blue-900 transition"></i>
+                    <i class="fas fa-file-invoice text-3xl text-gray-100 group-hover:text-blue-900 transition"></i>
                 </div>
             </a>
 
-            <a href="teacher-portal.html" class="group bg-white p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all border-b-4 border-red-700">
+            <a href="seat-numbers.html" class="group bg-white p-6 rounded-[25px] shadow-sm hover:shadow-xl transition-all border-b-4 border-emerald-600">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h4 class="text-2xl font-black text-red-700">المعلمون</h4>
-                        <p class="text-gray-400 font-bold text-sm mt-1">منصة الكادر التعليمي</p>
+                        <h4 class="text-xl font-black text-emerald-600">أرقام الجلوس</h4>
+                        <p class="text-gray-400 font-bold text-[10px] mt-1">بيانات لجان الامتحانات</p>
                     </div>
-                    <i class="fas fa-user-tie text-4xl text-gray-100 group-hover:text-red-700 transition"></i>
+                    <i class="fas fa-id-card text-3xl text-gray-100 group-hover:text-emerald-600 transition"></i>
                 </div>
             </a>
 
-            <a href="#schedules" class="group bg-white p-8 rounded-[30px] shadow-sm hover:shadow-xl transition-all border-b-4 border-yellow-600">
+            <a href="teacher-portal.html" class="group bg-white p-6 rounded-[25px] shadow-sm hover:shadow-xl transition-all border-b-4 border-red-700">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h4 class="text-2xl font-black text-yellow-600">الجداول</h4>
-                        <p class="text-gray-400 font-bold text-sm mt-1">التوقيتات الرسمية</p>
+                        <h4 class="text-xl font-black text-red-700">المعلمون</h4>
+                        <p class="text-gray-400 font-bold text-[10px] mt-1">منصة الكادر التعليمي</p>
                     </div>
-                    <i class="fas fa-clock text-4xl text-gray-100 group-hover:text-yellow-600 transition"></i>
+                    <i class="fas fa-user-tie text-3xl text-gray-100 group-hover:text-red-700 transition"></i>
+                </div>
+            </a>
+
+            <a href="#schedules" class="group bg-white p-6 rounded-[25px] shadow-sm hover:shadow-xl transition-all border-b-4 border-yellow-600">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xl font-black text-yellow-600">الجداول</h4>
+                        <p class="text-gray-400 font-bold text-[10px] mt-1">التوقيتات الرسمية</p>
+                    </div>
+                    <i class="fas fa-clock text-3xl text-gray-100 group-hover:text-yellow-600 transition"></i>
                 </div>
             </a>
         </div>
     </section>
 
+    <!-- الجريدة الرسمية -->
     <main id="news" class="py-20 container mx-auto px-6">
         <div class="mb-16 text-right">
             <h3 class="text-4xl font-black text-blue-900 mb-2">الجريدة الرسمية</h3>
             <p class="text-gray-400 font-bold">تغطية حصرية لفعاليات مدرسة الملك الكامل</p>
             <div class="line-accent mt-4"></div>
         </div>
-
         <div id="newsGrid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-12">
-            </div>
+            <!-- الأخبار تُجلب من فايربيز -->
+        </div>
     </main>
 
+    <!-- قسم الجداول المطور -->
     <section id="schedules" class="py-24 bg-[#001f3f] text-white rounded-t-[50px] overflow-hidden text-center">
         <div class="container mx-auto px-6">
             <h3 class="text-5xl font-black mb-12 fancy-header text-yellow-500">الجداول المعتمدة</h3>
             <div class="flex flex-wrap justify-center gap-8">
-                <button onclick="viewSchedule('grade1')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الأول الثانوي</button>
-                <button onclick="viewSchedule('grade2')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الثاني الثانوي</button>
-                <button onclick="viewSchedule('grade3')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الثالث الثانوي</button>
+                <button onclick="openScheduleOptions('grade1')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الأول الثانوي</button>
+                <button onclick="openScheduleOptions('grade2')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الثاني الثانوي</button>
+                <button onclick="openScheduleOptions('grade3')" class="btn-royal px-12 py-6 rounded-2xl font-black text-xl shadow-lg hover:translate-y-[-5px]">الثالث الثانوي</button>
             </div>
         </div>
     </section>
+
+    <!-- نافذة منبثقة لاختيار نوع الجدول -->
+    <div id="scheduleModal" onclick="closeModal(event)">
+        <div class="bg-white p-8 rounded-[30px] max-w-md w-full mx-4 animate__animated animate__zoomIn text-center relative" onclick="event.stopPropagation()">
+            <button onclick="document.getElementById('scheduleModal').style.display='none'" class="absolute top-4 left-4 text-gray-400 hover:text-red-600">
+                <i class="fas fa-times-circle text-2xl"></i>
+            </button>
+            <h4 id="modalTitle" class="text-2xl font-black text-blue-900 mb-6 underline decoration-gold">اختر نوع الجدول</h4>
+            <div class="flex flex-col gap-4">
+                <button id="lessonBtn" class="bg-blue-900 text-white py-4 rounded-xl font-bold hover:bg-yellow-600 transition flex items-center justify-center gap-3">
+                    <i class="fas fa-chalkboard-teacher"></i> جدول الحصص الأسبوعي
+                </button>
+                <button id="examBtn" class="bg-red-700 text-white py-4 rounded-xl font-bold hover:bg-yellow-600 transition flex items-center justify-center gap-3">
+                    <i class="fas fa-file-signature"></i> جدول الامتحانات الرسمية
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="bg-white pt-20 pb-10 border-t">
         <div class="container mx-auto px-6 text-center">
@@ -186,11 +250,9 @@
                     <a href="https://www.facebook.com/groups/NaderRabee/" target="_blank" class="hover:text-blue-600 transition-all transform hover:scale-125">
                         <i class="fab fa-facebook"></i>
                     </a>
-
                     <a href="https://www.facebook.com/groups/NaderRabee/" target="_blank" class="hover:text-red-600 transition-all transform hover:scale-125">
                         <i class="fab fa-youtube"></i>
                     </a>
-
                     <a href="mailto:contact@school.com" class="hover:text-yellow-600 transition-all transform hover:scale-125">
                         <i class="fas fa-envelope"></i>
                     </a>
@@ -201,8 +263,24 @@
     </footer>
 
     <script>
-        document.getElementById('currentYear').innerText = new Date().getFullYear();
+        // 1. تحديث التواريخ (ميلادي وهجري)
+        function updateDates() {
+            const now = new Date();
+            
+            // ميلادي
+            const gregOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', locale: 'ar-EG' };
+            document.getElementById('gregorianDate').innerHTML = `<span>${now.toLocaleDateString('ar-EG', gregOptions)}</span><i class="fas fa-calendar-day text-blue-800"></i>`;
+            
+            // هجري (باستخدام Intl.DateTimeFormat)
+            const hijriOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+            const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', hijriOptions).format(now);
+            document.getElementById('hijriDate').innerHTML = `<i class="fas fa-moon text-yellow-600"></i><span>${hijriDate} هـ</span>`;
+            
+            document.getElementById('currentYear').innerText = now.getFullYear();
+        }
+        updateDates();
 
+        // 2. إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
             authDomain: "hazoma-60ed2.firebaseapp.com",
@@ -214,6 +292,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // 3. جلب الأخبار والنشرة
         db.collection('articles').orderBy('createdAt', 'desc').onSnapshot(snap => {
             const grid = document.getElementById('newsGrid');
             const ticker = document.getElementById('tickerText');
@@ -247,7 +326,24 @@
             ticker.innerText = tickerItems;
         });
 
-        function viewSchedule(grade) { window.open(`view-schedule.html?grade=${grade}`, '_blank'); }
+        // 4. منطق اختيار الجداول
+        function openScheduleOptions(grade) {
+            const modal = document.getElementById('scheduleModal');
+            const lessonBtn = document.getElementById('lessonBtn');
+            const examBtn = document.getElementById('examBtn');
+            const titles = { 'grade1': 'الصف الأول الثانوي', 'grade2': 'الصف الثاني الثانوي', 'grade3': 'الصف الثالث الثانوي' };
+            
+            document.getElementById('modalTitle').innerText = titles[grade];
+            modal.style.display = 'flex';
+
+            // تعيين الروابط بناءً على الاختيار
+            lessonBtn.onclick = () => { window.open(`view-schedule.html?grade=${grade}&type=lessons`, '_blank'); };
+            examBtn.onclick = () => { window.open(`view-schedule.html?grade=${grade}&type=exams`, '_blank'); };
+        }
+
+        function closeModal(e) {
+            if(e.target.id === 'scheduleModal') document.getElementById('scheduleModal').style.display = 'none';
+        }
     </script>
 </body>
 </html>
