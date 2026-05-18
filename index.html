@@ -117,6 +117,8 @@
             z-index: 999;
             pointer-events: none;
             display: none;
+            /* إضافة انتقال سلس لتأثير الاختفاء السريع عند الضغط */
+            transition: opacity 1.5s ease, transform 1.5s ease;
         }
         .balloon {
             position: absolute;
@@ -836,7 +838,23 @@
         }
 
         function closeCelebrationModal() {
+            // إخفاء نافذة التهنئة
             document.getElementById('holidayGreetingModal').style.display = 'none';
+            
+            // جعل البالونات والقصاصات تطير لأعلى وتختفي بسلاسة
+            const overlay = document.getElementById('celebrationOverlay');
+            overlay.style.opacity = '0';
+            overlay.style.transform = 'translateY(-100vh)';
+            
+            // إخفاء الحاوية بالكامل بعد انتهاء الحركة لتسهيل التصفح
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.innerHTML = ''; // تنظيف العناصر من الذاكرة
+                
+                // إعادة ضبط الخصائص للحالة الافتراضية
+                overlay.style.opacity = '1';
+                overlay.style.transform = 'translateY(0)';
+            }, 1500);
         }
 
         function closeModal(e, modalId) {
@@ -850,4 +868,3 @@
     </script>
 </body>
 </html>
-
