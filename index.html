@@ -480,11 +480,47 @@
             snap.docs.forEach((doc) => {
                 const a = doc.data();
                 const hasImg = a.image && a.image.trim() !== "";
+                const hasVid = a.video && a.video.trim() !== "";
                 tickerItems += ` ${a.title}  ...`;
+
+                let mediaContent = `<div class="h-4 bg-blue-900"></div>`;
+                
+                if (hasVid) {
+                    let isYouTube = a.video.includes('youtube.com') || a.video.includes('youtu.be');
+                    if (isYouTube) {
+                        let videoId = "";
+                        try {
+                            if (a.video.includes('youtu.be')) {
+                                videoId = a.video.split('youtu.be/')[1].split('?')[0];
+                            } else {
+                                videoId = a.video.split('v=')[1].split('&')[0];
+                            }
+                        } catch(e) {}
+                        mediaContent = `
+                            <div class="img-wrapper relative" oncontextmenu="return false;" style="background: #000;">
+                                <iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&modestbranding=1&rel=0&showinfo=0&disablekb=1&fs=0&iv_load_policy=3&playsinline=1" frameborder="0" style="width: 100%; height: 100%; pointer-events: auto;"></iframe>
+                                <!-- طبقة شفافة لمنع الضغط على عنوان الفيديو وزر المشاركة بالأعلى -->
+                                <div style="position:absolute; top:0; left:0; right:0; height:60px; z-index:10; background:transparent;"></div>
+                                <!-- طبقة شفافة لمنع الضغط على شعار يوتيوب بالأسفل ومنع فتح الموقع الأساسي -->
+                                <div style="position:absolute; bottom:0; right:0; width:120px; height:50px; z-index:10; background:transparent;"></div>
+                            </div>
+                        `;
+                    } else {
+                        mediaContent = `
+                            <div class="img-wrapper" oncontextmenu="return false;" style="background: #000;">
+                                <video width="100%" height="100%" controls controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture style="width: 100%; height: 100%; object-fit: cover;">
+                                    <source src="${a.video}" type="video/mp4">
+                                </video>
+                            </div>
+                        `;
+                    }
+                } else if (hasImg) {
+                    mediaContent = `<div class="img-wrapper"><img src="${a.image}" loading="lazy" alt="${a.title}"></div>`;
+                }
 
                 grid.innerHTML += `
                     <article class="news-card animate__animated animate__fadeIn">
-                        ${hasImg ? `<div class="img-wrapper"><img src="${a.image}" loading="lazy" alt="${a.title}"></div>` : `<div class="h-4 bg-blue-900"></div>`}
+                        ${mediaContent}
                         <div class="p-8">
                             <div class="flex items-center gap-2 mb-4 text-[10px] font-black text-red-700 uppercase">
                                 <span class="w-2 h-2 bg-red-700 rounded-full"></span> ${a.tag || 'أخبار مدرسة الملك الكامل'}
