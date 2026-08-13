@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة النتائج الرقمية | مدرسة الملك الكامل الثانوية</title>
+    <title>نتيجة الطالب | مدرسة الملك الكامل الثانوية</title>
     
     <!-- External Libraries & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -35,30 +34,38 @@
             box-shadow: 0 12px 25px -5px rgba(30, 58, 138, 0.5);
         }
 
-        /* الطباعة الاحترافية البسيطة والمنظمة */
+        /* الطباعة الاحترافية المنظمة في صفحة واحدة A4 */
+        .print-area { display: none; }
+
         @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
             .no-print { display: none !important; }
             .print-area { display: block !important; }
             body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
             @page { size: A4 portrait; margin: 1cm; }
             
             .print-card {
-                border: 2px solid #1e3a8a;
-                border-radius: 12px;
-                padding: 24px;
+                border: 3px double #1e3a8a;
+                border-radius: 16px;
+                padding: 30px;
                 background: #fff !important;
                 color: #000 !important;
+                max-width: 100%;
+                margin: 0 auto;
             }
             .print-table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-top: 15px;
+                margin-top: 20px;
             }
             .print-table th, .print-table td {
-                border: 1px solid #cbd5e1;
-                padding: 8px 12px;
+                border: 1px solid #94a3b8;
+                padding: 10px 14px;
                 text-align: center;
-                font-size: 14px;
+                font-size: 15px;
             }
             .print-table th {
                 background-color: #f1f5f9 !important;
@@ -67,7 +74,6 @@
             }
         }
 
-        .print-area { display: none; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -79,7 +85,6 @@
     <header class="no-print border-b border-white/10 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <img src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg" class="h-12 w-12 rounded-2xl border-2 border-amber-500 shadow-md object-cover">
                 <div>
                     <h1 class="text-lg font-black text-white">مدرسة الملك الكامل الثانوية</h1>
                     <p class="text-xs text-amber-400 font-bold">بوابة الاستعلام الرقمية للنتائج</p>
@@ -134,9 +139,9 @@
 
         <!-- Dynamic Content Display Area -->
         <div id="displayArea">
-            <!-- 1. Coming Soon / Not Uploaded Yet Box (Default state if unpublished) -->
+            <!-- 1. Coming Soon Box -->
             <div id="statusNotice" class="glass-card p-12 rounded-[3rem] text-center border border-white/10 space-y-6">
-                <img src="https://cdn-icons-png.flaticon.com/512/1458/1458260.png" class="w-20 mx-auto animate-pulse opacity-80">
+                <img src="https://cdn-icons-png.flaticon.com/512/1458/1458260.png" class="w-20 mx-auto animate-pulse opacity-80" alt="قريباً">
                 <h2 id="statusTitle" class="text-3xl font-black text-amber-400">ترقبوا إعلان النتائج قريباً</h2>
                 <p id="statusMsg" class="text-slate-300 text-base leading-relaxed max-w-xl mx-auto font-semibold">
                     تجري الآن عمليات التصحيح والرصد الدقيق لضمان حقوق كافة الطلاب. سيتم تفعيل الاستعلام فور اعتماد النتيجة رسمياً من إدارة المدرسة.
@@ -147,7 +152,7 @@
             </div>
 
             <!-- 2. Result Display Card -->
-            <div id="resultCard" class="hidden glass-card p-6 md:p-8 rounded-[3rem] border border-emerald-500/30 space-y-6 animate-fade-in">
+            <div id="resultCard" class="hidden glass-card p-6 md:p-8 rounded-[3rem] border border-emerald-500/30 space-y-6">
                 <!-- Student Info Header -->
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-slate-800 pb-6 text-center md:text-right">
                     <div class="space-y-1">
@@ -188,14 +193,14 @@
                 </div>
             </div>
 
-            <!-- 3. Payment Block Warning Card -->
+            <!-- 3. Payment Warning Card -->
             <div id="paymentNotice" class="hidden glass-card p-10 rounded-[3rem] text-center border border-amber-500/40 space-y-6">
                 <div class="w-16 h-16 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-amber-500/30">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <h2 class="text-2xl font-black text-white">النتيجة حُجبت مؤقتاً</h2>
                 <p class="text-slate-300 text-sm leading-relaxed max-w-md mx-auto">
-                    عزيزي الطالب، يرجى سداد المصروفات أو الرسوم المقررة لتفعيل عرض النتيجة. يمكنك السداد عبر كود فوري الخاص بالمدرسة.
+                    عزيزي الطالب، يرجى سداد المصروفات أو الرسوم المقررة لتفعيل عرض النتيجة.
                 </p>
                 <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 inline-block max-w-xs w-full">
                     <span class="block text-xs font-bold text-slate-400 mb-1">المبلغ المطلوب سداده:</span>
@@ -203,7 +208,7 @@
                 </div>
             </div>
 
-            <!-- 4. Not Found Alert Box -->
+            <!-- 4. Not Found Alert -->
             <div id="notFoundNotice" class="hidden glass-card p-8 rounded-[2.5rem] text-center border border-rose-500/30 space-y-4">
                 <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center mx-auto text-xl">
                     <i class="fas fa-user-slash"></i>
@@ -220,16 +225,13 @@
     <div id="printArea" class="print-area">
         <div class="print-card">
             <!-- School Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px; margin-bottom: 16px;">
-                <div>
-                    <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #1e3a8a;">مدرسة الملك الكامل الثانوية العسكرية</h2>
-                    <p style="margin: 4px 0 0 0; font-size: 13px; font-weight: 700; color: #475569;">إدارة شرق المنصورة التعليمية - كشف النتيجة الرسمية</p>
-                </div>
-                <div id="printQRCode" style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+            <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 24px; font-weight: 900; color: #1e3a8a;">مدرسة الملك الكامل الثانوية العسكرية</h2>
+                <p style="margin: 6px 0 0 0; font-size: 14px; font-weight: 700; color: #475569;">إدارة شرق المنصورة التعليمية - بيان نجاح ودرجات الطالب</p>
             </div>
 
             <!-- Student Metadata -->
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background-color: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; background-color: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #cbd5e1; font-size: 15px;">
                 <div><strong>اسم الطالب:</strong> <span id="pName"></span></div>
                 <div><strong>الصف الدراسي:</strong> <span id="pGrade"></span></div>
                 <div><strong>رقم الجلوس:</strong> <span id="pSeat"></span></div>
@@ -241,7 +243,7 @@
                 <thead>
                     <tr>
                         <th>المادة الدراسية</th>
-                        <th>الدرجة / الحالة</th>
+                        <th>الدرجة / التقييم النهائي</th>
                     </tr>
                 </thead>
                 <tbody id="pTableBody">
@@ -249,18 +251,16 @@
                 </tbody>
             </table>
 
-            <!-- Footer Signatures -->
-            <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center; font-size: 12px; font-weight: 800; color: #334155;">
-                <div>مسؤول الكنترول<br><br>........................</div>
-                <div>رئيس الكنترول<br><br>........................</div>
-                <div>مدير المدرسة<br><br>........................</div>
+            <!-- Footer Message -->
+            <div style="margin-top: 50px; text-align: center; font-size: 15px; font-weight: 800; color: #1e3a8a; line-height: 1.8;">
+                <p style="margin: 0; font-size: 16px; color: #b45309;">مع خالص تمنياتنا لكم دوام التوفيق والنجاح والتميز</p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #334155;">مع تحيات إدارة المدرسة</p>
             </div>
         </div>
     </div>
 
     <!-- Script & Backend Logic -->
     <script>
-        // تكوين Firebase السحابي
         const firebaseConfig = {
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
             authDomain: "hazoma-60ed2.firebaseapp.com",
@@ -284,12 +284,10 @@
             '3sec': 'الصف الثالث الثانوي'
         };
 
-        // On Page Load
         window.addEventListener('DOMContentLoaded', () => {
             checkGradeStatus();
         });
 
-        // التحقق من حالة إعلان النتيجة للصف المحدد
         async function checkGradeStatus() {
             const grade = document.getElementById('searchGrade').value;
             resetViews();
@@ -309,7 +307,6 @@
             }
         }
 
-        // معالجة البحث الذكي
         async function handleSearch(e) {
             e.preventDefault();
             const inputVal = document.getElementById('searchInput').value.trim();
@@ -331,12 +328,10 @@
             try {
                 let student = null;
 
-                // 1. البحث كـ رقم جلوس
                 const mapDoc = await db.collection(`mapping_${grade}`).doc(inputVal).get();
                 if (mapDoc.exists) {
                     student = mapDoc.data();
                 } else {
-                    // 2. البحث كـ كود سري
                     const resDoc = await db.collection(`results_${grade}`).doc(inputVal).get();
                     if (resDoc.exists) {
                         student = resDoc.data();
@@ -360,7 +355,6 @@
             }
         }
 
-        // عرض بطاقة النتيجة
         function displayResult(student) {
             currentStudentData = student;
             const gradeKey = student.grade || document.getElementById('searchGrade').value;
@@ -373,7 +367,6 @@
             const grid = document.getElementById('scoresGrid');
             grid.innerHTML = '';
 
-            // ترتيب عرض المواد بناءً على الترتيب المخصص في الإعدادات
             const columns = currentGradeSettings.displayColumns || Object.keys(student.scores || {});
 
             columns.forEach(col => {
@@ -389,7 +382,6 @@
             document.getElementById('resultCard').classList.remove('hidden');
         }
 
-        // طباعة الشيت الرسمي A4
         function printStudentCertificate() {
             if (!currentStudentData) return;
 
@@ -414,15 +406,6 @@
                         <td style="font-weight:900; color:#1e3a8a;">${score}</td>
                     </tr>
                 `;
-            });
-
-            // توليد رمز QR للتحقق
-            const qrContainer = document.getElementById('printQRCode');
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: `Student: ${student.name} | Seat: ${student.seatID} | Code: ${student.secretID}`,
-                width: 60,
-                height: 60
             });
 
             window.print();
