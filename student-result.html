@@ -218,6 +218,18 @@
                     تأكد من كتابة رقم الجلوس أو الكود السري بشكل صحيح، أو تأكد من اختيار الصف الدراسي الصحيح من القائمة.
                 </p>
             </div>
+
+            <!-- 5. Withheld Notice (Requires Secret Code) -->
+            <div id="withheldNotice" class="hidden glass-card p-10 rounded-[3rem] text-center border border-purple-500/40 space-y-6">
+                <div class="w-16 h-16 bg-purple-500/10 text-purple-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-purple-500/30">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white">النتيجة محجوبة برقم سري</h2>
+                <p class="text-slate-300 text-sm leading-relaxed max-w-md mx-auto">
+                    عزيزي الطالب، هذه النتيجة مؤمنة ومحجوبة برقم سري. يرجى البحث باستخدام الكود السري الخاص بك بدلاً من رقم الجلوس لعرض نتيجتك.
+                </p>
+            </div>
+
         </div>
     </main>
 
@@ -343,6 +355,9 @@
                 } else if (student.paymentRequired && !student.isPaid) {
                     document.getElementById('payAmount').innerText = student.amount || '0';
                     document.getElementById('paymentNotice').classList.remove('hidden');
+                } else if (student.secretID && String(student.secretID).trim() !== "" && String(inputVal).trim() !== String(student.secretID).trim()) {
+                    // التعديل: إذا كان للطالب رقم سري والباحث لم يدخله (بمعنى أنه بحث برقم الجلوس)
+                    document.getElementById('withheldNotice').classList.remove('hidden');
                 } else {
                     displayResult(student);
                 }
@@ -431,6 +446,7 @@
             document.getElementById('resultCard').classList.add('hidden');
             document.getElementById('paymentNotice').classList.add('hidden');
             document.getElementById('notFoundNotice').classList.add('hidden');
+            document.getElementById('withheldNotice').classList.add('hidden');
         }
 
         function resetSearch() {
