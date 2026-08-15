@@ -92,48 +92,52 @@
 
 <body class="bg-gray-100 min-h-screen p-4 md:p-10 font-sans">
 
-    <!-- الحاوية الرئيسية -->
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-3xl mx-auto">
 
-        <!-- عنوان الصفحة -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <!-- =====================================================
+             الكارت الرئيسي
+             ===================================================== -->
 
-            <div class="bg-gradient-to-l from-blue-700 to-blue-500 text-white p-6">
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
 
-                <div class="flex items-center justify-center gap-3">
+            <!-- الرأس -->
 
-                    <div class="bg-white/20 rounded-full p-3">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             width="28"
-                             height="28"
-                             viewBox="0 0 24 24"
-                             fill="none"
-                             stroke="currentColor"
-                             stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
+            <div class="bg-gradient-to-l from-blue-800 to-blue-500 text-white p-6 md:p-8">
+
+                <div class="flex items-center justify-center gap-4">
+
+                    <div class="bg-white/15 rounded-2xl p-4 text-2xl">
+                        📝
                     </div>
 
-                    <div>
-                        <h1 id="formTitle"
-                            class="text-2xl md:text-3xl font-bold">
+                    <div class="min-w-0">
+
+                        <h1
+                            id="formTitle"
+                            class="text-2xl md:text-3xl font-bold break-words"
+                        >
                             جاري التحميل...
                         </h1>
 
-                        <p class="text-blue-100 text-sm mt-1">
+                        <p class="text-blue-100 text-sm mt-2">
                             يرجى ملء البيانات المطلوبة بدقة
                         </p>
+
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- حالة التحميل -->
-            <div id="loadingBox" class="p-10 text-center">
+
+            <!-- =================================================
+                 التحميل
+                 ================================================= -->
+
+            <div
+                id="loadingBox"
+                class="p-10 text-center"
+            >
 
                 <div class="loading-spinner mb-4"></div>
 
@@ -143,50 +147,73 @@
 
             </div>
 
-            <!-- النموذج -->
-            <form id="dynamicForm"
-                  onsubmit="submitForm(event)"
-                  class="hidden p-5 md:p-8 space-y-5">
 
-                <!-- الأسئلة سيتم وضعها هنا -->
+            <!-- =================================================
+                 النموذج
+                 ================================================= -->
+
+            <form
+                id="dynamicForm"
+                onsubmit="submitForm(event)"
+                class="hidden p-5 md:p-8 space-y-5"
+                novalidate
+            >
 
             </form>
 
-            <!-- رسالة الخطأ -->
-            <div id="errorMessage"
-                 class="hidden mx-5 md:mx-8 mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700">
+
+            <!-- =================================================
+                 رسالة الخطأ
+                 ================================================= -->
+
+            <div
+                id="errorMessage"
+                class="hidden mx-5 md:mx-8 mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700"
+            >
 
                 <div class="flex gap-3">
 
-                    <span class="text-xl">⚠️</span>
+                    <span class="text-xl">
+                        ⚠️
+                    </span>
 
-                    <div>
+                    <div class="min-w-0">
+
                         <div class="font-bold mb-1">
                             حدث خطأ
                         </div>
 
                         <div id="errorText"></div>
+
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- رسالة النجاح -->
-            <div id="successMessage"
-                 class="hidden success-card m-5 md:m-8 p-6 bg-green-50 border border-green-300 rounded-2xl">
+
+            <!-- =================================================
+                 رسالة النجاح
+                 ================================================= -->
+
+            <div
+                id="successMessage"
+                class="hidden success-card m-5 md:m-8 p-6 bg-green-50 border border-green-300 rounded-2xl"
+            >
 
                 <div class="text-center">
 
                     <div class="mx-auto mb-4 w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
 
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             width="36"
-                             height="36"
-                             viewBox="0 0 24 24"
-                             fill="none"
-                             stroke="#16a34a"
-                             stroke-width="2">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="36"
+                            height="36"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#16a34a"
+                            stroke-width="2"
+                        >
                             <path d="M20 6L9 17l-5-5"/>
                         </svg>
 
@@ -197,12 +224,14 @@
                     </h2>
 
                     <p class="text-gray-600 mb-5">
-                        تم حفظ بياناتك بنجاح، يرجى الاحتفاظ ببيانات الإيصال.
+                        تم حفظ بياناتك بنجاح، يرجى الاحتفاظ ببيانات الإيصال والكود المميز.
                     </p>
 
                 </div>
 
-                <!-- بيانات التسجيل -->
+
+                <!-- أرقام التسجيل -->
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
                     <div class="bg-white border rounded-xl p-4 text-center">
@@ -211,12 +240,15 @@
                             الرقم التسلسلي
                         </div>
 
-                        <div id="serialNumSpan"
-                             class="font-bold text-2xl text-blue-700">
+                        <div
+                            id="serialNumSpan"
+                            class="font-bold text-2xl text-blue-700"
+                        >
                             -
                         </div>
 
                     </div>
+
 
                     <div class="bg-white border rounded-xl p-4 text-center">
 
@@ -224,8 +256,10 @@
                             الكود المميز للتعديل
                         </div>
 
-                        <div id="uniqueIdSpan"
-                             class="font-bold text-2xl text-red-600 tracking-widest">
+                        <div
+                            id="uniqueIdSpan"
+                            class="font-bold text-2xl text-red-600 tracking-widest"
+                        >
                             -
                         </div>
 
@@ -233,32 +267,40 @@
 
                 </div>
 
+
+                <!-- التنبيه -->
+
                 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5 text-sm text-yellow-800">
 
-                    <strong>تنبيه:</strong>
+                    <strong>
+                        تنبيه:
+                    </strong>
 
                     احتفظ بالكود المميز لأنه قد تحتاج إليه لاحقًا
                     لتعديل بياناتك إذا كان التعديل مسموحًا من الإدارة.
 
                 </div>
 
+
                 <!-- الأزرار -->
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                    <button type="button"
-                            onclick="printReceipt()"
-                            class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition">
-
+                    <button
+                        type="button"
+                        onclick="printReceipt()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition"
+                    >
                         🖨️ طباعة الإيصال
-
                     </button>
 
-                    <button type="button"
-                            onclick="location.reload()"
-                            class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-xl font-bold transition">
 
-                        تسجيل بيانات جديدة
-
+                    <button
+                        type="button"
+                        onclick="window.location.href='index.html'"
+                        class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-xl font-bold transition"
+                    >
+                        العودة للنماذج
                     </button>
 
                 </div>
@@ -267,8 +309,12 @@
 
         </div>
 
-        <!-- تنبيه أسفل الصفحة -->
-        <div class="text-center text-gray-500 text-xs mt-5">
+
+        <!-- =====================================================
+             تنبيه أسفل الصفحة
+             ===================================================== -->
+
+        <div class="text-center text-gray-500 text-xs mt-5 pb-4">
 
             يرجى التأكد من صحة جميع البيانات قبل الضغط على زر التسليم.
 
@@ -283,37 +329,45 @@
 
     <div id="printReceipt" class="receipt">
 
-        <div style="
-            direction:rtl;
-            font-family:Tahoma,Arial,sans-serif;
-            width:100%;
-            max-width:800px;
-            margin:0 auto;
-            color:#111827;
-        ">
+        <div
+            style="
+                direction:rtl;
+                font-family:Tahoma,Arial,sans-serif;
+                width:100%;
+                max-width:800px;
+                margin:0 auto;
+                color:#111827;
+            "
+        >
 
             <!-- رأس الإيصال -->
 
-            <div style="
-                text-align:center;
-                border-bottom:3px solid #1d4ed8;
-                padding-bottom:15px;
-                margin-bottom:20px;
-            ">
+            <div
+                style="
+                    text-align:center;
+                    border-bottom:3px solid #1d4ed8;
+                    padding-bottom:15px;
+                    margin-bottom:20px;
+                "
+            >
 
-                <h1 id="receiptTitle"
+                <h1
+                    id="receiptTitle"
                     style="
                         font-size:28px;
                         margin:0 0 8px 0;
                         font-weight:bold;
-                    ">
+                    "
+                >
                     إيصال تسجيل البيانات
                 </h1>
 
-                <div style="
-                    font-size:14px;
-                    color:#6b7280;
-                ">
+                <div
+                    style="
+                        font-size:14px;
+                        color:#6b7280;
+                    "
+                >
                     إيصال رسمي بتسجيل البيانات
                 </div>
 
@@ -322,46 +376,61 @@
 
             <!-- بيانات التسجيل -->
 
-            <table style="
-                width:100%;
-                border-collapse:collapse;
-                margin-bottom:25px;
-            ">
+            <table
+                style="
+                    width:100%;
+                    border-collapse:collapse;
+                    margin-bottom:25px;
+                "
+            >
 
                 <tr>
 
-                    <td style="
-                        border:1px solid #d1d5db;
-                        padding:12px;
-                        width:50%;
-                    ">
+                    <td
+                        style="
+                            border:1px solid #d1d5db;
+                            padding:12px;
+                            width:50%;
+                        "
+                    >
 
-                        <strong>الرقم التسلسلي:</strong>
+                        <strong>
+                            الرقم التسلسلي:
+                        </strong>
 
-                        <span id="receiptSerial"
-                              style="
-                                  font-size:20px;
-                                  font-weight:bold;
-                                  color:#1d4ed8;
-                              ">
+                        <span
+                            id="receiptSerial"
+                            style="
+                                font-size:20px;
+                                font-weight:bold;
+                                color:#1d4ed8;
+                            "
+                        >
                             -
                         </span>
 
                     </td>
 
-                    <td style="
-                        border:1px solid #d1d5db;
-                        padding:12px;
-                    ">
 
-                        <strong>الكود المميز:</strong>
+                    <td
+                        style="
+                            border:1px solid #d1d5db;
+                            padding:12px;
+                        "
+                    >
 
-                        <span id="receiptUnique"
-                              style="
-                                  font-size:20px;
-                                  font-weight:bold;
-                                  color:#dc2626;
-                              ">
+                        <strong>
+                            الكود المميز:
+                        </strong>
+
+                        <span
+                            id="receiptUnique"
+                            style="
+                                font-size:20px;
+                                font-weight:bold;
+                                color:#dc2626;
+                            "
+                        >
                             -
                         </span>
 
@@ -369,15 +438,20 @@
 
                 </tr>
 
+
                 <tr>
 
-                    <td colspan="2"
+                    <td
+                        colspan="2"
                         style="
                             border:1px solid #d1d5db;
                             padding:12px;
-                        ">
+                        "
+                    >
 
-                        <strong>تاريخ التسجيل:</strong>
+                        <strong>
+                            تاريخ التسجيل:
+                        </strong>
 
                         <span id="receiptDate">
                             -
@@ -392,45 +466,54 @@
 
             <!-- الإجابات -->
 
-            <h2 style="
-                font-size:20px;
-                border-bottom:2px solid #e5e7eb;
-                padding-bottom:8px;
-                margin-bottom:12px;
-            ">
+            <h2
+                style="
+                    font-size:20px;
+                    border-bottom:2px solid #e5e7eb;
+                    padding-bottom:8px;
+                    margin-bottom:12px;
+                "
+            >
                 بيانات المسجل
             </h2>
 
 
-            <table style="
-                width:100%;
-                border-collapse:collapse;
-            ">
+            <table
+                style="
+                    width:100%;
+                    border-collapse:collapse;
+                "
+            >
 
                 <thead>
 
                     <tr>
 
-                        <th style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                            background:#f3f4f6;
-                            width:40%;
-                        ">
+                        <th
+                            style="
+                                border:1px solid #9ca3af;
+                                padding:10px;
+                                background:#f3f4f6;
+                                width:40%;
+                            "
+                        >
                             البيان
                         </th>
 
-                        <th style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                            background:#f3f4f6;
-                        ">
+                        <th
+                            style="
+                                border:1px solid #9ca3af;
+                                padding:10px;
+                                background:#f3f4f6;
+                            "
+                        >
                             البيانات
                         </th>
 
                     </tr>
 
                 </thead>
+
 
                 <tbody id="receiptAnswers">
 
@@ -441,30 +524,37 @@
 
             <!-- التوقيع -->
 
-            <div style="
-                margin-top:50px;
-                display:flex;
-                justify-content:space-between;
-                text-align:center;
-            ">
+            <div
+                style="
+                    margin-top:50px;
+                    display:flex;
+                    justify-content:space-between;
+                    text-align:center;
+                "
+            >
 
                 <div style="width:40%;">
 
-                    <div style="
-                        border-top:1px solid #111827;
-                        padding-top:8px;
-                    ">
+                    <div
+                        style="
+                            border-top:1px solid #111827;
+                            padding-top:8px;
+                        "
+                    >
                         توقيع المسؤول
                     </div>
 
                 </div>
 
+
                 <div style="width:40%;">
 
-                    <div style="
-                        border-top:1px solid #111827;
-                        padding-top:8px;
-                    ">
+                    <div
+                        style="
+                            border-top:1px solid #111827;
+                            padding-top:8px;
+                        "
+                    >
                         توقيع المسجل
                     </div>
 
@@ -473,15 +563,15 @@
             </div>
 
 
-            <div style="
-                margin-top:40px;
-                text-align:center;
-                font-size:12px;
-                color:#6b7280;
-            ">
-
+            <div
+                style="
+                    margin-top:40px;
+                    text-align:center;
+                    font-size:12px;
+                    color:#6b7280;
+                "
+            >
                 يرجى الاحتفاظ بهذا الإيصال للرجوع إليه عند الحاجة.
-
             </div>
 
         </div>
@@ -540,9 +630,11 @@
         };
 
 
-        const app = initializeApp(firebaseConfig);
+        const app =
+            initializeApp(firebaseConfig);
 
-        const db = getFirestore(app);
+        const db =
+            getFirestore(app);
 
 
         /* =========================================================
@@ -550,10 +642,14 @@
            ========================================================= */
 
         const urlParams =
-            new URLSearchParams(window.location.search);
+            new URLSearchParams(
+                window.location.search
+            );
+
 
         const formId =
-            urlParams.get('formId');
+            urlParams.get("formId");
+
 
         let questions = [];
 
@@ -569,38 +665,57 @@
 
 
         /* =========================================================
-           أدوات مساعدة
+           حماية HTML
            ========================================================= */
 
         function escapeHTML(value) {
 
-            if (value === null || value === undefined) {
-                return '';
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return "";
             }
 
             return String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
 
         }
 
 
+        /* =========================================================
+           رسالة الخطأ
+           ========================================================= */
+
         function showError(message) {
 
-            document
-                .getElementById('errorMessage')
-                .classList.remove('hidden');
+            const errorMessage =
+                document.getElementById(
+                    "errorMessage"
+                );
 
-            document
-                .getElementById('errorText')
-                .innerText = message;
+            const errorText =
+                document.getElementById(
+                    "errorText"
+                );
+
+
+            errorMessage.classList.remove(
+                "hidden"
+            );
+
+
+            errorText.innerText =
+                message;
+
 
             window.scrollTo({
                 top: 0,
-                behavior: 'smooth'
+                behavior: "smooth"
             });
 
         }
@@ -609,22 +724,55 @@
         function hideError() {
 
             document
-                .getElementById('errorMessage')
-                .classList.add('hidden');
+                .getElementById(
+                    "errorMessage"
+                )
+                .classList.add(
+                    "hidden"
+                );
 
         }
 
 
+        /* =========================================================
+           هل السؤال ظاهر؟
+           ========================================================= */
+
         function isVisible(q) {
 
             const div =
-                document.getElementById('div_' + q.id);
+                document.getElementById(
+                    "div_" + q.id
+                );
+
 
             if (!div) {
                 return false;
             }
 
-            return div.style.display !== 'none';
+
+            return (
+                div.style.display !==
+                "none"
+            );
+
+        }
+
+
+        /* =========================================================
+           قيمة السؤال
+           ========================================================= */
+
+        function getElementValue(element) {
+
+            if (!element) {
+                return "";
+            }
+
+
+            return String(
+                element.value || ""
+            ).trim();
 
         }
 
@@ -640,7 +788,9 @@
                 if (!formId) {
 
                     document
-                        .getElementById('loadingBox')
+                        .getElementById(
+                            "loadingBox"
+                        )
                         .innerHTML = `
 
                             <div class="text-red-600 text-5xl mb-3">
@@ -652,25 +802,32 @@
                             </h2>
 
                             <p class="text-gray-600">
-                                لم يتم تحديد رقم الفورم.
+                                لم يتم تحديد رقم الفورم في الرابط.
                             </p>
 
                         `;
 
                     return;
+
                 }
 
 
                 const formDoc =
                     await getDoc(
-                        doc(db, "forms", formId)
+                        doc(
+                            db,
+                            "forms",
+                            formId
+                        )
                     );
 
 
                 if (!formDoc.exists()) {
 
                     document
-                        .getElementById('loadingBox')
+                        .getElementById(
+                            "loadingBox"
+                        )
                         .innerHTML = `
 
                             <div class="text-red-600 text-5xl mb-3">
@@ -688,6 +845,7 @@
                         `;
 
                     return;
+
                 }
 
 
@@ -696,21 +854,33 @@
 
 
                 document
-                    .getElementById('formTitle')
+                    .getElementById(
+                        "formTitle"
+                    )
                     .innerText =
-                    formDataLoaded.title || 'نموذج تسجيل';
+                    formDataLoaded.title ||
+                    "نموذج تسجيل";
 
 
                 questions =
-                    Array.isArray(formDataLoaded.questions)
-                        ? formDataLoaded.questions
-                        : [];
+                    Array.isArray(
+                        formDataLoaded.questions
+                    )
+                    ?
+                    formDataLoaded.questions
+                    :
+                    [];
 
 
-                if (questions.length === 0) {
+                if (
+                    questions.length ===
+                    0
+                ) {
 
                     document
-                        .getElementById('loadingBox')
+                        .getElementById(
+                            "loadingBox"
+                        )
                         .innerHTML = `
 
                             <div class="text-yellow-600 text-5xl mb-3">
@@ -728,18 +898,27 @@
                         `;
 
                     return;
+
                 }
 
 
                 renderForm();
 
+                refreshAllConditions();
+
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    "Load Form Error:",
+                    error
+                );
+
 
                 document
-                    .getElementById('loadingBox')
+                    .getElementById(
+                        "loadingBox"
+                    )
                     .innerHTML = `
 
                         <div class="text-red-600 text-5xl mb-3">
@@ -751,7 +930,9 @@
                         </h2>
 
                         <p class="text-gray-600">
-                            ${escapeHTML(error.message)}
+                            ${escapeHTML(
+                                getFriendlyError(error)
+                            )}
                         </p>
 
                     `;
@@ -762,170 +943,215 @@
 
 
         /* =========================================================
-           إنشاء الأسئلة
+           إنشاء الحقول
            ========================================================= */
 
         function renderForm() {
 
-            let html = '';
+            let html = "";
 
 
-            questions.forEach((q, index) => {
+            questions.forEach(
+                (q, index) => {
 
-                const display =
-                    q.conditionId
-                        ? 'none'
-                        : 'block';
-
-
-                const required =
-                    q.required
-                        ? 'required'
-                        : '';
+                    const hasCondition =
+                        !!(
+                            q.conditionId
+                        );
 
 
-                let extraAttr = '';
+                    /*
+                     * السؤال المشروط يبدأ مخفياً.
+                     * ولا نضع required عليه من البداية
+                     * حتى لا يمنع إرسال النموذج وهو مخفي.
+                     */
+
+                    const display =
+                        hasCondition
+                        ?
+                        "none"
+                        :
+                        "block";
 
 
-                /* الرقم القومي */
-
-                if (
-                    q.title &&
-                    q.title.includes("القومي")
-                ) {
-
-                    extraAttr = `
-                        pattern="\\d{14}"
-                        maxlength="14"
-                        minlength="14"
-                        inputmode="numeric"
-                        title="يجب أن يكون الرقم القومي مكوناً من 14 رقم"
-                    `;
-
-                }
+                    const required =
+                        (
+                            q.required &&
+                            !hasCondition
+                        )
+                        ?
+                        "required"
+                        :
+                        "";
 
 
-                html += `
-
-                    <div
-                        id="div_${escapeHTML(q.id)}"
-                        data-question-id="${escapeHTML(q.id)}"
-                        style="display:${display}"
-                        class="question-card p-4 border border-gray-200 rounded-xl bg-gray-50"
-                    >
-
-                        <label
-                            for="${escapeHTML(q.id)}"
-                            class="block font-bold text-gray-800 mb-2"
-                        >
-
-                            <span class="text-blue-600 ml-1">
-                                ${index + 1}.
-                            </span>
-
-                            ${escapeHTML(q.title)}
-
-                            ${
-                                q.required
-                                ?
-                                '<span class="text-red-500 mr-1">*</span>'
-                                :
-                                ''
-                            }
-
-                        </label>
-
-                `;
+                    let extraAttr = "";
 
 
-                /* =================================================
-                   Select
-                   ================================================= */
+                    /*
+                     * الرقم القومي
+                     */
 
-                if (q.type === 'select') {
+                    if (
+                        q.title &&
+                        q.title.includes(
+                            "القومي"
+                        )
+                    ) {
 
-                    html += `
-
-                        <select
-                            id="${escapeHTML(q.id)}"
-                            name="${escapeHTML(q.id)}"
-                            ${required}
-                            onchange="checkConditions('${escapeHTML(q.id)}')"
-                            class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        >
-
-                            <option value="">
-                                اختر...
-                            </option>
-
-                    `;
-
-
-                    if (Array.isArray(q.options)) {
-
-                        q.options.forEach(opt => {
-
-                            html += `
-
-                                <option value="${escapeHTML(opt)}">
-                                    ${escapeHTML(opt)}
-                                </option>
-
-                            `;
-
-                        });
+                        extraAttr = `
+                            pattern="\\d{14}"
+                            maxlength="14"
+                            minlength="14"
+                            inputmode="numeric"
+                            title="يجب أن يكون الرقم القومي مكوناً من 14 رقم"
+                        `;
 
                     }
 
 
                     html += `
 
-                        </select>
+                        <div
+                            id="div_${escapeHTML(q.id)}"
+                            data-question-id="${escapeHTML(q.id)}"
+                            style="display:${display}"
+                            class="question-card p-4 md:p-5 border border-gray-200 rounded-2xl bg-gray-50"
+                        >
+
+                            <label
+                                for="${escapeHTML(q.id)}"
+                                class="block font-bold text-gray-800 mb-2"
+                            >
+
+                                <span class="text-blue-600 ml-1">
+                                    ${index + 1}.
+                                </span>
+
+                                ${escapeHTML(q.title)}
+
+                                ${
+                                    q.required
+                                    ?
+                                    '<span class="text-red-500 mr-1">*</span>'
+                                    :
+                                    ''
+                                }
+
+                            </label>
 
                     `;
 
-                }
 
-                /* =================================================
-                   باقي أنواع الحقول
-                   ================================================= */
+                    /* =================================================
+                       قائمة منسدلة
+                       ================================================= */
 
-                else {
+                    if (
+                        q.type ===
+                        "select"
+                    ) {
 
-                    let inputType =
-                        ['text', 'number', 'tel', 'date']
-                            .includes(q.type)
-                            ? q.type
-                            : 'text';
+                        html += `
+
+                            <select
+                                id="${escapeHTML(q.id)}"
+                                name="${escapeHTML(q.id)}"
+                                ${required}
+                                onchange="checkConditions('${escapeHTML(q.id)}')"
+                                class="w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            >
+
+                                <option value="">
+                                    اختر...
+                                </option>
+
+                        `;
+
+
+                        if (
+                            Array.isArray(
+                                q.options
+                            )
+                        ) {
+
+                            q.options.forEach(
+                                opt => {
+
+                                    html += `
+
+                                        <option value="${escapeHTML(opt)}">
+                                            ${escapeHTML(opt)}
+                                        </option>
+
+                                    `;
+
+                                }
+                            );
+
+                        }
+
+
+                        html += `
+
+                            </select>
+
+                        `;
+
+                    }
+
+
+                    /* =================================================
+                       الحقول الأخرى
+                       ================================================= */
+
+                    else {
+
+                        let inputType =
+                            [
+                                "text",
+                                "number",
+                                "tel",
+                                "date"
+                            ].includes(
+                                q.type
+                            )
+                            ?
+                            q.type
+                            :
+                            "text";
+
+
+                        html += `
+
+                            <input
+                                type="${inputType}"
+                                id="${escapeHTML(q.id)}"
+                                name="${escapeHTML(q.id)}"
+                                ${required}
+                                ${extraAttr}
+                                class="w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                oninput="checkConditions('${escapeHTML(q.id)}')"
+                            >
+
+                        `;
+
+                    }
 
 
                     html += `
 
-                        <input
-                            type="${inputType}"
-                            id="${escapeHTML(q.id)}"
-                            name="${escapeHTML(q.id)}"
-                            ${required}
-                            ${extraAttr}
-                            class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                            oninput="checkConditions('${escapeHTML(q.id)}')"
-                        >
+                        </div>
 
                     `;
 
                 }
+            );
 
 
-                html += `
-
-                    </div>
-
-                `;
-
-            });
-
-
-            /* زر التسليم */
+            /* =================================================
+               زر التسليم
+               ================================================= */
 
             html += `
 
@@ -949,31 +1175,44 @@
 
 
             document
-                .getElementById('dynamicForm')
-                .innerHTML = html;
+                .getElementById(
+                    "dynamicForm"
+                )
+                .innerHTML =
+                html;
 
 
             document
-                .getElementById('loadingBox')
-                .classList.add('hidden');
+                .getElementById(
+                    "loadingBox"
+                )
+                .classList.add(
+                    "hidden"
+                );
 
 
             document
-                .getElementById('dynamicForm')
-                .classList.remove('hidden');
+                .getElementById(
+                    "dynamicForm"
+                )
+                .classList.remove(
+                    "hidden"
+                );
 
         }
 
 
         /* =========================================================
-           الشروط
+           فحص الشروط
            ========================================================= */
 
         window.checkConditions =
             function(changedQId) {
 
                 const changedElement =
-                    document.getElementById(changedQId);
+                    document.getElementById(
+                        changedQId
+                    );
 
 
                 if (!changedElement) {
@@ -982,94 +1221,245 @@
 
 
                 const value =
-                    changedElement.value;
+                    getElementValue(
+                        changedElement
+                    );
 
 
-                questions.forEach(q => {
+                questions.forEach(
+                    q => {
 
-                    if (q.conditionId !== changedQId) {
-                        return;
-                    }
-
-
-                    const targetDiv =
-                        document.getElementById(
-                            'div_' + q.id
-                        );
+                        if (
+                            q.conditionId !==
+                            changedQId
+                        ) {
+                            return;
+                        }
 
 
-                    const targetElement =
-                        document.getElementById(q.id);
+                        const targetDiv =
+                            document.getElementById(
+                                "div_" + q.id
+                            );
 
 
-                    if (!targetDiv || !targetElement) {
-                        return;
-                    }
+                        const targetElement =
+                            document.getElementById(
+                                q.id
+                            );
 
 
-                    const shouldShow =
-                        value === String(q.conditionValue || '');
+                        if (
+                            !targetDiv ||
+                            !targetElement
+                        ) {
+                            return;
+                        }
 
 
-                    if (shouldShow) {
+                        const shouldShow =
+                            value ===
+                            String(
+                                q.conditionValue ||
+                                ""
+                            ).trim();
 
-                        targetDiv.style.display =
-                            'block';
+
+                        if (shouldShow) {
+
+                            targetDiv.style.display =
+                                "block";
 
 
-                        if (q.required) {
+                            if (q.required) {
 
-                            targetElement
-                                .setAttribute(
-                                    'required',
-                                    'true'
+                                targetElement.setAttribute(
+                                    "required",
+                                    "required"
                                 );
+
+                            }
+
+                        } else {
+
+                            targetDiv.style.display =
+                                "none";
+
+
+                            targetElement.removeAttribute(
+                                "required"
+                            );
+
+
+                            /*
+                             * مسح الإجابة المخفية
+                             */
+
+                            if (
+                                targetElement.tagName ===
+                                "SELECT"
+                            ) {
+
+                                targetElement.value =
+                                    "";
+
+                            } else {
+
+                                targetElement.value =
+                                    "";
+
+                            }
+
+
+                            /*
+                             * تحديث الأسئلة التابعة
+                             */
+
+                            checkConditions(
+                                q.id
+                            );
 
                         }
 
-                    } else {
-
-                        targetDiv.style.display =
-                            'none';
-
-
-                        targetElement
-                            .removeAttribute('required');
-
-
-                        targetElement.value = '';
-
-
-                        /*
-                         * إذا كان السؤال المخفي نفسه
-                         * يتحكم في أسئلة أخرى، نقوم
-                         * بتحديث الشروط التابعة له.
-                         */
-
-                        checkConditions(q.id);
-
                     }
-
-                });
+                );
 
             };
 
 
         /* =========================================================
-           التحقق من جميع الشروط
+           تحديث جميع الشروط
            ========================================================= */
 
         function refreshAllConditions() {
 
-            questions.forEach(q => {
+            /*
+             * نعيد التقييم عدة مرات حتى تعمل
+             * الشروط المتسلسلة:
+             *
+             * سؤال 1
+             *   ↓
+             * سؤال 2
+             *   ↓
+             * سؤال 3
+             */
 
-                if (!q.conditionId) {
+            for (
+                let pass = 0;
+                pass < 10;
+                pass++
+            ) {
 
-                    checkConditions(q.id);
+                let changed =
+                    false;
 
+
+                questions.forEach(
+                    q => {
+
+                        if (
+                            !q.conditionId
+                        ) {
+                            return;
+                        }
+
+
+                        const conditionElement =
+                            document.getElementById(
+                                q.conditionId
+                            );
+
+
+                        const targetDiv =
+                            document.getElementById(
+                                "div_" + q.id
+                            );
+
+
+                        const targetElement =
+                            document.getElementById(
+                                q.id
+                            );
+
+
+                        if (
+                            !conditionElement ||
+                            !targetDiv ||
+                            !targetElement
+                        ) {
+                            return;
+                        }
+
+
+                        const value =
+                            getElementValue(
+                                conditionElement
+                            );
+
+
+                        const shouldShow =
+                            value ===
+                            String(
+                                q.conditionValue ||
+                                ""
+                            ).trim();
+
+
+                        const currentlyVisible =
+                            targetDiv.style.display !==
+                            "none";
+
+
+                        if (
+                            shouldShow !==
+                            currentlyVisible
+                        ) {
+
+                            changed =
+                                true;
+
+                        }
+
+
+                        if (shouldShow) {
+
+                            targetDiv.style.display =
+                                "block";
+
+
+                            if (q.required) {
+
+                                targetElement.setAttribute(
+                                    "required",
+                                    "required"
+                                );
+
+                            }
+
+                        } else {
+
+                            targetDiv.style.display =
+                                "none";
+
+
+                            targetElement.removeAttribute(
+                                "required"
+                            );
+
+                            targetElement.value =
+                                "";
+
+                        }
+
+                    }
+                );
+
+
+                if (!changed) {
+                    break;
                 }
 
-            });
+            }
 
         }
 
@@ -1092,13 +1482,22 @@
                 hideError();
 
 
+                /*
+                 * تحديث الشروط قبل التحقق
+                 */
+
+                refreshAllConditions();
+
+
                 const form =
                     document.getElementById(
-                        'dynamicForm'
+                        "dynamicForm"
                     );
 
 
-                if (!form.checkValidity()) {
+                if (
+                    !form.checkValidity()
+                ) {
 
                     form.reportValidity();
 
@@ -1107,49 +1506,63 @@
                 }
 
 
-                isSubmitting = true;
+                isSubmitting =
+                    true;
 
 
                 const button =
                     document.getElementById(
-                        'submitButton'
+                        "submitButton"
                     );
 
 
                 const buttonText =
                     document.getElementById(
-                        'submitButtonText'
+                        "submitButtonText"
                     );
 
 
-                button.disabled = true;
+                if (button) {
 
-                button.classList.add(
-                    'opacity-70',
-                    'cursor-not-allowed'
-                );
+                    button.disabled =
+                        true;
+
+                    button.classList.add(
+                        "opacity-70",
+                        "cursor-not-allowed"
+                    );
+
+                }
 
 
-                buttonText.innerHTML = `
-                    جاري حفظ البيانات...
-                `;
+                if (buttonText) {
+
+                    buttonText.innerHTML =
+                        "جاري حفظ البيانات...";
+
+                }
 
 
                 try {
 
                     let answers = {};
 
-                    let hasError = false;
+                    let hasError =
+                        false;
 
 
                     /* =============================================
                        جمع الإجابات
                        ============================================= */
 
-                    for (const q of questions) {
+                    for (
+                        const q of questions
+                    ) {
 
                         const element =
-                            document.getElementById(q.id);
+                            document.getElementById(
+                                q.id
+                            );
 
 
                         if (!element) {
@@ -1158,12 +1571,15 @@
 
 
                         /*
-                         * لا نسجل السؤال المخفي
+                         * السؤال المخفي لا يدخل في البيانات
                          */
 
-                        if (!isVisible(q)) {
+                        if (
+                            !isVisible(q)
+                        ) {
 
-                            answers[q.id] = '';
+                            answers[q.id] =
+                                "";
 
                             continue;
 
@@ -1171,11 +1587,13 @@
 
 
                         const value =
-                            element.value.trim();
+                            getElementValue(
+                                element
+                            );
 
 
                         /*
-                         * التحقق من الإجباري
+                         * تحقق إضافي من الإجباري
                          */
 
                         if (
@@ -1187,9 +1605,41 @@
                                 `يرجى إدخال "${q.title}"`
                             );
 
+
                             element.focus();
 
-                            hasError = true;
+                            hasError =
+                                true;
+
+                            break;
+
+                        }
+
+
+                        /*
+                         * تحقق الرقم القومي
+                         */
+
+                        if (
+                            q.title &&
+                            q.title.includes(
+                                "القومي"
+                            ) &&
+                            value &&
+                            !/^\d{14}$/.test(
+                                value
+                            )
+                        ) {
+
+                            alert(
+                                `الرقم القومي في "${q.title}" يجب أن يكون 14 رقمًا.`
+                            );
+
+
+                            element.focus();
+
+                            hasError =
+                                true;
 
                             break;
 
@@ -1236,7 +1686,9 @@
                                 );
 
 
-                            if (!dupCheck.empty) {
+                            if (
+                                !dupCheck.empty
+                            ) {
 
                                 alert(
                                     `البيانات المدخلة في "${q.title}" مسجلة مسبقاً! يمنع التكرار.`
@@ -1245,8 +1697,8 @@
 
                                 element.focus();
 
-
-                                hasError = true;
+                                hasError =
+                                    true;
 
                                 break;
 
@@ -1292,23 +1744,24 @@
 
 
                     /*
-                     * الرقم التسلسلي
+                     * نفس آلية النظام الكبير:
+                     * عدد التسجيلات + 1
                      */
 
                     const serialNum =
                         countSnap.size + 1;
 
 
-                    /*
-                     * الكود المميز
-                     */
+                    /* =============================================
+                       إنشاء كود مميز مع فحص عدم التكرار
+                       ============================================= */
 
                     const uniqueId =
-                        generateUniqueCode();
+                        await generateUniqueCode();
 
 
                     /* =============================================
-                       تسجيل البيانات
+                       حفظ البيانات
                        ============================================= */
 
                     await addDoc(
@@ -1344,38 +1797,51 @@
                     submittedAnswers =
                         answers;
 
+
                     submittedSerial =
                         serialNum;
+
 
                     submittedUniqueId =
                         uniqueId;
 
 
                     /* =============================================
-                       عرض النتيجة
+                       تجهيز الإيصال
+                       ============================================= */
+
+                    prepareReceipt(
+                        answers,
+                        serialNum,
+                        uniqueId
+                    );
+
+
+                    /* =============================================
+                       عرض النجاح
                        ============================================= */
 
                     document
                         .getElementById(
-                            'dynamicForm'
+                            "dynamicForm"
                         )
                         .classList.add(
-                            'hidden'
+                            "hidden"
                         );
 
 
                     document
                         .getElementById(
-                            'successMessage'
+                            "successMessage"
                         )
                         .classList.remove(
-                            'hidden'
+                            "hidden"
                         );
 
 
                     document
                         .getElementById(
-                            'serialNumSpan'
+                            "serialNumSpan"
                         )
                         .innerText =
                         serialNum;
@@ -1383,21 +1849,16 @@
 
                     document
                         .getElementById(
-                            'uniqueIdSpan'
+                            "uniqueIdSpan"
                         )
                         .innerText =
                         uniqueId;
 
 
-                    /*
-                     * تجهيز الإيصال
-                     */
-
-                    prepareReceipt(
-                        answers,
-                        serialNum,
-                        uniqueId
-                    );
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                    });
 
 
                 } catch (error) {
@@ -1409,7 +1870,9 @@
 
 
                     showError(
-                        getFriendlyError(error)
+                        getFriendlyError(
+                            error
+                        )
                     );
 
 
@@ -1424,33 +1887,81 @@
            إنشاء الكود المميز
            ========================================================= */
 
-        function generateUniqueCode() {
+        async function generateUniqueCode() {
 
             const chars =
-                'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
-
-            let result = '';
+                "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 
             for (
-                let i = 0;
-                i < 8;
-                i++
+                let attempt = 0;
+                attempt < 10;
+                attempt++
             ) {
 
-                result +=
-                    chars.charAt(
-                        Math.floor(
-                            Math.random() *
-                            chars.length
+                let result = "";
+
+
+                for (
+                    let i = 0;
+                    i < 8;
+                    i++
+                ) {
+
+                    result +=
+                        chars.charAt(
+                            Math.floor(
+                                Math.random() *
+                                chars.length
+                            )
+                        );
+
+                }
+
+
+                const codeQuery =
+                    query(
+                        collection(
+                            db,
+                            "submissions"
+                        ),
+
+                        where(
+                            "formId",
+                            "==",
+                            formId
+                        ),
+
+                        where(
+                            "uniqueId",
+                            "==",
+                            result
                         )
                     );
+
+
+                const snap =
+                    await getDocs(
+                        codeQuery
+                    );
+
+
+                if (snap.empty) {
+
+                    return result;
+
+                }
 
             }
 
 
-            return result;
+            /*
+             * احتمال الوصول هنا ضعيف جداً.
+             */
+
+            throw new Error(
+                "تعذر إنشاء كود مميز جديد. حاول مرة أخرى."
+            );
 
         }
 
@@ -1461,28 +1972,30 @@
 
         function resetSubmitButton() {
 
-            isSubmitting = false;
+            isSubmitting =
+                false;
 
 
             const button =
                 document.getElementById(
-                    'submitButton'
+                    "submitButton"
                 );
 
 
             const buttonText =
                 document.getElementById(
-                    'submitButtonText'
+                    "submitButtonText"
                 );
 
 
             if (button) {
 
-                button.disabled = false;
+                button.disabled =
+                    false;
 
                 button.classList.remove(
-                    'opacity-70',
-                    'cursor-not-allowed'
+                    "opacity-70",
+                    "cursor-not-allowed"
                 );
 
             }
@@ -1491,7 +2004,7 @@
             if (buttonText) {
 
                 buttonText.innerText =
-                    'تسليم البيانات';
+                    "تسليم البيانات";
 
             }
 
@@ -1499,21 +2012,23 @@
 
 
         /* =========================================================
-           رسائل أخطاء Firebase
+           أخطاء Firebase
            ========================================================= */
 
-        function getFriendlyError(error) {
+        function getFriendlyError(
+            error
+        ) {
 
             if (!error) {
 
-                return 'حدث خطأ غير معروف.';
+                return "حدث خطأ غير معروف.";
 
             }
 
 
             if (
                 error.code ===
-                'permission-denied'
+                "permission-denied"
             ) {
 
                 return `
@@ -1526,7 +2041,7 @@
 
             if (
                 error.code ===
-                'unavailable'
+                "unavailable"
             ) {
 
                 return `
@@ -1539,7 +2054,7 @@
 
             if (
                 error.code ===
-                'failed-precondition'
+                "failed-precondition"
             ) {
 
                 return `
@@ -1551,7 +2066,7 @@
 
             return (
                 error.message ||
-                'حدث خطأ أثناء حفظ البيانات.'
+                "حدث خطأ أثناء حفظ البيانات."
             );
 
         }
@@ -1569,17 +2084,19 @@
 
             document
                 .getElementById(
-                    'receiptTitle'
+                    "receiptTitle"
                 )
                 .innerText =
                 formDataLoaded?.title
-                ? `إيصال - ${formDataLoaded.title}`
-                : 'إيصال تسجيل البيانات';
+                ?
+                `إيصال - ${formDataLoaded.title}`
+                :
+                "إيصال تسجيل البيانات";
 
 
             document
                 .getElementById(
-                    'receiptSerial'
+                    "receiptSerial"
                 )
                 .innerText =
                 serialNum;
@@ -1587,7 +2104,7 @@
 
             document
                 .getElementById(
-                    'receiptUnique'
+                    "receiptUnique"
                 )
                 .innerText =
                 uniqueId;
@@ -1599,71 +2116,81 @@
 
             document
                 .getElementById(
-                    'receiptDate'
+                    "receiptDate"
                 )
                 .innerText =
                 now.toLocaleString(
-                    'ar-EG'
+                    "ar-EG"
                 );
 
 
-            let rows = '';
+            let rows = "";
 
 
-            questions.forEach(q => {
+            questions.forEach(
+                q => {
 
-                const value =
-                    answers[q.id];
+                    const value =
+                        answers[q.id];
 
 
-                /*
-                 * لا نطبع الأسئلة المخفية
-                 * والتي لا تحتوي على إجابة
-                 */
+                    /*
+                     * لا نطبع الأسئلة المخفية
+                     * أو الفارغة.
+                     */
 
-                if (
-                    value === undefined ||
-                    value === null ||
-                    value === ''
-                ) {
+                    if (
+                        value ===
+                        undefined ||
+                        value ===
+                        null ||
+                        value ===
+                        ""
+                    ) {
 
-                    return;
+                        return;
+
+                    }
+
+
+                    rows += `
+
+                        <tr>
+
+                            <td
+                                style="
+                                    border:1px solid #9ca3af;
+                                    padding:10px;
+                                    font-weight:bold;
+                                "
+                            >
+                                ${escapeHTML(q.title)}
+                            </td>
+
+                            <td
+                                style="
+                                    border:1px solid #9ca3af;
+                                    padding:10px;
+                                "
+                            >
+                                ${escapeHTML(value)}
+                            </td>
+
+                        </tr>
+
+                    `;
 
                 }
-
-
-                rows += `
-
-                    <tr>
-
-                        <td style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                            font-weight:bold;
-                        ">
-                            ${escapeHTML(q.title)}
-                        </td>
-
-                        <td style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                        ">
-                            ${escapeHTML(value)}
-                        </td>
-
-                    </tr>
-
-                `;
-
-            });
+            );
 
 
             document
                 .getElementById(
-                    'receiptAnswers'
+                    "receiptAnswers"
                 )
                 .innerHTML =
-                rows || `
+                rows ||
+                `
 
                     <tr>
 
@@ -1698,7 +2225,7 @@
                 ) {
 
                     alert(
-                        'لا توجد بيانات مسجلة للطباعة.'
+                        "لا توجد بيانات مسجلة للطباعة."
                     );
 
                     return;
@@ -1714,19 +2241,87 @@
 
 
                 /*
-                 * فتح نافذة الطباعة
+                 * عنوان نافذة الطباعة
                  */
+
+                const oldTitle =
+                    document.title;
+
+
+                const studentName =
+                    getPrintableStudentName();
+
+
+                document.title =
+                    studentName
+                    ?
+                    `إيصال - ${studentName}`
+                    :
+                    `إيصال - ${submittedUniqueId}`;
+
 
                 setTimeout(
                     function() {
 
                         window.print();
 
+                        setTimeout(
+                            function() {
+
+                                document.title =
+                                    oldTitle;
+
+                            },
+                            500
+                        );
+
                     },
                     200
                 );
 
             };
+
+
+        /* =========================================================
+           محاولة استخراج اسم الطالب من الإجابات
+           ========================================================= */
+
+        function getPrintableStudentName() {
+
+            const nameQuestion =
+                questions.find(
+                    q =>
+                        q.title &&
+                        (
+                            q.title.includes(
+                                "الاسم"
+                            ) ||
+                            q.title.includes(
+                                "اسم الطالب"
+                            )
+                        )
+                );
+
+
+            if (
+                nameQuestion &&
+                submittedAnswers[
+                    nameQuestion.id
+                ]
+            ) {
+
+                return String(
+                    submittedAnswers[
+                        nameQuestion.id
+                    ]
+                ).trim();
+
+            }
+
+
+            return "";
+
+        }
 
 
         /* =========================================================
