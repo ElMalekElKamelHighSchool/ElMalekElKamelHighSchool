@@ -2,41 +2,523 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوابة الطلاب</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        .form-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .loading-spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 p-10 font-sans">
-    <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md text-center">
-        <h1 class="text-3xl font-bold mb-6 text-blue-600">النماذج والاستبيانات المتاحة</h1>
-        <div id="formsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        
-        <div class="mt-10 p-4 bg-yellow-50 border border-yellow-200 rounded">
-            <h3 class="font-bold">هل لديك كود تعديل؟</h3>
-            <a href="student_edit.html" class="text-blue-600 underline">اضغط هنا لتعديل بياناتك السابقة</a>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <div class="min-h-screen p-4 md:p-8">
+
+        <div class="max-w-5xl mx-auto">
+
+            <!-- الرأس -->
+            <div class="bg-gradient-to-l from-blue-800 to-blue-500 text-white rounded-3xl shadow-xl overflow-hidden mb-6">
+
+                <div class="p-7 md:p-10 text-center">
+
+                    <div class="mx-auto mb-4 w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center text-3xl">
+                        📋
+                    </div>
+
+                    <h1 class="text-3xl md:text-4xl font-bold mb-3">
+                        بوابة الطلاب
+                    </h1>
+
+                    <p class="text-blue-100 text-sm md:text-base">
+                        النماذج والاستبيانات المتاحة للتسجيل
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- المحتوى -->
+            <div class="bg-white rounded-3xl shadow-lg p-5 md:p-8">
+
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            النماذج المتاحة
+                        </h2>
+
+                        <p class="text-gray-500 text-sm mt-1">
+                            اختر النموذج الذي تريد تسجيل بياناتك فيه
+                        </p>
+                    </div>
+
+                    <div
+                        id="formsCount"
+                        class="text-sm font-bold text-blue-700 bg-blue-50 px-4 py-2 rounded-full"
+                    >
+                        جاري التحميل...
+                    </div>
+
+                </div>
+
+                <!-- تحميل -->
+                <div id="loadingBox" class="py-14 text-center">
+
+                    <div class="loading-spinner mb-4"></div>
+
+                    <p class="text-gray-600">
+                        جاري تحميل النماذج...
+                    </p>
+
+                </div>
+
+                <!-- خطأ -->
+                <div
+                    id="errorBox"
+                    class="hidden p-5 bg-red-50 border border-red-200 rounded-2xl text-red-700 mb-5"
+                >
+                    <div class="font-bold mb-1">
+                        ⚠️ تعذر تحميل النماذج
+                    </div>
+
+                    <div id="errorText" class="text-sm"></div>
+
+                    <button
+                        type="button"
+                        onclick="loadForms()"
+                        class="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl font-bold"
+                    >
+                        إعادة المحاولة
+                    </button>
+                </div>
+
+                <!-- النماذج -->
+                <div
+                    id="formsContainer"
+                    class="grid grid-cols-1 md:grid-cols-2 gap-5"
+                ></div>
+
+                <!-- لا توجد نماذج -->
+                <div
+                    id="emptyBox"
+                    class="hidden py-12 text-center border-2 border-dashed border-gray-200 rounded-2xl"
+                >
+                    <div class="text-5xl mb-4">
+                        📭
+                    </div>
+
+                    <h3 class="font-bold text-xl text-gray-700">
+                        لا توجد نماذج متاحة حالياً
+                    </h3>
+
+                    <p class="text-gray-500 mt-2">
+                        يرجى العودة لاحقاً.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- تعديل البيانات -->
+            <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-5 text-center shadow-sm">
+
+                <div class="text-2xl mb-2">
+                    🔑
+                </div>
+
+                <h3 class="font-bold text-yellow-900">
+                    هل لديك كود تعديل؟
+                </h3>
+
+                <p class="text-yellow-800 text-sm mt-1 mb-3">
+                    يمكنك استخدام الكود المميز لتعديل بياناتك السابقة إذا كان التعديل مسموحاً.
+                </p>
+
+                <a
+                    href="student_edit.html"
+                    class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-xl font-bold transition"
+                >
+                    تعديل البيانات السابقة
+                </a>
+
+            </div>
+
+            <!-- التذييل -->
+            <div class="text-center text-gray-500 text-xs mt-6 pb-4">
+                يرجى التأكد من صحة البيانات قبل التسليم.
+            </div>
+
         </div>
+
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        const firebaseConfig = { /* ضع الكونفيج هنا */ 
-            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4", authDomain: "hazoma-60ed2.firebaseapp.com", projectId: "hazoma-60ed2", storageBucket: "hazoma-60ed2.firebasestorage.app", messagingSenderId: "962438384604", appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        import {
+            initializeApp
+        } from
+        "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+
+        import {
+            getFirestore,
+            collection,
+            getDocs
+        } from
+        "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+
+        /* =========================================================
+           Firebase
+           ========================================================= */
+
+        const firebaseConfig = {
+
+            apiKey:
+                "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+
+            authDomain:
+                "hazoma-60ed2.firebaseapp.com",
+
+            projectId:
+                "hazoma-60ed2",
+
+            storageBucket:
+                "hazoma-60ed2.firebasestorage.app",
+
+            messagingSenderId:
+                "962438384604",
+
+            appId:
+                "1:962438384604:web:52db16e5723a8f6d3bdd19"
+
         };
-        const db = getFirestore(initializeApp(firebaseConfig));
 
-        async function loadForms() {
-            const querySnapshot = await getDocs(collection(db, "forms"));
-            let html = '';
-            querySnapshot.forEach((doc) => {
-                html += `<a href="student_fill.html?formId=${doc.id}" class="block p-6 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg shadow transition">
-                    <h2 class="text-xl font-bold">${doc.data().title}</h2>
-                    <p class="text-sm text-gray-600 mt-2">اضغط هنا للبدء بالتسجيل</p>
-                </a>`;
-            });
-            document.getElementById('formsContainer').innerHTML = html;
+
+        const app =
+            initializeApp(firebaseConfig);
+
+        const db =
+            getFirestore(app);
+
+
+        /* =========================================================
+           حماية HTML
+           ========================================================= */
+
+        function escapeHTML(value) {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return "";
+            }
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
         }
+
+
+        /* =========================================================
+           تحميل النماذج
+           ========================================================= */
+
+        window.loadForms =
+            async function() {
+
+                const loadingBox =
+                    document.getElementById(
+                        "loadingBox"
+                    );
+
+                const errorBox =
+                    document.getElementById(
+                        "errorBox"
+                    );
+
+                const emptyBox =
+                    document.getElementById(
+                        "emptyBox"
+                    );
+
+                const container =
+                    document.getElementById(
+                        "formsContainer"
+                    );
+
+                const formsCount =
+                    document.getElementById(
+                        "formsCount"
+                    );
+
+                const errorText =
+                    document.getElementById(
+                        "errorText"
+                    );
+
+
+                loadingBox.classList.remove(
+                    "hidden"
+                );
+
+                errorBox.classList.add(
+                    "hidden"
+                );
+
+                emptyBox.classList.add(
+                    "hidden"
+                );
+
+                container.innerHTML = "";
+
+                formsCount.innerText =
+                    "جاري التحميل...";
+
+
+                try {
+
+                    const querySnapshot =
+                        await getDocs(
+                            collection(
+                                db,
+                                "forms"
+                            )
+                        );
+
+
+                    loadingBox.classList.add(
+                        "hidden"
+                    );
+
+
+                    if (querySnapshot.empty) {
+
+                        emptyBox.classList.remove(
+                            "hidden"
+                        );
+
+                        formsCount.innerText =
+                            "0 نموذج";
+
+                        return;
+
+                    }
+
+
+                    let html = "";
+
+                    let count = 0;
+
+
+                    querySnapshot.forEach(
+                        docSnap => {
+
+                            const data =
+                                docSnap.data();
+
+                            const title =
+                                data.title ||
+                                "نموذج بدون اسم";
+
+
+                            /*
+                             * كل نموذج محفوظ من النظام الكبير
+                             * يحتوي على:
+                             * title
+                             * questions
+                             * allowEdit
+                             */
+
+                            const allowEdit =
+                                data.allowEdit !== false;
+
+
+                            html += `
+
+                                <a
+                                    href="student_fill.html?formId=${encodeURIComponent(docSnap.id)}"
+                                    class="form-card block bg-gradient-to-br from-blue-50 to-white border border-blue-100 hover:border-blue-300 rounded-2xl p-6 shadow-sm hover:shadow-lg"
+                                >
+
+                                    <div class="flex items-start gap-4">
+
+                                        <div class="shrink-0 w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl">
+                                            📝
+                                        </div>
+
+                                        <div class="min-w-0 flex-1">
+
+                                            <h3 class="font-bold text-lg text-gray-800 break-words">
+                                                ${escapeHTML(title)}
+                                            </h3>
+
+                                            <p class="text-gray-500 text-sm mt-2">
+                                                اضغط هنا لبدء تسجيل البيانات
+                                            </p>
+
+                                            <div class="mt-4 flex flex-wrap gap-2">
+
+                                                <span class="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                                    فتح النموذج
+                                                </span>
+
+                                                ${
+                                                    allowEdit
+                                                    ?
+                                                    `
+                                                        <span class="text-xs font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                                                            التعديل متاح
+                                                        </span>
+                                                    `
+                                                    :
+                                                    `
+                                                        <span class="text-xs font-bold bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                                                            تسجيل فقط
+                                                        </span>
+                                                    `
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="text-blue-500 text-xl">
+                                            ←
+                                        </div>
+
+                                    </div>
+
+                                </a>
+
+                            `;
+
+                            count++;
+
+                        }
+                    );
+
+
+                    container.innerHTML =
+                        html;
+
+
+                    formsCount.innerText =
+                        `${count} نموذج متاح`;
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Load Forms Error:",
+                        error
+                    );
+
+
+                    loadingBox.classList.add(
+                        "hidden"
+                    );
+
+                    errorBox.classList.remove(
+                        "hidden"
+                    );
+
+
+                    errorText.innerText =
+                        getFriendlyError(error);
+
+
+                    formsCount.innerText =
+                        "حدث خطأ";
+
+                }
+
+            };
+
+
+        /* =========================================================
+           رسائل الأخطاء
+           ========================================================= */
+
+        function getFriendlyError(error) {
+
+            if (!error) {
+
+                return "حدث خطأ غير معروف.";
+
+            }
+
+
+            if (
+                error.code ===
+                "permission-denied"
+            ) {
+
+                return "ليس لديك صلاحية قراءة النماذج. راجع قواعد Firebase.";
+
+            }
+
+
+            if (
+                error.code ===
+                "unavailable"
+            ) {
+
+                return "تعذر الاتصال بقاعدة البيانات. تأكد من الإنترنت ثم حاول مرة أخرى.";
+
+            }
+
+
+            return (
+                error.message ||
+                "تعذر تحميل النماذج."
+            );
+
+        }
+
+
+        /* =========================================================
+           التشغيل
+           ========================================================= */
+
         loadForms();
+
     </script>
+
 </body>
 </html>
