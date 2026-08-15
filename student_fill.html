@@ -83,10 +83,6 @@
                 rgba(37, 99, 235, .10);
         }
 
-        .question-card.hidden-question {
-            display: none !important;
-        }
-
         .success-card {
             animation: successShow .4s ease;
         }
@@ -158,6 +154,12 @@
             margin-top: 7px;
         }
 
+        .dependent-loading {
+
+            opacity: .65;
+            pointer-events: none;
+        }
+
         @media print {
 
             html,
@@ -212,9 +214,7 @@
 <div class="max-w-3xl mx-auto">
 
 
-    <!-- =====================================================
-         MAIN CARD
-    ====================================================== -->
+    <!-- MAIN CARD -->
 
     <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
 
@@ -562,9 +562,7 @@
 
 
 
-<!-- =========================================================
-     PRINT RECEIPT
-========================================================= -->
+<!-- PRINT RECEIPT -->
 
 <div
     id="printReceipt"
@@ -941,43 +939,20 @@ function escapeHTML(value) {
         value === null ||
         value === undefined
     ) {
-
         return "";
-
     }
 
     return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
 /* =========================================================
-   NORMALIZE VALUE
+   NORMALIZE
 ========================================================= */
 
 function normalizeValue(value) {
@@ -986,38 +961,59 @@ function normalizeValue(value) {
         value === null ||
         value === undefined
     ) {
-
         return "";
-
     }
 
-
-    if (
-        Array.isArray(value)
-    ) {
+    if (Array.isArray(value)) {
 
         return value
-            .map(
-                v => String(v)
-            )
+            .map(v => normalizeValue(v))
             .join("، ");
-
     }
 
-
-    return String(value).trim();
-
+    return String(value)
+        .trim();
 }
 
 
 /* =========================================================
-   OPTION HELPERS
-   مهم جداً:
-   الكود الأول يحفظ:
-   {
-       id: "...",
-       text: "..."
-   }
+   OPTION ID
+========================================================= */
+
+function getOptionId(option) {
+
+    if (
+        option === null ||
+        option === undefined
+    ) {
+        return "";
+    }
+
+    if (
+        typeof option === "object"
+    ) {
+
+        if (
+            option.id !== undefined &&
+            option.id !== null
+        ) {
+            return String(option.id).trim();
+        }
+
+        if (
+            option.value !== undefined &&
+            option.value !== null
+        ) {
+            return String(option.value).trim();
+        }
+    }
+
+    return "";
+}
+
+
+/* =========================================================
+   OPTION TEXT
 ========================================================= */
 
 function getOptionValue(option) {
@@ -1026,15 +1022,8 @@ function getOptionValue(option) {
         option === null ||
         option === undefined
     ) {
-
         return "";
-
     }
-
-
-    /*
-     * صيغة الكود الأول
-     */
 
     if (
         typeof option === "object"
@@ -1044,50 +1033,26 @@ function getOptionValue(option) {
             option.text !== undefined &&
             option.text !== null
         ) {
-
-            return String(
-                option.text
-            );
-
+            return String(option.text).trim();
         }
-
-
-        /*
-         * دعم البيانات القديمة
-         */
-
-        if (
-            option.value !== undefined &&
-            option.value !== null
-        ) {
-
-            return String(
-                option.value
-            );
-
-        }
-
 
         if (
             option.label !== undefined &&
             option.label !== null
         ) {
+            return String(option.label).trim();
+        }
 
-            return String(
-                option.label
-            );
-
+        if (
+            option.value !== undefined &&
+            option.value !== null
+        ) {
+            return String(option.value).trim();
         }
 
     }
 
-
-    /*
-     * إذا كانت String مباشرة
-     */
-
-    return String(option);
-
+    return String(option).trim();
 }
 
 
@@ -1095,6 +1060,186 @@ function getOptionLabel(option) {
 
     return getOptionValue(option);
 
+}
+
+
+/* =========================================================
+   OPTION MATCH
+   مهم جدًا للربط
+========================================================= */
+
+function optionMatchesReference(
+    option,
+    reference
+) {
+
+    if (
+        reference === null ||
+        reference === undefined
+    ) {
+        return false;
+    }
+
+    const ref =
+        normalizeValue(reference);
+
+    if (!ref) {
+        return false;
+    }
+
+    const optionId =
+        normalizeValue(
+            getOptionId(option)
+        );
+
+    const optionText =
+        normalizeValue(
+            getOptionValue(option)
+        );
+
+    return (
+        optionId === ref ||
+        optionText === ref
+    );
+}
+
+
+/* =========================================================
+   FIND OPTION
+========================================================= */
+
+function findOption(
+    question,
+    value
+) {
+
+    if (
+        !question ||
+        !Array.isArray(question.options)
+    ) {
+        return null;
+    }
+
+    return question.options.find(
+        option =>
+            optionMatchesReference(
+                option,
+                value
+            )
+    ) || null;
+}
+
+
+/* =========================================================
+   GET QUESTION VALUE
+========================================================= */
+
+function getQuestionValue(q) {
+
+    if (!q) {
+        return "";
+    }
+
+    if (
+        q.type === "radio"
+    ) {
+
+        const checked =
+            dynamicForm.querySelector(
+                `input[name="question_${CSS.escape(String(q.id))}"]:checked`
+            );
+
+        return checked
+            ? normalizeValue(checked.value)
+            : "";
+    }
+
+
+    if (
+        q.type === "checkbox"
+    ) {
+
+        const checked =
+            dynamicForm.querySelectorAll(
+                `input[data-question-id="${CSS.escape(String(q.id))}"]:checked`
+            );
+
+        return Array.from(checked)
+            .map(input =>
+                normalizeValue(input.value)
+            );
+    }
+
+
+    const element =
+        document.getElementById(
+            q.id
+        );
+
+    if (!element) {
+        return "";
+    }
+
+    return normalizeValue(
+        element.value
+    );
+}
+
+
+/* =========================================================
+   CLEAR QUESTION VALUE
+========================================================= */
+
+function clearQuestionValue(q) {
+
+    if (!q) {
+        return;
+    }
+
+    if (
+        q.type === "radio"
+    ) {
+
+        dynamicForm
+            .querySelectorAll(
+                `input[name="question_${CSS.escape(String(q.id))}"]`
+            )
+            .forEach(
+                radio => {
+                    radio.checked = false;
+                }
+            );
+
+        return;
+    }
+
+
+    if (
+        q.type === "checkbox"
+    ) {
+
+        dynamicForm
+            .querySelectorAll(
+                `input[data-question-id="${CSS.escape(String(q.id))}"]`
+            )
+            .forEach(
+                checkbox => {
+                    checkbox.checked = false;
+                }
+            );
+
+        return;
+    }
+
+
+    const element =
+        document.getElementById(
+            q.id
+        );
+
+    if (element) {
+        element.value = "";
+    }
 }
 
 
@@ -1113,13 +1258,9 @@ function showError(message) {
         "حدث خطأ غير معروف.";
 
     window.scrollTo({
-
         top: 0,
-
         behavior: "smooth"
-
     });
-
 }
 
 
@@ -1130,7 +1271,6 @@ function hideError() {
     );
 
     errorText.textContent = "";
-
 }
 
 
@@ -1168,7 +1308,6 @@ function setLoadingMessage(
         </p>
 
     `;
-
 }
 
 
@@ -1183,164 +1322,28 @@ function isQuestionVisible(q) {
             "div_" + q.id
         );
 
-
     if (!div) {
-
         return false;
-
     }
-
 
     return div.style.display !== "none";
-
-}
-
-
-/* =========================================================
-   GET QUESTION VALUE
-========================================================= */
-
-function getQuestionValue(q) {
-
-    const element =
-        document.getElementById(
-            q.id
-        );
-
-
-    /*
-     * Radio
-     */
-
-    if (
-        q.type === "radio"
-    ) {
-
-        const checked =
-            dynamicForm.querySelector(
-                `input[name="question_${CSS.escape(String(q.id))}"]:checked`
-            );
-
-
-        return checked
-            ?
-            normalizeValue(
-                checked.value
-            )
-            :
-            "";
-
-    }
-
-
-    /*
-     * Checkbox
-     */
-
-    if (
-        q.type === "checkbox"
-    ) {
-
-        const checked =
-            dynamicForm.querySelectorAll(
-                `input[data-question-id="${CSS.escape(String(q.id))}"]:checked`
-            );
-
-
-        return Array.from(
-            checked
-        ).map(
-            input =>
-                input.value
-        );
-
-    }
-
-
-    if (!element) {
-
-        return "";
-
-    }
-
-
-    return normalizeValue(
-        element.value
-    );
-
-}
-
-
-/* =========================================================
-   CLEAR QUESTION VALUE
-========================================================= */
-
-function clearQuestionValue(q) {
-
-    const element =
-        document.getElementById(
-            q.id
-        );
-
-
-    if (
-        q.type === "radio"
-    ) {
-
-        const radios =
-            dynamicForm.querySelectorAll(
-                `input[name="question_${CSS.escape(String(q.id))}"]`
-            );
-
-
-        radios.forEach(
-            radio => {
-
-                radio.checked = false;
-
-            }
-        );
-
-        return;
-
-    }
-
-
-    if (
-        q.type === "checkbox"
-    ) {
-
-        const checkboxes =
-            dynamicForm.querySelectorAll(
-                `input[data-question-id="${CSS.escape(String(q.id))}"]`
-            );
-
-
-        checkboxes.forEach(
-            checkbox => {
-
-                checkbox.checked = false;
-
-            }
-        );
-
-        return;
-
-    }
-
-
-    if (element) {
-
-        element.value = "";
-
-    }
-
 }
 
 
 /* =========================================================
    CONDITION
 ========================================================= */
+
+function hasCondition(q) {
+
+    return Boolean(
+        q &&
+        q.conditionId !== undefined &&
+        q.conditionId !== null &&
+        String(q.conditionId).trim() !== ""
+    );
+}
+
 
 function conditionMatches(
     currentValue,
@@ -1352,11 +1355,8 @@ function conditionMatches(
             conditionValue
         );
 
-
     if (
-        Array.isArray(
-            currentValue
-        )
+        Array.isArray(currentValue)
     ) {
 
         return currentValue.some(
@@ -1364,47 +1364,17 @@ function conditionMatches(
                 normalizeValue(value) ===
                 expected
         );
-
     }
 
-
     return (
-        normalizeValue(
-            currentValue
-        ) === expected
+        normalizeValue(currentValue) ===
+        expected
     );
-
-}
-
-
-function hasCondition(q) {
-
-    return Boolean(
-
-        q &&
-
-        q.conditionId !== undefined &&
-
-        q.conditionId !== null &&
-
-        String(
-            q.conditionId
-        ).trim() !== ""
-
-    );
-
 }
 
 
 /* =========================================================
    DEPENDENCY
-   من الكود الأول:
-   dependentOn: {
-       questionId,
-       mappings: {
-           "القاهرة": ["مدينة نصر", "المعادي"]
-       }
-   }
 ========================================================= */
 
 function hasDependency(q) {
@@ -1415,15 +1385,199 @@ function hasDependency(q) {
 
         q.dependentOn &&
 
-        q.dependentOn.questionId
+        q.dependentOn.questionId !==
+            undefined &&
+
+        q.dependentOn.questionId !==
+            null &&
+
+        String(
+            q.dependentOn.questionId
+        ).trim() !== ""
 
     );
-
 }
 
 
 /* =========================================================
-   APPLY DEPENDENT LIST
+   GET PARENT QUESTION
+========================================================= */
+
+function getParentQuestion(q) {
+
+    if (
+        !hasDependency(q)
+    ) {
+        return null;
+    }
+
+    const parentId =
+        String(
+            q.dependentOn.questionId
+        ).trim();
+
+    return questions.find(
+        item =>
+            String(item.id) ===
+            parentId
+    ) || null;
+}
+
+
+/* =========================================================
+   DEPENDENCY REFERENCES
+========================================================= */
+
+function getMappingReferences(
+    mappings,
+    parentValue,
+    parentQuestion
+) {
+
+    if (!mappings) {
+        return [];
+    }
+
+    const keys =
+        Object.keys(mappings);
+
+    if (!keys.length) {
+        return [];
+    }
+
+
+    /*
+     * البحث أولاً بالمفتاح كما هو
+     */
+
+    let foundKey =
+        keys.find(
+            key =>
+                normalizeValue(key) ===
+                normalizeValue(parentValue)
+        );
+
+
+    /*
+     * لو القيمة الموجودة في select
+     * هي ID بينما الـ mapping مكتوب بالنص
+     * أو العكس.
+     */
+
+    if (
+        !foundKey &&
+        parentQuestion
+    ) {
+
+        const parentOption =
+            findOption(
+                parentQuestion,
+                parentValue
+            );
+
+        if (parentOption) {
+
+            const parentId =
+                getOptionId(
+                    parentOption
+                );
+
+            const parentText =
+                getOptionValue(
+                    parentOption
+                );
+
+            foundKey =
+                keys.find(
+                    key => {
+
+                        const normalizedKey =
+                            normalizeValue(key);
+
+                        return (
+                            normalizedKey ===
+                            normalizeValue(parentId)
+                            ||
+                            normalizedKey ===
+                            normalizeValue(parentText)
+                        );
+
+                    }
+                );
+        }
+    }
+
+
+    if (!foundKey) {
+        return [];
+    }
+
+
+    const result =
+        mappings[foundKey];
+
+
+    if (
+        Array.isArray(result)
+    ) {
+        return result;
+    }
+
+
+    if (
+        result &&
+        typeof result === "object"
+    ) {
+
+        return Object.values(
+            result
+        );
+    }
+
+
+    if (
+        result !== undefined &&
+        result !== null
+    ) {
+
+        return [result];
+    }
+
+
+    return [];
+}
+
+
+/* =========================================================
+   CHECK OPTION ALLOWED
+========================================================= */
+
+function isOptionAllowed(
+    option,
+    allowedReferences
+) {
+
+    if (
+        !Array.isArray(
+            allowedReferences
+        )
+    ) {
+        return false;
+    }
+
+    return allowedReferences.some(
+        reference =>
+            optionMatchesReference(
+                option,
+                reference
+            )
+    );
+}
+
+
+/* =========================================================
+   UPDATE DEPENDENT QUESTION
+   الجزء المهم الذي تم إصلاحه
 ========================================================= */
 
 function updateDependentQuestion(q) {
@@ -1431,9 +1585,7 @@ function updateDependentQuestion(q) {
     if (
         !hasDependency(q)
     ) {
-
-        return;
-
+        return false;
     }
 
 
@@ -1442,36 +1594,29 @@ function updateDependentQuestion(q) {
             q.id
         );
 
-
     if (
         !select
     ) {
-
-        return;
-
+        return false;
     }
 
 
-    const dependency =
-        q.dependentOn;
-
-
     const parent =
-        questions.find(
-            item =>
-                String(item.id) ===
-                String(
-                    dependency.questionId
-                )
-        );
-
+        getParentQuestion(q);
 
     if (
         !parent
     ) {
 
-        return;
+        select.innerHTML = `
+            <option value="">
+                اختر...
+            </option>
+        `;
 
+        select.value = "";
+
+        return false;
     }
 
 
@@ -1481,15 +1626,20 @@ function updateDependentQuestion(q) {
         );
 
 
-    const mappings =
-        dependency.mappings || {};
-
-
     /*
-     * إذا لم يحدد الطالب الأب
+     * لو الأب فاضي
      */
 
-    if (!parentValue) {
+    if (
+        !parentValue ||
+        (
+            Array.isArray(parentValue) &&
+            parentValue.length === 0
+        )
+    ) {
+
+        const oldValue =
+            select.value;
 
         select.innerHTML = `
 
@@ -1501,36 +1651,24 @@ function updateDependentQuestion(q) {
 
         select.value = "";
 
-        return;
-
+        return oldValue !== "";
     }
 
 
-    /*
-     * العثور على الخيارات التابعة
-     */
-
-    let allowedOptions =
-        mappings[parentValue];
+    const mappings =
+        q.dependentOn.mappings || {};
 
 
-    /*
-     * دعم اختلاف بسيط في البيانات
-     */
-
-    if (
-        !Array.isArray(
-            allowedOptions
-        )
-    ) {
-
-        allowedOptions = [];
-
-    }
+    const allowedReferences =
+        getMappingReferences(
+            mappings,
+            parentValue,
+            parent
+        );
 
 
     /*
-     * إنشاء القائمة
+     * بناء القائمة
      */
 
     let html = `
@@ -1542,47 +1680,66 @@ function updateDependentQuestion(q) {
     `;
 
 
-    /*
-     * نأخذ خيارات السؤال نفسه
-     * من الكود الأول
-     */
-
-    (q.options || []).forEach(
-        option => {
-
-            const value =
-                getOptionValue(
-                    option
-                );
+    const oldValue =
+        select.value;
 
 
-            /*
-             * يظهر الخيار إذا كان
-             * مربوطاً بهذا الأب.
-             */
+    let optionStillExists =
+        false;
 
-            if (
-                allowedOptions.includes(
-                    value
-                )
-            ) {
+
+    if (
+        Array.isArray(q.options)
+    ) {
+
+        q.options.forEach(
+            option => {
+
+                if (
+                    !isOptionAllowed(
+                        option,
+                        allowedReferences
+                    )
+                ) {
+                    return;
+                }
+
+
+                const value =
+                    getOptionValue(
+                        option
+                    );
+
+                const label =
+                    getOptionLabel(
+                        option
+                    );
+
+
+                if (
+                    normalizeValue(value) ===
+                    normalizeValue(oldValue)
+                ) {
+
+                    optionStillExists =
+                        true;
+                }
+
 
                 html += `
 
                     <option
                         value="${escapeHTML(value)}"
                     >
-                        ${escapeHTML(
-                            getOptionLabel(option)
-                        )}
+                        ${escapeHTML(label)}
                     </option>
 
                 `;
 
             }
+        );
 
-        }
-    );
+    }
 
 
     select.innerHTML =
@@ -1590,52 +1747,50 @@ function updateDependentQuestion(q) {
 
 
     /*
-     * القيمة القديمة لو ما زالت موجودة
+     * الاحتفاظ بالقيمة فقط لو ما زالت
+     * موجودة في القائمة الجديدة
      */
 
-    const currentValue =
-        select.dataset.currentValue || "";
-
-
     if (
-        currentValue &&
-        [...select.options].some(
-            option =>
-                option.value ===
-                currentValue
-        )
+        oldValue &&
+        optionStillExists
     ) {
 
         select.value =
-            currentValue;
+            oldValue;
 
     }
     else {
 
-        select.value = "";
+        select.value =
+            "";
 
     }
 
 
-    delete select.dataset.currentValue;
-
+    return true;
 }
 
 
 /* =========================================================
-   UPDATE ALL DEPENDENT LISTS
+   UPDATE ALL DEPENDENCIES
 ========================================================= */
 
 function refreshAllDependencies() {
 
     /*
-     * أكثر من دورة حتى لو عندنا:
+     * نكرر عدة مرات لأن ممكن يكون:
      *
      * محافظة
-     * ↓
+     *    ↓
      * مركز
-     * ↓
+     *    ↓
      * مدرسة
+     *    ↓
+     * فصل
+     *
+     * وبالتالي نتيجة السؤال الأول
+     * تؤثر على الثاني والثاني على الثالث.
      */
 
     for (
@@ -1644,6 +1799,9 @@ function refreshAllDependencies() {
         pass++
     ) {
 
+        let changed = false;
+
+
         questions.forEach(
             q => {
 
@@ -1651,22 +1809,31 @@ function refreshAllDependencies() {
                     hasDependency(q)
                 ) {
 
-                    updateDependentQuestion(
-                        q
-                    );
+                    const result =
+                        updateDependentQuestion(
+                            q
+                        );
+
+                    if (result) {
+                        changed = true;
+                    }
 
                 }
 
             }
         );
 
-    }
 
+        if (!changed) {
+            break;
+        }
+
+    }
 }
 
 
 /* =========================================================
-   UPDATE QUESTION VISIBILITY
+   UPDATE VISIBILITY
 ========================================================= */
 
 function updateQuestionVisibility(q) {
@@ -1676,17 +1843,10 @@ function updateQuestionVisibility(q) {
             "div_" + q.id
         );
 
-
     if (!targetDiv) {
-
         return;
-
     }
 
-
-    /*
-     * شرط الظهور
-     */
 
     if (
         hasCondition(q)
@@ -1708,7 +1868,6 @@ function updateQuestionVisibility(q) {
             clearQuestionValue(q);
 
             return;
-
         }
 
 
@@ -1727,18 +1886,13 @@ function updateQuestionVisibility(q) {
 
         targetDiv.style.display =
             shouldShow
-            ?
-            "block"
-            :
-            "none";
+                ? "block"
+                : "none";
 
 
-        if (
-            !shouldShow
-        ) {
+        if (!shouldShow) {
 
             clearQuestionValue(q);
-
         }
 
     }
@@ -1748,19 +1902,22 @@ function updateQuestionVisibility(q) {
             "block";
 
     }
-
 }
 
 
 /* =========================================================
-   REFRESH CONDITIONS
+   REFRESH EVERYTHING
 ========================================================= */
 
 function refreshAllConditions() {
 
+    /*
+     * أولاً شروط الظهور
+     */
+
     for (
         let pass = 0;
-        pass < 20;
+        pass < 10;
         pass++
     ) {
 
@@ -1777,11 +1934,15 @@ function refreshAllConditions() {
     }
 
 
+    /*
+     * ثانياً القوائم التابعة
+     */
+
     refreshAllDependencies();
 
 
     /*
-     * Required
+     * ثالثاً required
      */
 
     questions.forEach(
@@ -1800,7 +1961,7 @@ function refreshAllConditions() {
 
 
 /* =========================================================
-   SET REQUIRED
+   REQUIRED
 ========================================================= */
 
 function setRequired(
@@ -1899,13 +2060,9 @@ function getInputType(type) {
 
     ];
 
-
     return allowed.includes(type)
-        ?
-        type
-        :
-        "text";
-
+        ? type
+        : "text";
 }
 
 
@@ -2012,12 +2169,8 @@ function renderQuestion(
         type === "select"
     ) {
 
-        /*
-         * إذا كانت قائمة تابعة
-         * نعرض رسالة مؤقتة حتى يختار الأب.
-         */
-
         let initialOptions = "";
+
 
         if (
             hasDependency(q)
@@ -2043,15 +2196,8 @@ function renderQuestion(
             `;
 
 
-            /*
-             * مهم:
-             * نقرأ option.text من الكود الأول
-             */
-
             if (
-                Array.isArray(
-                    q.options
-                )
+                Array.isArray(q.options)
             ) {
 
                 q.options.forEach(
@@ -2061,7 +2207,6 @@ function renderQuestion(
                             getOptionValue(
                                 option
                             );
-
 
                         const label =
                             getOptionLabel(
@@ -2179,7 +2324,6 @@ function renderQuestion(
                             option
                         );
 
-
                     const label =
                         getOptionLabel(
                             option
@@ -2251,7 +2395,6 @@ function renderQuestion(
                             option
                         );
 
-
                     const label =
                         getOptionLabel(
                             option
@@ -2308,10 +2451,6 @@ function renderQuestion(
 
         let extraAttributes = "";
 
-
-        /*
-         * الرقم القومي
-         */
 
         if (
             title.includes("القومي")
@@ -2391,7 +2530,6 @@ function renderQuestion(
 
 
     return html;
-
 }
 
 
@@ -2467,7 +2605,6 @@ function renderForm() {
 
 
     attachQuestionEvents();
-
 }
 
 
@@ -2496,11 +2633,6 @@ function attachQuestionEvents() {
                             q.id
                         );
 
-                        /*
-                         * لو السؤال الأب
-                         * نحدث التابعين فوراً
-                         */
-
                         refreshAllConditions();
 
                     }
@@ -2514,6 +2646,11 @@ function attachQuestionEvents() {
                         clearFieldError(
                             q.id
                         );
+
+                        /*
+                         * هنا يتم تحديث القوائم التابعة
+                         * فور تغيير الكومبو
+                         */
 
                         refreshAllConditions();
 
@@ -2557,7 +2694,6 @@ function attachQuestionEvents() {
 
         }
     );
-
 }
 
 
@@ -2601,7 +2737,6 @@ function showFieldError(
         );
 
     }
-
 }
 
 
@@ -2638,7 +2773,6 @@ function clearFieldError(qId) {
         );
 
     }
-
 }
 
 
@@ -2653,7 +2787,6 @@ function clearAllFieldErrors() {
 
         }
     );
-
 }
 
 
@@ -2680,10 +2813,6 @@ function validateQuestion(q) {
     const value =
         getQuestionValue(q);
 
-
-    /*
-     * Required
-     */
 
     if (
         q.required
@@ -2712,10 +2841,6 @@ function validateQuestion(q) {
     }
 
 
-    /*
-     * الرقم القومي
-     */
-
     if (
         q.title &&
         q.title.includes("القومي") &&
@@ -2740,10 +2865,6 @@ function validateQuestion(q) {
 
     }
 
-
-    /*
-     * EMAIL
-     */
 
     if (
         q.type === "email" &&
@@ -2773,10 +2894,6 @@ function validateQuestion(q) {
     }
 
 
-    /*
-     * MIN LENGTH
-     */
-
     if (
         q.minLength &&
         value
@@ -2799,10 +2916,6 @@ function validateQuestion(q) {
 
     }
 
-
-    /*
-     * MAX LENGTH
-     */
 
     if (
         q.maxLength &&
@@ -2827,8 +2940,68 @@ function validateQuestion(q) {
     }
 
 
-    return true;
+    /*
+     * التأكد من أن اختيار القائمة التابعة
+     * ما زال مسموحًا
+     */
 
+    if (
+        q.type === "select" &&
+        hasDependency(q) &&
+        value
+    ) {
+
+        const parent =
+            getParentQuestion(q);
+
+
+        if (parent) {
+
+            const parentValue =
+                getQuestionValue(
+                    parent
+                );
+
+
+            const allowedReferences =
+                getMappingReferences(
+                    q.dependentOn.mappings || {},
+                    parentValue,
+                    parent
+                );
+
+
+            const selectedOption =
+                findOption(
+                    q,
+                    value
+                );
+
+
+            if (
+                !selectedOption ||
+                !isOptionAllowed(
+                    selectedOption,
+                    allowedReferences
+                )
+            ) {
+
+                showFieldError(
+                    q,
+                    "يرجى اختيار قيمة صحيحة من القائمة الحالية."
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+    }
+
+
+    return true;
 }
 
 
@@ -2844,10 +3017,6 @@ function collectAnswers() {
     for (
         const q of questions
     ) {
-
-        /*
-         * السؤال المخفي
-         */
 
         if (
             !isQuestionVisible(q)
@@ -2868,7 +3037,6 @@ function collectAnswers() {
 
 
     return answers;
-
 }
 
 
@@ -2945,11 +3113,9 @@ async function checkDuplicate(
             error
         );
 
-
         throw error;
 
     }
-
 }
 
 
@@ -3032,7 +3198,6 @@ async function generateUniqueCode() {
     throw new Error(
         "تعذر إنشاء كود مميز جديد. حاول مرة أخرى."
     );
-
 }
 
 
@@ -3069,7 +3234,6 @@ async function getNextSerialNumber() {
         countSnap.size +
         1
     );
-
 }
 
 
@@ -3094,9 +3258,7 @@ function setSubmitLoading(
 
 
     if (!button) {
-
         return;
-
     }
 
 
@@ -3123,1156 +3285,4 @@ function setSubmitLoading(
                     gap-2
                 ">
 
-                    <span class="
-                        w-5
-                        h-5
-                        border-2
-                        border-white/40
-                        border-t-white
-                        rounded-full
-                        animate-spin
-                    "></span>
-
-                    جاري حفظ البيانات...
-
-                </span>
-
-            `;
-
-        }
-
-    }
-    else {
-
-        button.classList.remove(
-            "opacity-70",
-            "cursor-not-allowed"
-        );
-
-
-        if (buttonText) {
-
-            buttonText.innerText =
-                "تسليم البيانات";
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   FRIENDLY ERROR
-========================================================= */
-
-function getFriendlyError(error) {
-
-    console.error(error);
-
-
-    if (!error) {
-
-        return "حدث خطأ غير معروف.";
-
-    }
-
-
-    const code =
-        error.code ||
-        "";
-
-
-    if (
-        code ===
-        "permission-denied"
-    ) {
-
-        return `
-            ليس لديك صلاحية لإرسال البيانات.
-            يرجى مراجعة قواعد Firebase Firestore.
-        `;
-
-    }
-
-
-    if (
-        code ===
-        "unavailable"
-    ) {
-
-        return `
-            لا يمكن الاتصال بقاعدة البيانات حاليًا.
-            تأكد من اتصال الإنترنت ثم حاول مرة أخرى.
-        `;
-
-    }
-
-
-    if (
-        code ===
-        "failed-precondition"
-    ) {
-
-        return `
-            توجد مشكلة في إعداد قاعدة بيانات Firebase
-            أو في استعلام Firestore.
-        `;
-
-    }
-
-
-    if (
-        code ===
-        "resource-exhausted"
-    ) {
-
-        return `
-            تم تجاوز الحد المسموح لطلبات قاعدة البيانات.
-            حاول مرة أخرى بعد قليل.
-        `;
-
-    }
-
-
-    if (
-        code ===
-        "network-request-failed"
-    ) {
-
-        return `
-            حدثت مشكلة في الاتصال بالإنترنت.
-        `;
-
-    }
-
-
-    if (
-        code ===
-        "invalid-argument"
-    ) {
-
-        return `
-            توجد بيانات غير صحيحة تم إرسالها إلى قاعدة البيانات.
-        `;
-
-    }
-
-
-    return (
-        error.message ||
-        "حدث خطأ أثناء حفظ البيانات. حاول مرة أخرى."
-    );
-
-}
-
-
-/* =========================================================
-   CUSTOM VALIDATION ERROR
-========================================================= */
-
-class SubmissionValidationError
-    extends Error {
-
-    constructor() {
-
-        super(
-            "Submission validation failed"
-        );
-
-        this.name =
-            "SubmissionValidationError";
-
-    }
-
-}
-
-
-/* =========================================================
-   SCROLL
-========================================================= */
-
-function scrollToQuestion(qId) {
-
-    const div =
-        document.getElementById(
-            "div_" + qId
-        );
-
-
-    if (!div) {
-
-        return;
-
-    }
-
-
-    div.scrollIntoView({
-
-        behavior: "smooth",
-
-        block: "center"
-
-    });
-
-
-    setTimeout(
-        () => {
-
-            const input =
-                document.getElementById(
-                    qId
-                );
-
-
-            if (
-                input &&
-                typeof input.focus ===
-                "function"
-            ) {
-
-                input.focus();
-
-            }
-
-        },
-        400
-    );
-
-}
-
-
-/* =========================================================
-   SUBMIT
-========================================================= */
-
-async function submitForm(event) {
-
-    event.preventDefault();
-
-
-    if (
-        isSubmitting
-    ) {
-
-        return;
-
-    }
-
-
-    hideError();
-
-    clearAllFieldErrors();
-
-
-    refreshAllConditions();
-
-
-    let valid =
-        true;
-
-
-    let firstInvalidQuestion =
-        null;
-
-
-    for (
-        const q of questions
-    ) {
-
-        const questionValid =
-            validateQuestion(q);
-
-
-        if (
-            !questionValid
-        ) {
-
-            valid =
-                false;
-
-
-            if (
-                !firstInvalidQuestion
-            ) {
-
-                firstInvalidQuestion =
-                    q;
-
-            }
-
-        }
-
-    }
-
-
-    if (
-        !valid
-    ) {
-
-        if (
-            firstInvalidQuestion
-        ) {
-
-            scrollToQuestion(
-                firstInvalidQuestion.id
-            );
-
-        }
-
-
-        return;
-
-    }
-
-
-    isSubmitting =
-        true;
-
-
-    setSubmitLoading(
-        true
-    );
-
-
-    try {
-
-        /*
-         * الإجابات
-         */
-
-        const answers =
-            collectAnswers();
-
-
-        /*
-         * منع التكرار
-         */
-
-        for (
-            const q of questions
-        ) {
-
-            if (
-                !isQuestionVisible(q)
-            ) {
-
-                continue;
-
-            }
-
-
-            if (
-                !q.unique
-            ) {
-
-                continue;
-
-            }
-
-
-            const value =
-                answers[q.id];
-
-
-            if (
-                !value
-            ) {
-
-                continue;
-
-            }
-
-
-            const duplicate =
-                await checkDuplicate(
-                    q,
-                    value
-                );
-
-
-            if (
-                duplicate
-            ) {
-
-                showFieldError(
-                    q,
-                    `البيانات المدخلة في "${q.title}" مسجلة مسبقًا، ولا يسمح بالتكرار.`
-                );
-
-
-                scrollToQuestion(
-                    q.id
-                );
-
-
-                throw new SubmissionValidationError();
-
-            }
-
-        }
-
-
-        /*
-         * Serial
-         */
-
-        const serialNumber =
-            await getNextSerialNumber();
-
-
-        /*
-         * Unique Code
-         */
-
-        const uniqueId =
-            await generateUniqueCode();
-
-
-        /*
-         * SAVE
-         */
-
-        await addDoc(
-
-            collection(
-                db,
-                "submissions"
-            ),
-
-            {
-
-                formId:
-                    formId,
-
-                serialNumber:
-                    serialNumber,
-
-                uniqueId:
-                    uniqueId,
-
-                answers:
-                    answers,
-
-                timestamp:
-                    serverTimestamp(),
-
-                createdAt:
-                    new Date().toISOString()
-
-            }
-
-        );
-
-
-        submittedAnswers =
-            answers;
-
-
-        submittedSerial =
-            serialNumber;
-
-
-        submittedUniqueId =
-            uniqueId;
-
-
-        prepareReceipt(
-
-            answers,
-
-            serialNumber,
-
-            uniqueId
-
-        );
-
-
-        dynamicForm.classList.add(
-            "hidden"
-        );
-
-
-        successMessage.classList.remove(
-            "hidden"
-        );
-
-
-        document
-            .getElementById(
-                "serialNumSpan"
-            )
-            .innerText =
-            serialNumber;
-
-
-        document
-            .getElementById(
-                "uniqueIdSpan"
-            )
-            .innerText =
-            uniqueId;
-
-
-        window.scrollTo({
-
-            top: 0,
-
-            behavior: "smooth"
-
-        });
-
-
-    }
-    catch(error) {
-
-        if (
-            error instanceof
-            SubmissionValidationError
-        ) {
-
-            setSubmitLoading(
-                false
-            );
-
-            isSubmitting =
-                false;
-
-            return;
-
-        }
-
-
-        console.error(
-            "Submit Error:",
-            error
-        );
-
-
-        showError(
-            getFriendlyError(
-                error
-            )
-        );
-
-
-        setSubmitLoading(
-            false
-        );
-
-
-        isSubmitting =
-            false;
-
-    }
-
-}
-
-
-/* =========================================================
-   RECEIPT
-========================================================= */
-
-function prepareReceipt(
-    answers,
-    serialNumber,
-    uniqueId
-) {
-
-    const receiptTitle =
-        formDataLoaded?.title
-            ?
-            `إيصال - ${formDataLoaded.title}`
-            :
-            "إيصال تسجيل البيانات";
-
-
-    document
-        .getElementById(
-            "receiptTitle"
-        )
-        .innerText =
-        receiptTitle;
-
-
-    document
-        .getElementById(
-            "receiptSerial"
-        )
-        .innerText =
-        serialNumber;
-
-
-    document
-        .getElementById(
-            "receiptUnique"
-        )
-        .innerText =
-        uniqueId;
-
-
-    const now =
-        new Date();
-
-
-    document
-        .getElementById(
-            "receiptDate"
-        )
-        .innerText =
-        now.toLocaleString(
-            "ar-EG",
-            {
-                dateStyle:
-                    "full",
-
-                timeStyle:
-                    "short"
-            }
-        );
-
-
-    let rows = "";
-
-
-    questions.forEach(
-        q => {
-
-            if (
-                !isQuestionVisible(q)
-            ) {
-
-                return;
-
-            }
-
-
-            const value =
-                answers[q.id];
-
-
-            if (
-                value === undefined ||
-                value === null ||
-                value === "" ||
-                (
-                    Array.isArray(value) &&
-                    value.length === 0
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            const printableValue =
-                Array.isArray(value)
-                    ?
-                    value.join("، ")
-                    :
-                    String(value);
-
-
-            rows += `
-
-                <tr>
-
-                    <td
-                        style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                            font-weight:bold;
-                        "
-                    >
-                        ${escapeHTML(q.title)}
-                    </td>
-
-
-                    <td
-                        style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                            word-break:break-word;
-                        "
-                    >
-                        ${escapeHTML(printableValue)}
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-    );
-
-
-    document
-        .getElementById(
-            "receiptAnswers"
-        )
-        .innerHTML =
-
-        rows ||
-
-        `
-
-            <tr>
-
-                <td
-                    colspan="2"
-                    style="
-                        border:1px solid #9ca3af;
-                        padding:15px;
-                        text-align:center;
-                    "
-                >
-                    لا توجد بيانات إضافية.
-                </td>
-
-            </tr>
-
-        `;
-
-}
-
-
-/* =========================================================
-   STUDENT NAME
-========================================================= */
-
-function getPrintableStudentName() {
-
-    const nameQuestion =
-        questions.find(
-            q => {
-
-                const title =
-                    String(
-                        q.title || ""
-                    );
-
-
-                return (
-
-                    title.includes(
-                        "اسم الطالب"
-                    )
-
-                    ||
-
-                    title.includes(
-                        "الاسم"
-                    )
-
-                    ||
-
-                    title.includes(
-                        "اسم"
-                    )
-
-                );
-
-            }
-        );
-
-
-    if (
-        nameQuestion
-    ) {
-
-        const value =
-            submittedAnswers[
-                nameQuestion.id
-            ];
-
-
-        if (
-            value &&
-            !Array.isArray(value)
-        ) {
-
-            return String(
-                value
-            ).trim();
-
-        }
-
-    }
-
-
-    return "";
-
-}
-
-
-/* =========================================================
-   PRINT
-========================================================= */
-
-function printReceipt() {
-
-    if (
-        !submittedUniqueId ||
-        submittedSerial === null ||
-        submittedSerial === undefined
-    ) {
-
-        alert(
-            "لا توجد بيانات مسجلة للطباعة."
-        );
-
-        return;
-
-    }
-
-
-    prepareReceipt(
-
-        submittedAnswers,
-
-        submittedSerial,
-
-        submittedUniqueId
-
-    );
-
-
-    const oldTitle =
-        document.title;
-
-
-    const studentName =
-        getPrintableStudentName();
-
-
-    document.title =
-        studentName
-            ?
-            `إيصال - ${studentName}`
-            :
-            `إيصال - ${submittedUniqueId}`;
-
-
-    setTimeout(
-        () => {
-
-            window.print();
-
-
-            setTimeout(
-                () => {
-
-                    document.title =
-                        oldTitle;
-
-                },
-                500
-            );
-
-        },
-        250
-    );
-
-}
-
-
-/* =========================================================
-   LOAD FORM
-========================================================= */
-
-async function loadForm() {
-
-    try {
-
-        if (
-            !formId
-        ) {
-
-            setLoadingMessage(
-
-                "⚠️",
-
-                "رابط الفورم غير صحيح",
-
-                "لم يتم تحديد رقم الفورم في الرابط.",
-
-                "red"
-
-            );
-
-            return;
-
-        }
-
-
-        const formDoc =
-            await getDoc(
-
-                doc(
-                    db,
-                    "forms",
-                    formId
-                )
-
-            );
-
-
-        if (
-            !formDoc.exists()
-        ) {
-
-            setLoadingMessage(
-
-                "❌",
-
-                "الفورم غير موجود",
-
-                "قد يكون الفورم قد تم حذفه أو أن الرابط غير صحيح.",
-
-                "red"
-
-            );
-
-            return;
-
-        }
-
-
-        formDataLoaded =
-            formDoc.data();
-
-
-        const title =
-            formDataLoaded.title ||
-            formDataLoaded.name ||
-            "نموذج تسجيل";
-
-
-        document
-            .getElementById(
-                "formTitle"
-            )
-            .innerText =
-            title;
-
-
-        /*
-         * تحميل الأسئلة
-         */
-
-        questions =
-            Array.isArray(
-                formDataLoaded.questions
-            )
-            ?
-            formDataLoaded.questions
-            :
-            [];
-
-
-        /*
-         * تنظيف البيانات
-         * مع الحفاظ على نفس بنية
-         * الكود الأول
-         */
-
-        questions =
-            questions.map(
-                (q, index) => {
-
-                    const cleanQuestion = {
-
-                        ...q,
-
-                        id:
-                            String(
-                                q.id ??
-                                `q_${index + 1}`
-                            ),
-
-                        title:
-                            String(
-                                q.title ??
-                                q.label ??
-                                `السؤال ${index + 1}`
-                            ),
-
-                        type:
-                            String(
-                                q.type ??
-                                "text"
-                            ).toLowerCase(),
-
-                        required:
-                            Boolean(
-                                q.required
-                            ),
-
-                        unique:
-                            Boolean(
-                                q.unique
-                            ),
-
-                        conditionId:
-                            q.conditionId || "",
-
-                        conditionValue:
-                            q.conditionValue || "",
-
-                        options:
-                            Array.isArray(
-                                q.options
-                            )
-                            ?
-                            q.options
-                            :
-                            []
-
-                    };
-
-
-                    /*
-                     * الحفاظ على dependentOn
-                     */
-
-                    if (
-                        q.dependentOn
-                    ) {
-
-                        cleanQuestion.dependentOn = {
-
-                            questionId:
-                                String(
-                                    q.dependentOn.questionId ||
-                                    ""
-                                ),
-
-                            mappings:
-                                q.dependentOn.mappings ||
-                                {}
-
-                        };
-
-                    }
-
-
-                    return cleanQuestion;
-
-                }
-            );
-
-
-        if (
-            questions.length === 0
-        ) {
-
-            setLoadingMessage(
-
-                "⚠️",
-
-                "الفورم فارغ",
-
-                "لا توجد أسئلة متاحة في هذا الفورم.",
-
-                "yellow"
-
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * رسم الفورم
-         */
-
-        renderForm();
-
-
-        /*
-         * أول تحديث
-         */
-
-        refreshAllConditions();
-
-        refreshAllDependencies();
-
-    }
-    catch(error) {
-
-        console.error(
-            "Load Form Error:",
-            error
-        );
-
-
-        setLoadingMessage(
-
-            "❌",
-
-            "تعذر تحميل الفورم",
-
-            getFriendlyError(
-                error
-            ),
-
-            "red"
-
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-document
-    .getElementById(
-        "printButton"
-    )
-    .addEventListener(
-        "click",
-        printReceipt
-    );
-
-
-document
-    .getElementById(
-        "backButton"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            window.location.href =
-                "index.html";
-
-        }
-    );
-
-
-/* =========================================================
-   SUBMIT EVENT
-========================================================= */
-
-dynamicForm.addEventListener(
-    "submit",
-    submitForm
-);
-
-
-/* =========================================================
-   START
-========================================================= */
-
-loadForm();
-
-</script>
-
-</body>
-</html>
+                    <span class
