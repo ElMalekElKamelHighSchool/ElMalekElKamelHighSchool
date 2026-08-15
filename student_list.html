@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>بوابة الطلاب</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-10 font-sans">
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md text-center">
+        <h1 class="text-3xl font-bold mb-6 text-blue-600">النماذج والاستبيانات المتاحة</h1>
+        <div id="formsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        
+        <div class="mt-10 p-4 bg-yellow-50 border border-yellow-200 rounded">
+            <h3 class="font-bold">هل لديك كود تعديل؟</h3>
+            <a href="student_edit.html" class="text-blue-600 underline">اضغط هنا لتعديل بياناتك السابقة</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = { /* ضع الكونفيج هنا */ 
+            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4", authDomain: "hazoma-60ed2.firebaseapp.com", projectId: "hazoma-60ed2", storageBucket: "hazoma-60ed2.firebasestorage.app", messagingSenderId: "962438384604", appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        };
+        const db = getFirestore(initializeApp(firebaseConfig));
+
+        async function loadForms() {
+            const querySnapshot = await getDocs(collection(db, "forms"));
+            let html = '';
+            querySnapshot.forEach((doc) => {
+                html += `<a href="student_fill.html?formId=${doc.id}" class="block p-6 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg shadow transition">
+                    <h2 class="text-xl font-bold">${doc.data().title}</h2>
+                    <p class="text-sm text-gray-600 mt-2">اضغط هنا للبدء بالتسجيل</p>
+                </a>`;
+            });
+            document.getElementById('formsContainer').innerHTML = html;
+        }
+        loadForms();
+    </script>
+</body>
+</html>
