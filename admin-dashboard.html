@@ -13,7 +13,10 @@
             <div class="w-3 h-3 bg-yellow-500 rounded-full animate-ping"></div>
             <h1 class="text-xl font-black text-yellow-500 tracking-wider">لوحة تحكم المستشار (ADMIN HUB)</h1>
         </div>
-        <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2 rounded-xl transition shadow-md">تسجيل الخروج</button>
+        <div class="flex items-center gap-3">
+            <a href="admin_users.html" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition shadow-md">إضافة مستخدم</a>
+            <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-md">تسجيل الخروج</button>
+        </div>
     </nav>
 
     <!-- المحتوى الرئيسي -->
@@ -52,19 +55,31 @@
                 <p class="text-slate-400 text-sm">رفع نتائج الامتحانات ودرجات الطلاب الخاصة بالمدرسة.</p>
             </a>
 
-            <!-- كارد 5: إعدادات المنصة -->
-            <div class="bg-slate-800/50 border border-slate-700/50 p-8 rounded-3xl text-center opacity-60 flex flex-col items-center justify-center cursor-not-allowed">
-                <div class="w-16 h-16 bg-slate-700/50 rounded-2xl flex items-center justify-center mb-4 text-slate-400 text-2xl font-bold">⚙️</div>
-                <h3 class="text-xl font-bold text-slate-300 mb-2">إعدادات المنصة</h3>
-                <p class="text-slate-500 text-sm">قريباً - إعدادات عامة للنظام.</p>
-            </div>
+            <!-- كارد 5: إدارة المستخدمين -->
+            <a href="admin_users.html" class="bg-slate-800/90 border border-slate-700 hover:border-yellow-500 p-8 rounded-3xl text-center hover:scale-105 transition-all duration-300 shadow-2xl group flex flex-col items-center justify-center">
+                <div class="w-16 h-16 bg-teal-500/10 group-hover:bg-teal-500/20 rounded-2xl flex items-center justify-center mb-4 text-teal-400 text-2xl font-bold">👤</div>
+                <h3 class="text-xl font-bold text-white mb-2">إدارة المستخدمين</h3>
+                <p class="text-slate-400 text-sm">إنشاء حسابات إدارية جديدة للوصول للتحكم.</p>
+            </a>
         </div>
     </main>
 
-    <!-- سكريبت المصادقة -->
+    <!-- سكريبت المصادقة المباشر -->
     <script type="module">
-        import { auth } from './config.js';
-        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+            authDomain: "hazoma-60ed2.firebaseapp.com",
+            projectId: "hazoma-60ed2",
+            storageBucket: "hazoma-60ed2.firebasestorage.app",
+            messagingSenderId: "962438384604",
+            appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
         onAuthStateChanged(auth, (user) => {
             if (!user) { 
