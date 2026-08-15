@@ -56,7 +56,7 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = 'admin_hub.html'; // اسم صفحة لوحة التحكم الخاصة بك
+                window.location.href = 'admin-dashboard.html'; // اسم صفحة لوحة التحكم الخاصة بك
             } catch (error) {
                 errorDiv.innerText = "خطأ في البريد الإلكتروني أو كلمة المرور!";
                 errorDiv.classList.remove('hidden');
