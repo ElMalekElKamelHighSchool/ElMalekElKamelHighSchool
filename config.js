@@ -3,13 +3,12 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  // ضَع بيانات مشروعك هنا (hazoma-60ed2)
-  apiKey: "YOUR_API_KEY",
-  authDomain: "hazoma-60ed2.firebaseapp.com",
-  projectId: "hazoma-60ed2",
-  storageBucket: "hazoma-60ed2.appspot.com",
-  messagingSenderId: "YOUR_ID",
-  appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+    authDomain: "hazoma-60ed2.firebaseapp.com",
+    projectId: "hazoma-60ed2",
+    storageBucket: "hazoma-60ed2.firebasestorage.app",
+    messagingSenderId: "962438384604",
+    appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
 };
 
 const app = initializeApp(firebaseConfig);
