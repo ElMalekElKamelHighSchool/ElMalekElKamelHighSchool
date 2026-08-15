@@ -2,44 +2,65 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>دخول المنصة | مدرسة الملك الكامل</title>
+    <title>تسجيل الدخول الإداري | المستشار</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-br from-blue-900 to-black min-h-screen flex items-center justify-center font-['Cairo'] p-4">
-    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-        <h2 class="text-2xl font-black text-center text-blue-900 mb-6">تسجيل دخول المنصة</h2>
-        <form id="loginForm" class="space-y-4">
-            <input type="email" id="email" placeholder="البريد الإلكتروني" class="w-full p-3 border-2 rounded-xl outline-none focus:border-blue-900" required>
-            <input type="password" id="pass" placeholder="كلمة المرور" class="w-full p-3 border-2 rounded-xl outline-none focus:border-blue-900" required>
-            <button type="submit" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition">دخول</button>
+<body class="bg-slate-900 text-white font-['Cairo'] min-h-screen flex items-center justify-center p-6">
+    <div class="bg-slate-800/90 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-slate-700 w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-yellow-500 text-2xl font-bold">🔐</div>
+            <h1 class="text-2xl font-black text-yellow-500 mb-2">بوابة دخول الإدارة</h1>
+            <p class="text-slate-400 text-sm">يرجى تسجيل الدخول للوصول إلى لوحة تحكم المستشار</p>
+        </div>
+        
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label class="block text-sm font-bold mb-2 text-slate-300">البريد الإلكتروني</label>
+                <input type="email" id="email" required class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl focus:border-yellow-500 focus:outline-none text-white transition" placeholder="admin@domain.com">
+            </div>
+            <div>
+                <label class="block text-sm font-bold mb-2 text-slate-300">كلمة المرور</label>
+                <input type="password" id="password" required class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl focus:border-yellow-500 focus:outline-none text-white transition" placeholder="••••••••">
+            </div>
+            <div id="errorMsg" class="text-red-500 text-sm text-center font-bold hidden bg-red-500/10 p-2 rounded-lg border border-red-500/20"></div>
+            <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-black p-3.5 rounded-xl transition shadow-lg shadow-yellow-500/20">تسجيل الدخول</button>
         </form>
-        <p class="text-center mt-4 text-sm text-gray-600">ليس لديك حساب؟ <a href="signup.html" class="text-blue-900 font-bold underline">سجل الآن</a></p>
+        
+        <div class="mt-6 text-center">
+            <a href="index.html" class="text-slate-400 hover:text-yellow-500 text-sm transition">← العودة للرئيسية</a>
+        </div>
     </div>
 
     <script type="module">
-        import { auth, db } from './config.js';
-        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+            authDomain: "hazoma-60ed2.firebaseapp.com",
+            projectId: "hazoma-60ed2",
+            storageBucket: "hazoma-60ed2.firebasestorage.app",
+            messagingSenderId: "962438384604",
+            appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMsg');
 
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-                const user = userCredential.user;
-
-                if (email.endsWith('@admin.com')) {
-                    window.location.href = 'admin-dashboard.html';
-                } else {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        window.location.href = 'dashboard.html';
-                    }
-                }
-            } catch (error) { alert("خطأ في البيانات أو الحساب غير موجود"); }
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'admin_hub.html'; // اسم صفحة لوحة التحكم الخاصة بك
+            } catch (error) {
+                errorDiv.innerText = "خطأ في البريد الإلكتروني أو كلمة المرور!";
+                errorDiv.classList.remove('hidden');
+            }
         };
     </script>
 </body>
