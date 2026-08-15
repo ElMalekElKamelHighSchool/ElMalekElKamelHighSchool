@@ -1,86 +1,68 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>تعديل بيانات التسجيل</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#1d4ed8">
+<title>تعديل بيانات التسجيل</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;min-height:100vh}button,input,select,textarea{font-family:inherit}input,select,textarea{direction:rtl}.spinner{width:24px;height:24px;border:3px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}@keyframes spin{to{transform:rotate(360deg)}}.question-card{transition:.2s}.question-card:focus-within{border-color:#3b82f6;box-shadow:0 5px 18px rgba(37,99,235,.1)}.option-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer}.option-item:hover{background:#eff6ff;border-color:#93c5fd}.option-item input{width:18px;height:18px}.error-field{border-color:#ef4444!important;box-shadow:0 0 0 3px rgba(239,68,68,.08)!important}.field-error{color:#dc2626;font-size:13px;margin-top:7px}
+</style>
 </head>
-<body class="bg-gray-100 p-10 font-sans">
-    <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mb-6" id="loginSection">
-        <h1 class="text-2xl font-bold mb-4 text-center">تعديل بياناتي</h1>
-        <input type="text" id="studentUniqueId" placeholder="أدخل الكود المميز الخاص بك" class="w-full p-3 border rounded mb-4 text-center text-xl uppercase">
-        <button onclick="findSubmission()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">بحث واسترجاع البيانات</button>
-    </div>
-
-    <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md hidden" id="editSection">
-        <h2 class="text-xl font-bold mb-4 text-red-600">تعديل الإجابات</h2>
-        <form id="editForm" onsubmit="updateSubmission(event)" class="space-y-4"></form>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        const firebaseConfig = { /* الكونفيج */ 
-            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4", authDomain: "hazoma-60ed2.firebaseapp.com", projectId: "hazoma-60ed2", storageBucket: "hazoma-60ed2.firebasestorage.app", messagingSenderId: "962438384604", appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
-        };
-        const db = getFirestore(initializeApp(firebaseConfig));
-        let currentSubId = null;
-        let formQuestions = [];
-
-        window.findSubmission = async function() {
-            let uId = document.getElementById('studentUniqueId').value.toUpperCase();
-            if(!uId) return;
-
-            const qSnap = await getDocs(query(collection(db, "submissions"), where("uniqueId", "==", uId)));
-            if(qSnap.empty) return alert("الكود غير صحيح أو غير مسجل.");
-
-            let subDoc = qSnap.docs[0];
-            currentSubId = subDoc.id;
-            let subData = subDoc.data();
-
-            // التحقق إذا كان الأدمن يسمح بالتعديل
-            const formDoc = await getDoc(doc(db, "forms", subData.formId));
-            if(!formDoc.data().allowEdit) return alert("عذراً، الإدارة أغلقت إمكانية التعديل لهذا الفورم.");
-
-            formQuestions = formDoc.data().questions;
-            
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('editSection').classList.remove('hidden');
-
-            let html = '';
-            formQuestions.forEach(q => {
-                let val = subData.answers[q.id] || '';
-                html += `<div class="p-3 border rounded bg-gray-50">
-                    <label class="block font-bold mb-2">${q.title}</label>`;
-                
-                if(q.type === 'select') {
-                    html += `<select id="edit_${q.id}" class="w-full p-2 border rounded">
-                        <option value="">اختر...</option>
-                        ${q.options.map(opt => `<option value="${opt}" ${val===opt?'selected':''}>${opt}</option>`).join('')}
-                    </select>`;
-                } else {
-                    html += `<input type="${q.type}" id="edit_${q.id}" value="${val}" class="w-full p-2 border rounded">`;
-                }
-                html += `</div>`;
-            });
-            html += `<button type="submit" class="w-full bg-green-600 text-white p-3 rounded font-bold">حفظ التعديلات</button>`;
-            document.getElementById('editForm').innerHTML = html;
-        }
-
-        window.updateSubmission = async function(e) {
-            e.preventDefault();
-            let newAnswers = {};
-            formQuestions.forEach(q => {
-                newAnswers[q.id] = document.getElementById('edit_'+q.id).value;
-            });
-
-            await updateDoc(doc(db, "submissions", currentSubId), {
-                answers: newAnswers
-            });
-            alert("تم تحديث بياناتك بنجاح!");
-            location.reload();
-        }
-    </script>
+<body class="bg-gray-100 p-4 md:p-8">
+<div class="max-w-3xl mx-auto">
+<section id="loginSection" class="bg-white rounded-3xl shadow-xl overflow-hidden">
+<div class="bg-gradient-to-l from-blue-900 via-blue-700 to-blue-500 text-white p-7 text-center"><div class="text-5xl mb-3">✏️</div><h1 class="text-2xl md:text-3xl font-bold">تعديل بيانات التسجيل</h1><p class="text-blue-100 mt-2">أدخل الكود المميز لاسترجاع بياناتك</p></div>
+<div class="p-6 md:p-8"><label class="block font-bold mb-2">الكود المميز</label><input id="studentUniqueId" type="text" autocomplete="off" autocapitalize="characters" placeholder="مثال: ABCD2345" class="w-full p-4 border border-gray-300 rounded-xl text-center text-xl tracking-widest uppercase outline-none focus:ring-2 focus:ring-blue-500"><button id="findButton" type="button" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold">🔎 بحث واسترجاع البيانات</button><div id="loginError" class="hidden mt-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700"></div></div>
+</section>
+<section id="editSection" class="hidden bg-white rounded-3xl shadow-xl overflow-hidden">
+<div class="bg-gradient-to-l from-blue-900 via-blue-700 to-blue-500 text-white p-6"><h2 id="editTitle" class="text-2xl font-bold">تعديل بيانات التسجيل</h2><p class="text-blue-100 mt-2">راجع بياناتك ثم احفظ التعديلات.</p></div>
+<div class="p-5 md:p-8"><div id="editInfo" class="mb-5 p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-800"></div><form id="editForm" class="space-y-5" novalidate></form><div id="saveMessage" class="hidden mt-5 p-4 rounded-xl"></div><button id="backButton" type="button" class="w-full mt-4 bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-xl font-bold">↩️ الرجوع</button></div>
+</section>
+</div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import{getFirestore,collection,query,where,getDocs,doc,getDoc,updateDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",authDomain:"hazoma-60ed2.firebaseapp.com",projectId:"hazoma-60ed2",storageBucket:"hazoma-60ed2.firebasestorage.app",messagingSenderId:"962438384604",appId:"1:962438384604:web:52db16e5723a8f6d3bdd19"};
+const db=getFirestore(initializeApp(firebaseConfig));
+let currentSubId=null,currentSubmission=null,currentFormData=null,formQuestions=[],isSaving=false;
+const $=id=>document.getElementById(id),loginSection=$("loginSection"),editSection=$("editSection"),editForm=$("editForm"),codeInput=$("studentUniqueId"),findButton=$("findButton"),loginError=$("loginError"),saveMessage=$("saveMessage");
+function esc(v){return v==null?"":String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function norm(v){return v==null?"":Array.isArray(v)?v.map(norm).join("، "):String(v).trim()}
+function sid(id){return String(id).replace(/[^a-zA-Z0-9_-]/g,"_")}
+function eid(q){return"edit_"+sid(q.id)}
+function type(q){return String(q?.type||"text").toLowerCase()}
+function inputType(t){return["text","number","tel","date","email","time","datetime-local","url","password"].includes(t)?t:"text"}
+function optValue(o){if(o==null)return"";if(typeof o==="object")return o.value!=null?String(o.value).trim():o.id!=null?String(o.id).trim():o.text!=null?String(o.text).trim():o.label!=null?String(o.label).trim():"";return String(o).trim()}
+function optId(o){return o&&typeof o==="object"?(o.id!=null?String(o.id).trim():o.value!=null?String(o.value).trim():""):""}
+function optLabel(o){return o&&typeof o==="object"?(o.text!=null?String(o.text).trim():o.label!=null?String(o.label).trim():optValue(o)):optValue(o)}
+function findOpt(q,v){return Array.isArray(q.options)?q.options.find(o=>[optId(o),optValue(o),optLabel(o)].some(x=>norm(x)===norm(v))):null}
+function saved(q){return currentSubmission?.answers?.[q.id]??currentSubmission?.answers?.[String(q.id)]??""}
+function value(q){let t=type(q);if(t==="radio"){let x=editForm.querySelector(`input[data-q="${CSS.escape(String(q.id))}"]:checked`);return x?x.value:""}if(t==="checkbox")return[...editForm.querySelectorAll(`input[data-q="${CSS.escape(String(q.id))}"]:checked`)].map(x=>x.value);let x=$(eid(q));return x?x.value:""}
+function setValue(q,v){let t=type(q),vals=Array.isArray(v)?v.map(norm):[norm(v)];if(t==="radio"||t==="checkbox"){editForm.querySelectorAll(`input[data-q="${CSS.escape(String(q.id))}"]`).forEach(x=>x.checked=vals.includes(norm(x.value)));return}let x=$(eid(q));if(x)x.value=Array.isArray(v)?v[0]||"":v??""}
+function hasCondition(q){return q?.conditionId!=null&&String(q.conditionId).trim()!==""}
+function hasDep(q){return q?.dependentOn?.questionId!=null&&String(q.dependentOn.questionId).trim()!==""}
+function parent(q){return formQuestions.find(x=>String(x.id)===String(q.dependentOn?.questionId))||null}
+function conditionMatch(v,e){return Array.isArray(v)?v.some(x=>norm(x)===norm(e)):norm(v)===norm(e)}
+function visible(q){let d=$("div_"+sid(q.id));return !!d&&d.style.display!=="none"}
+function mappingRefs(m,p,pq){if(!m)return[];let keys=Object.keys(m),vals=Array.isArray(p)?p:[p];for(let pv of vals){let k=keys.find(x=>norm(x)===norm(pv));let po=findOpt(pq,pv);if(!k&&po)k=keys.find(x=>[optId(po),optValue(po),optLabel(po)].some(y=>norm(x)===norm(y)));if(k){let r=m[k];if(Array.isArray(r))return r;if(r&&typeof r==="object")return Object.values(r);return r==null?[]:[r]}}return[]}
+function allowed(o,refs){return refs.some(r=>[optId(o),optValue(o),optLabel(o)].some(x=>norm(x)===norm(r)))}
+function updateDep(q){if(!hasDep(q)||type(q)!=="select")return;let s=$(eid(q));if(!s)return;let p=parent(q);if(!p){s.innerHTML='<option value="">اختر...</option>';return}s;let pv=value(p);if(!norm(pv)||Array.isArray(pv)&&!pv.length){s.innerHTML=`<option value="">اختر أولاً ${esc(p.title||"القائمة السابقة")}...</option>`;s.value="";return}let refs=mappingRefs(q.dependentOn.mappings||{},pv,p),old=s.value,h='<option value="">اختر...</option>',keep=false;(q.options||[]).forEach(o=>{if(!allowed(o,refs))return;let v=optValue(o);if(norm(v)===norm(old))keep=true;h+=`<option value="${esc(v)}">${esc(optLabel(o))}</option>`});s.innerHTML=h;s.value=keep?old:""}
+function clearQ(q){let t=type(q);if(t==="radio"||t==="checkbox")editForm.querySelectorAll(`input[data-q="${CSS.escape(String(q.id))}"]`).forEach(x=>x.checked=false);else{let x=$(eid(q));if(x)x.value=""}}
+function updateVisibility(q){let d=$("div_"+sid(q.id));if(!d)return;if(!hasCondition(q)){d.style.display="block";return}let p=formQuestions.find(x=>String(x.id)===String(q.conditionId));if(!p){d.style.display="none";clearQ(q);return}let show=conditionMatch(value(p),q.conditionValue);d.style.display=show?"block":"none";if(!show)clearQ(q)}
+function refresh(){for(let i=0;i<10;i++)formQuestions.forEach(updateVisibility);for(let i=0;i<10;i++)formQuestions.forEach(updateDep)}
+function options(q,selected){return(q.options||[]).map(o=>{let v=optValue(o),s=Array.isArray(selected)?selected.some(x=>norm(x)===norm(v)):norm(selected)===norm(v);return`<option value="${esc(v)}" ${s?"selected":""}>${esc(optLabel(o))}</option>`}).join("")}
+function renderQ(q,i){q.id=String(q.id??`q_${i+1}`);let t=type(q),v=saved(q),safe=sid(q.id),show=!hasCondition(q),h=`<div id="div_${esc(safe)}" class="question-card p-4 md:p-5 border border-gray-200 rounded-2xl bg-gray-50" style="display:${show?"block":"none"}"><label class="block font-bold text-gray-800 mb-3"><span class="text-blue-600 ml-1">${i+1}.</span>${esc(q.title??q.label??`السؤال ${i+1}`)}${q.required?'<span class="text-red-500 mr-1">*</span>':''}</label>`;if(t==="select")h+=`<select id="${esc(eid(q))}" class="w-full p-3 border border-gray-300 rounded-xl bg-white outline-none focus:ring-2 focus:ring-blue-500"><option value="">اختر...</option>${hasDep(q)?"":options(q,v)}</select>`;else if(t==="textarea")h+=`<textarea id="${esc(eid(q))}" rows="4" class="w-full p-3 border border-gray-300 rounded-xl bg-white outline-none focus:ring-2 focus:ring-blue-500">${esc(Array.isArray(v)?v.join("، "):v)}</textarea>`;else if(t==="radio"){h+='<div class="space-y-2">';(q.options||[]).forEach((o,j)=>{let x=optValue(o);h+=`<label class="option-item"><input type="radio" name="q_${esc(safe)}" data-q="${esc(q.id)}" value="${esc(x)}" ${norm(v)===norm(x)?"checked":""}><span>${esc(optLabel(o))}</span></label>`});h+='</div>'}else if(t==="checkbox"){let a=Array.isArray(v)?v:v?[v]:[];h+='<div class="space-y-2">';(q.options||[]).forEach((o,j)=>{let x=optValue(o);h+=`<label class="option-item"><input type="checkbox" data-q="${esc(q.id)}" value="${esc(x)}" ${a.some(z=>norm(z)===norm(x))?"checked":""}><span>${esc(optLabel(o))}</span></label>`});h+='</div>'}else{let it=inputType(t),extra=q.title?.includes("القومي")?'pattern="\\d{14}" maxlength="14" minlength="14" inputmode="numeric" autocomplete="off"':'';h+=`<input type="${esc(it)}" id="${esc(eid(q))}" value="${esc(Array.isArray(v)?v.join("، "):v)}" ${extra} placeholder="${esc(q.placeholder||"")}" class="w-full p-3 border border-gray-300 rounded-xl bg-white outline-none focus:ring-2 focus:ring-blue-500">`}return h+`<div id="error_${esc(safe)}" class="field-error hidden"></div></div>`}
+function render(){let h=formQuestions.map(renderQ).join("");h+=`<button id="saveButton" type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl font-bold text-lg">💾 حفظ التعديلات</button>`;editForm.innerHTML=h;formQuestions.forEach(q=>{let el=$(eid(q));if(el){el.addEventListener("input",()=>{clearErr(q.id);refresh()});el.addEventListener("change",()=>{clearErr(q.id);refresh()})}editForm.querySelectorAll(`input[data-q="${CSS.escape(String(q.id))}"]`).forEach(x=>x.addEventListener("change",()=>{clearErr(q.id);refresh()}))});refresh()}
+function showErr(q,msg){$("div_"+sid(q.id))?.classList.add("error-field");let e=$("error_"+sid(q.id));if(e){e.textContent=msg;e.classList.remove("hidden")}}
+function clearErr(id){$("div_"+sid(id))?.classList.remove("error-field");let e=$("error_"+sid(id));if(e){e.textContent="";e.classList.add("hidden")}}
+function validate(q){clearErr(q.id);if(!visible(q))return true;let v=value(q),t=type(q);if(q.required&&(Array.isArray(v)?!v.length:!norm(v))){showErr(q,`يرجى إدخال "${q.title||"هذا السؤال"}".`);return false}if(q.title?.includes("القومي")&&v&&!/^\d{14}$/.test(String(v))){showErr(q,"الرقم القومي يجب أن يكون 14 رقمًا.");return false}if(t==="email"&&v&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v))){showErr(q,"يرجى إدخال بريد إلكتروني صحيح.");return false}if(q.minLength&&v&&!Array.isArray(v)&&String(v).length<Number(q.minLength)){showErr(q,`يجب ألا تقل الإجابة عن ${q.minLength} أحرف.`);return false}if(q.maxLength&&v&&!Array.isArray(v)&&String(v).length>Number(q.maxLength)){showErr(q,`يجب ألا تزيد الإجابة عن ${q.maxLength} أحرف.`);return false}if(t==="select"&&hasDep(q)&&v){let p=parent(q),refs=mappingRefs(q.dependentOn.mappings||{},value(p),p),o=findOpt(q,v);if(!o||!allowed(o,refs)){showErr(q,"القيمة المختارة غير متاحة بناءً على الاختيار السابق.");return false}}return true}
+function collect(){let a={};formQuestions.forEach(q=>a[q.id]=visible(q)?value(q):"");return a}
+async function uniqueOK(a){for(let q of formQuestions){if(!q.unique)continue;let v=a[q.id],old=currentSubmission?.answers?.[q.id];if(Array.isArray(v)||!norm(v)||norm(v)===norm(old))continue;let s=await getDocs(query(collection(db,"submissions"),where("formId","==",currentSubmission.formId),where(`answers.${q.id}`,"==",v)));if(s.docs.some(d=>d.id!==currentSubId)){showErr(q,"هذه القيمة مستخدمة بالفعل في تسجيل آخر.");return false}}return true}
+async function findSubmission(){let code=codeInput.value.trim().toUpperCase();loginError.classList.add("hidden");if(!code){loginError.textContent="يرجى إدخال الكود المميز أولاً.";loginError.classList.remove("hidden");return}findButton.disabled=true;findButton.innerHTML='<span class="inline-flex items-center gap-2"><span class="spinner"></span>جاري البحث...</span>';try{let s=await getDocs(query(collection(db,"submissions"),where("uniqueId","==",code)));if(s.empty)throw Error("الكود غير صحيح أو غير مسجل.");let d=s.docs[0];currentSubId=d.id;currentSubmission=d.data();if(!currentSubmission.formId)throw Error("التسجيل لا يحتوي على formId.");let f=await getDoc(doc(db,"forms",currentSubmission.formId));if(!f.exists())throw Error("النموذج المرتبط بالتسجيل غير موجود.");currentFormData=f.data();if(currentFormData.allowEdit!==true)throw Error("عذرًا، الإدارة أغلقت إمكانية التعديل لهذا النموذج.");formQuestions=Array.isArray(currentFormData.questions)?currentFormData.questions:Array.isArray(currentFormData.fields)?currentFormData.fields:[];if(!formQuestions.length)throw Error("النموذج لا يحتوي على أسئلة.");$("editTitle").textContent=currentFormData.title||currentFormData.name||currentFormData.formTitle||"تعديل بيانات التسجيل";$("editInfo").innerHTML=`<div class="grid sm:grid-cols-2 gap-3"><div><small>الرقم التسلسلي</small><div class="font-bold text-lg">${esc(currentSubmission.serialNumber??currentSubmission.serial??"-")}</div></div><div><small>الكود المميز</small><div class="font-bold text-lg tracking-widest">${esc(currentSubmission.uniqueId||code)}</div></div></div>`;loginSection.classList.add("hidden");editSection.classList.remove("hidden");render();window.scrollTo({top:0,behavior:"smooth"})}catch(e){console.error(e);loginError.textContent=e.message||"حدث خطأ أثناء استرجاع البيانات.";loginError.classList.remove("hidden")}finally{findButton.disabled=false;findButton.textContent="🔎 بحث واسترجاع البيانات"}}
+async function save(e){e.preventDefault();if(isSaving)return;saveMessage.className="hidden";refresh();let ok=true,first=null;for(let q of formQuestions){if(!validate(q)){ok=false;first??=q}}if(!ok){if(first)$("div_"+sid(first.id))?.scrollIntoView({behavior:"smooth",block:"center"});return}let answers=collect();isSaving=true;let b=$("saveButton");b.disabled=true;b.innerHTML='<span class="inline-flex items-center gap-2"><span class="spinner"></span>جاري حفظ التعديلات...</span>';try{if(!await uniqueOK(answers))return;await updateDoc(doc(db,"submissions",currentSubId),{answers,updatedAt:serverTimestamp()});currentSubmission.answers=answers;saveMessage.textContent="تم تحديث بياناتك بنجاح.";saveMessage.className="mt-5 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 font-bold";window.scrollTo({top:0,behavior:"smooth"})}catch(e){console.error(e);saveMessage.textContent="تعذر حفظ التعديلات. تأكد من الإنترنت ثم حاول مرة أخرى.";saveMessage.className="mt-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 font-bold"}finally{isSaving=false;b.disabled=false;b.textContent="💾 حفظ التعديلات"}}
+findButton.addEventListener("click",findSubmission);codeInput.addEventListener("keydown",e=>{if(e.key==="Enter")findSubmission()});editForm.addEventListener("submit",save);$("backButton").addEventListener("click",()=>{editSection.classList.add("hidden");loginSection.classList.remove("hidden");editForm.innerHTML="";currentSubId=null;currentSubmission=null;currentFormData=null;formQuestions=[];codeInput.focus()});codeInput.focus();
+</script>
 </body>
 </html>
