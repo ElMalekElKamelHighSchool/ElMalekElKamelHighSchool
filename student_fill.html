@@ -2,819 +2,292 @@
 <html lang="ar" dir="rtl">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <meta name="theme-color"
-          content="#1d4ed8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1d4ed8">
     <title>تسجيل البيانات</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: Tahoma, Arial, sans-serif;
             min-height: 100vh;
         }
 
-        button,
-        input,
-        select,
-        textarea {
-            font-family: inherit;
-        }
+        button, input, select, textarea { font-family: inherit; }
 
-        input,
-        select,
-        textarea {
-            direction: rtl;
-        }
+        input, select, textarea { direction: rtl; }
 
         .loading-spinner {
-
             width: 44px;
             height: 44px;
-
             border: 4px solid #e5e7eb;
             border-top-color: #2563eb;
-
             border-radius: 50%;
-
             animation: spin .8s linear infinite;
-
             margin: auto;
         }
 
-        @keyframes spin {
-
-            to {
-                transform: rotate(360deg);
-            }
-
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .question-card {
-
-            transition:
-                border-color .2s ease,
-                box-shadow .2s ease,
-                transform .2s ease;
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
         }
 
         .question-card:focus-within {
-
             border-color: #3b82f6;
-
-            box-shadow:
-                0 5px 18px
-                rgba(37, 99, 235, .10);
+            box-shadow: 0 5px 18px rgba(37, 99, 235, .10);
         }
 
-        .success-card {
-            animation: successShow .4s ease;
-        }
+        .success-card { animation: successShow .4s ease; }
 
         @keyframes successShow {
-
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .receipt {
-            display: none;
-        }
+        .receipt { display: none; }
 
         .option-item {
-
             display: flex;
             align-items: center;
             gap: 10px;
-
             padding: 10px 12px;
-
             border: 1px solid #e5e7eb;
             border-radius: 12px;
-
             background: white;
-
-            transition:
-                background .2s ease,
-                border-color .2s ease;
+            transition: background .2s ease, border-color .2s ease;
         }
 
         .option-item:hover {
-
             background: #eff6ff;
             border-color: #93c5fd;
         }
 
         .option-item input {
-
             width: 18px;
             height: 18px;
-
             flex-shrink: 0;
         }
 
         .error-field {
-
             border-color: #ef4444 !important;
-
-            box-shadow:
-                0 0 0 3px
-                rgba(239, 68, 68, .08) !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, .08) !important;
         }
 
         .field-error {
-
             color: #dc2626;
             font-size: 13px;
-
             margin-top: 7px;
         }
 
         .dependent-loading {
-
             opacity: .65;
             pointer-events: none;
         }
 
         @media print {
-
-            html,
-            body {
-
+            html, body {
                 background: white !important;
-
                 margin: 0 !important;
                 padding: 0 !important;
-
                 width: 100% !important;
             }
 
-            body > * {
-                display: none !important;
-            }
+            body > * { display: none !important; }
 
             #printReceipt {
-
                 display: block !important;
-
                 width: 100% !important;
-
                 visibility: visible !important;
             }
 
-            #printReceipt * {
-                visibility: visible !important;
-            }
-
-            .no-print {
-                display: none !important;
-            }
-
+            #printReceipt * { visibility: visible !important; }
+            .no-print { display: none !important; }
         }
 
         @page {
-
             size: A4;
             margin: 12mm;
-
         }
-
     </style>
-
 </head>
-
 
 <body class="bg-gray-100 min-h-screen p-4 md:p-10">
 
-
 <div class="max-w-3xl mx-auto">
-
-
-    <!-- MAIN CARD -->
 
     <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
 
-
-        <!-- HEADER -->
-
-        <div class="
-            bg-gradient-to-l
-            from-blue-900
-            via-blue-700
-            to-blue-500
-            text-white
-            p-6 md:p-8
-        ">
-
-            <div class="
-                flex
-                items-center
-                justify-center
-                gap-4
-            ">
-
-                <div class="
-                    bg-white/15
-                    rounded-2xl
-                    p-4
-                    text-2xl
-                    shadow-inner
-                ">
-                    📝
-                </div>
-
+        <div class="bg-gradient-to-l from-blue-900 via-blue-700 to-blue-500 text-white p-6 md:p-8">
+            <div class="flex items-center justify-center gap-4">
+                <div class="bg-white/15 rounded-2xl p-4 text-2xl shadow-inner">📝</div>
 
                 <div class="min-w-0 text-center">
-
-                    <h1
-                        id="formTitle"
-                        class="
-                            text-2xl
-                            md:text-3xl
-                            font-bold
-                            break-words
-                        "
-                    >
+                    <h1 id="formTitle" class="text-2xl md:text-3xl font-bold break-words">
                         جاري التحميل...
                     </h1>
 
-
-                    <p class="
-                        text-blue-100
-                        text-sm
-                        mt-2
-                    ">
+                    <p class="text-blue-100 text-sm mt-2">
                         يرجى ملء البيانات المطلوبة بدقة
                     </p>
-
                 </div>
-
             </div>
-
         </div>
 
-
-        <!-- LOADING -->
-
-        <div
-            id="loadingBox"
-            class="p-10 text-center"
-        >
-
+        <div id="loadingBox" class="p-10 text-center">
             <div class="loading-spinner mb-4"></div>
-
-            <p class="text-gray-600">
-                جاري تحميل نموذج التسجيل...
-            </p>
-
+            <p class="text-gray-600">جاري تحميل نموذج التسجيل...</p>
         </div>
 
+        <form id="dynamicForm" class="hidden p-5 md:p-8 space-y-5" novalidate></form>
 
-        <!-- FORM -->
-
-        <form
-            id="dynamicForm"
-            class="
-                hidden
-                p-5
-                md:p-8
-                space-y-5
-            "
-            novalidate
-        >
-        </form>
-
-
-        <!-- ERROR -->
-
-        <div
-            id="errorMessage"
-            class="
-                hidden
-                mx-5
-                md:mx-8
-                mb-6
-                p-4
-                rounded-2xl
-                bg-red-50
-                border
-                border-red-200
-                text-red-700
-            "
-        >
-
+        <div id="errorMessage"
+             class="hidden mx-5 md:mx-8 mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700">
             <div class="flex gap-3">
-
-                <span class="text-xl">
-                    ⚠️
-                </span>
-
+                <span class="text-xl">⚠️</span>
                 <div class="min-w-0">
-
-                    <div class="font-bold mb-1">
-                        حدث خطأ
-                    </div>
-
+                    <div class="font-bold mb-1">حدث خطأ</div>
                     <div id="errorText"></div>
-
                 </div>
-
             </div>
-
         </div>
 
-
-        <!-- SUCCESS -->
-
-        <div
-            id="successMessage"
-            class="
-                hidden
-                success-card
-                m-5
-                md:m-8
-                p-6
-                bg-green-50
-                border
-                border-green-300
-                rounded-2xl
-            "
-        >
+        <div id="successMessage"
+             class="hidden success-card m-5 md:m-8 p-6 bg-green-50 border border-green-300 rounded-2xl">
 
             <div class="text-center">
-
-                <div class="
-                    mx-auto
-                    mb-4
-                    w-16
-                    h-16
-                    rounded-full
-                    bg-green-100
-                    flex
-                    items-center
-                    justify-center
-                ">
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="36"
-                        height="36"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#16a34a"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    >
-
+                <div class="mx-auto mb-4 w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"
+                         viewBox="0 0 24 24" fill="none" stroke="#16a34a"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 6L9 17l-5-5"/>
-
                     </svg>
-
                 </div>
 
-
-                <h2 class="
-                    text-2xl
-                    font-bold
-                    text-green-700
-                    mb-2
-                ">
+                <h2 class="text-2xl font-bold text-green-700 mb-2">
                     تم تسجيل البيانات بنجاح
                 </h2>
-
 
                 <p class="text-gray-600 mb-5">
                     تم حفظ بياناتك بنجاح، يرجى الاحتفاظ ببيانات الإيصال والكود المميز.
                 </p>
-
             </div>
 
-
-            <div class="
-                grid
-                grid-cols-1
-                md:grid-cols-2
-                gap-4
-                mb-6
-            ">
-
-                <div class="
-                    bg-white
-                    border
-                    rounded-xl
-                    p-4
-                    text-center
-                ">
-
-                    <div class="text-gray-500 text-sm mb-1">
-                        الرقم التسلسلي
-                    </div>
-
-                    <div
-                        id="serialNumSpan"
-                        class="
-                            font-bold
-                            text-2xl
-                            text-blue-700
-                        "
-                    >
-                        -
-                    </div>
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white border rounded-xl p-4 text-center">
+                    <div class="text-gray-500 text-sm mb-1">الرقم التسلسلي</div>
+                    <div id="serialNumSpan" class="font-bold text-2xl text-blue-700">-</div>
                 </div>
 
-
-                <div class="
-                    bg-white
-                    border
-                    rounded-xl
-                    p-4
-                    text-center
-                ">
-
-                    <div class="text-gray-500 text-sm mb-1">
-                        الكود المميز للتعديل
-                    </div>
-
-                    <div
-                        id="uniqueIdSpan"
-                        class="
-                            font-bold
-                            text-2xl
-                            text-red-600
-                            tracking-widest
-                        "
-                    >
-                        -
-                    </div>
-
+                <div class="bg-white border rounded-xl p-4 text-center">
+                    <div class="text-gray-500 text-sm mb-1">الكود المميز للتعديل</div>
+                    <div id="uniqueIdSpan"
+                         class="font-bold text-2xl text-red-600 tracking-widest">-</div>
                 </div>
-
             </div>
 
-
-            <div class="
-                bg-yellow-50
-                border
-                border-yellow-200
-                rounded-xl
-                p-4
-                mb-5
-                text-sm
-                text-yellow-800
-            ">
-
-                <strong>
-                    تنبيه:
-                </strong>
-
-                احتفظ بالكود المميز لأنه قد تحتاج إليه لاحقًا
-                لتعديل بياناتك إذا كان التعديل مسموحًا من الإدارة.
-
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5 text-sm text-yellow-800">
+                <strong>تنبيه:</strong>
+                احتفظ بالكود المميز لأنه قد تحتاج إليه لاحقًا لتعديل بياناتك إذا كان التعديل مسموحًا من الإدارة.
             </div>
 
-
-            <div class="
-                grid
-                grid-cols-1
-                md:grid-cols-2
-                gap-3
-            ">
-
-                <button
-                    id="printButton"
-                    type="button"
-                    class="
-                        bg-blue-600
-                        hover:bg-blue-700
-                        text-white
-                        p-3
-                        rounded-xl
-                        font-bold
-                        transition
-                    "
-                >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button id="printButton" type="button"
+                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition">
                     🖨️ طباعة الإيصال
                 </button>
 
-
-                <button
-                    id="backButton"
-                    type="button"
-                    class="
-                        bg-gray-600
-                        hover:bg-gray-700
-                        text-white
-                        p-3
-                        rounded-xl
-                        font-bold
-                        transition
-                    "
-                >
+                <button id="backButton" type="button"
+                        class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-xl font-bold transition">
                     ↩️ العودة للنماذج
                 </button>
-
             </div>
-
         </div>
-
     </div>
 
-
-    <div
-        class="
-            text-center
-            text-gray-500
-            text-xs
-            mt-5
-            pb-4
-        "
-    >
+    <div class="text-center text-gray-500 text-xs mt-5 pb-4">
         يرجى التأكد من صحة جميع البيانات قبل الضغط على زر التسليم.
     </div>
-
 </div>
 
+<div id="printReceipt" class="receipt">
+    <div style="direction:rtl;font-family:Tahoma,Arial,sans-serif;width:100%;max-width:800px;margin:0 auto;color:#111827;">
 
-
-<!-- PRINT RECEIPT -->
-
-<div
-    id="printReceipt"
-    class="receipt"
->
-
-    <div
-        style="
-            direction:rtl;
-            font-family:Tahoma,Arial,sans-serif;
-            width:100%;
-            max-width:800px;
-            margin:0 auto;
-            color:#111827;
-        "
-    >
-
-        <div
-            style="
-                text-align:center;
-                border-bottom:3px solid #1d4ed8;
-                padding-bottom:15px;
-                margin-bottom:20px;
-            "
-        >
-
-            <h1
-                id="receiptTitle"
-                style="
-                    font-size:28px;
-                    margin:0 0 8px 0;
-                    font-weight:bold;
-                "
-            >
+        <div style="text-align:center;border-bottom:3px solid #1d4ed8;padding-bottom:15px;margin-bottom:20px;">
+            <h1 id="receiptTitle" style="font-size:28px;margin:0 0 8px 0;font-weight:bold;">
                 إيصال تسجيل البيانات
             </h1>
 
-            <div
-                style="
-                    font-size:14px;
-                    color:#6b7280;
-                "
-            >
+            <div style="font-size:14px;color:#6b7280;">
                 إيصال رسمي بتسجيل البيانات
             </div>
-
         </div>
 
-
-        <table
-            style="
-                width:100%;
-                border-collapse:collapse;
-                margin-bottom:25px;
-            "
-        >
-
+        <table style="width:100%;border-collapse:collapse;margin-bottom:25px;">
             <tr>
-
-                <td
-                    style="
-                        border:1px solid #d1d5db;
-                        padding:12px;
-                        width:50%;
-                    "
-                >
-
-                    <strong>
-                        الرقم التسلسلي:
-                    </strong>
-
-                    <span
-                        id="receiptSerial"
-                        style="
-                            font-size:20px;
-                            font-weight:bold;
-                            color:#1d4ed8;
-                        "
-                    >
-                        -
-                    </span>
-
+                <td style="border:1px solid #d1d5db;padding:12px;width:50%;">
+                    <strong>الرقم التسلسلي:</strong>
+                    <span id="receiptSerial" style="font-size:20px;font-weight:bold;color:#1d4ed8;">-</span>
                 </td>
 
-
-                <td
-                    style="
-                        border:1px solid #d1d5db;
-                        padding:12px;
-                    "
-                >
-
-                    <strong>
-                        الكود المميز:
-                    </strong>
-
-                    <span
-                        id="receiptUnique"
-                        style="
-                            font-size:20px;
-                            font-weight:bold;
-                            color:#dc2626;
-                        "
-                    >
-                        -
-                    </span>
-
+                <td style="border:1px solid #d1d5db;padding:12px;">
+                    <strong>الكود المميز:</strong>
+                    <span id="receiptUnique" style="font-size:20px;font-weight:bold;color:#dc2626;">-</span>
                 </td>
-
             </tr>
 
-
             <tr>
-
-                <td
-                    colspan="2"
-                    style="
-                        border:1px solid #d1d5db;
-                        padding:12px;
-                    "
-                >
-
-                    <strong>
-                        تاريخ التسجيل:
-                    </strong>
-
-                    <span id="receiptDate">
-                        -
-                    </span>
-
+                <td colspan="2" style="border:1px solid #d1d5db;padding:12px;">
+                    <strong>تاريخ التسجيل:</strong>
+                    <span id="receiptDate">-</span>
                 </td>
-
             </tr>
-
         </table>
 
-
-        <h2
-            style="
-                font-size:20px;
-                border-bottom:2px solid #e5e7eb;
-                padding-bottom:8px;
-                margin-bottom:12px;
-            "
-        >
+        <h2 style="font-size:20px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px;">
             بيانات المسجل
         </h2>
 
-
-        <table
-            style="
-                width:100%;
-                border-collapse:collapse;
-            "
-        >
-
+        <table style="width:100%;border-collapse:collapse;">
             <thead>
-
                 <tr>
-
-                    <th
-                        style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                            background:#f3f4f6;
-                            width:40%;
-                        "
-                    >
+                    <th style="border:1px solid #9ca3af;padding:10px;background:#f3f4f6;width:40%;">
                         البيان
                     </th>
-
-                    <th
-                        style="
-                            border:1px solid #9ca3af;
-                            padding:10px;
-                            background:#f3f4f6;
-                        "
-                    >
+                    <th style="border:1px solid #9ca3af;padding:10px;background:#f3f4f6;">
                         البيانات
                     </th>
-
                 </tr>
-
             </thead>
 
             <tbody id="receiptAnswers"></tbody>
-
         </table>
 
-
-        <div
-            style="
-                margin-top:50px;
-                display:flex;
-                justify-content:space-between;
-                text-align:center;
-            "
-        >
-
+        <div style="margin-top:50px;display:flex;justify-content:space-between;text-align:center;">
             <div style="width:40%;">
-
-                <div
-                    style="
-                        border-top:1px solid #111827;
-                        padding-top:8px;
-                    "
-                >
-                    توقيع المسؤول
-                </div>
-
+                <div style="border-top:1px solid #111827;padding-top:8px;">توقيع المسؤول</div>
             </div>
 
-
             <div style="width:40%;">
-
-                <div
-                    style="
-                        border-top:1px solid #111827;
-                        padding-top:8px;
-                    "
-                >
-                    توقيع المسجل
-                </div>
-
+                <div style="border-top:1px solid #111827;padding-top:8px;">توقيع المسجل</div>
             </div>
-
         </div>
 
-
-        <div
-            style="
-                margin-top:40px;
-                text-align:center;
-                font-size:12px;
-                color:#6b7280;
-            "
-        >
+        <div style="margin-top:40px;text-align:center;font-size:12px;color:#6b7280;">
             يرجى الاحتفاظ بهذا الإيصال للرجوع إليه عند الحاجة.
         </div>
-
     </div>
-
 </div>
-
-
 
 <script type="module">
 
-import {
-    initializeApp
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-
+import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 
 import {
     getFirestore,
@@ -826,7 +299,8 @@ import {
     where,
     getDocs,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+}
+    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 
 /* =========================================================
@@ -834,34 +308,16 @@ import {
 ========================================================= */
 
 const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
-
-    authDomain:
-        "hazoma-60ed2.firebaseapp.com",
-
-    projectId:
-        "hazoma-60ed2",
-
-    storageBucket:
-        "hazoma-60ed2.firebasestorage.app",
-
-    messagingSenderId:
-        "962438384604",
-
-    appId:
-        "1:962438384604:web:52db16e5723a8f6d3bdd19"
-
+    apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+    authDomain: "hazoma-60ed2.firebaseapp.com",
+    projectId: "hazoma-60ed2",
+    storageBucket: "hazoma-60ed2.firebasestorage.app",
+    messagingSenderId: "962438384604",
+    appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
 };
 
-
-const app =
-    initializeApp(firebaseConfig);
-
-
-const db =
-    getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 
 /* =========================================================
@@ -869,10 +325,7 @@ const db =
 ========================================================= */
 
 const urlParams =
-    new URLSearchParams(
-        window.location.search
-    );
-
+    new URLSearchParams(window.location.search);
 
 const formId =
     urlParams.get("formId");
@@ -883,15 +336,11 @@ const formId =
 ========================================================= */
 
 let questions = [];
-
 let formDataLoaded = null;
-
 let submittedAnswers = {};
-
 let submittedSerial = null;
-
 let submittedUniqueId = null;
-
+let submittedDate = null;
 let isSubmitting = false;
 
 
@@ -900,33 +349,19 @@ let isSubmitting = false;
 ========================================================= */
 
 const loadingBox =
-    document.getElementById(
-        "loadingBox"
-    );
-
+    document.getElementById("loadingBox");
 
 const dynamicForm =
-    document.getElementById(
-        "dynamicForm"
-    );
-
+    document.getElementById("dynamicForm");
 
 const errorMessage =
-    document.getElementById(
-        "errorMessage"
-    );
-
+    document.getElementById("errorMessage");
 
 const errorText =
-    document.getElementById(
-        "errorText"
-    );
-
+    document.getElementById("errorText");
 
 const successMessage =
-    document.getElementById(
-        "successMessage"
-    );
+    document.getElementById("successMessage");
 
 
 /* =========================================================
@@ -935,10 +370,7 @@ const successMessage =
 
 function escapeHTML(value) {
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
+    if (value === null || value === undefined) {
         return "";
     }
 
@@ -957,22 +389,15 @@ function escapeHTML(value) {
 
 function normalizeValue(value) {
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
+    if (value === null || value === undefined) {
         return "";
     }
 
     if (Array.isArray(value)) {
-
-        return value
-            .map(v => normalizeValue(v))
-            .join("، ");
+        return value.map(v => normalizeValue(v)).join("، ");
     }
 
-    return String(value)
-        .trim();
+    return String(value).trim();
 }
 
 
@@ -982,28 +407,17 @@ function normalizeValue(value) {
 
 function getOptionId(option) {
 
-    if (
-        option === null ||
-        option === undefined
-    ) {
+    if (option === null || option === undefined) {
         return "";
     }
 
-    if (
-        typeof option === "object"
-    ) {
+    if (typeof option === "object") {
 
-        if (
-            option.id !== undefined &&
-            option.id !== null
-        ) {
+        if (option.id !== undefined && option.id !== null) {
             return String(option.id).trim();
         }
 
-        if (
-            option.value !== undefined &&
-            option.value !== null
-        ) {
+        if (option.value !== undefined && option.value !== null) {
             return String(option.value).trim();
         }
     }
@@ -1018,38 +432,23 @@ function getOptionId(option) {
 
 function getOptionValue(option) {
 
-    if (
-        option === null ||
-        option === undefined
-    ) {
+    if (option === null || option === undefined) {
         return "";
     }
 
-    if (
-        typeof option === "object"
-    ) {
+    if (typeof option === "object") {
 
-        if (
-            option.text !== undefined &&
-            option.text !== null
-        ) {
+        if (option.text !== undefined && option.text !== null) {
             return String(option.text).trim();
         }
 
-        if (
-            option.label !== undefined &&
-            option.label !== null
-        ) {
+        if (option.label !== undefined && option.label !== null) {
             return String(option.label).trim();
         }
 
-        if (
-            option.value !== undefined &&
-            option.value !== null
-        ) {
+        if (option.value !== undefined && option.value !== null) {
             return String(option.value).trim();
         }
-
     }
 
     return String(option).trim();
@@ -1057,50 +456,33 @@ function getOptionValue(option) {
 
 
 function getOptionLabel(option) {
-
     return getOptionValue(option);
-
 }
 
 
 /* =========================================================
    OPTION MATCH
-   مهم جدًا للربط
 ========================================================= */
 
-function optionMatchesReference(
-    option,
-    reference
-) {
+function optionMatchesReference(option, reference) {
 
-    if (
-        reference === null ||
-        reference === undefined
-    ) {
+    if (reference === null || reference === undefined) {
         return false;
     }
 
-    const ref =
-        normalizeValue(reference);
+    const ref = normalizeValue(reference);
 
     if (!ref) {
         return false;
     }
 
     const optionId =
-        normalizeValue(
-            getOptionId(option)
-        );
+        normalizeValue(getOptionId(option));
 
     const optionText =
-        normalizeValue(
-            getOptionValue(option)
-        );
+        normalizeValue(getOptionValue(option));
 
-    return (
-        optionId === ref ||
-        optionText === ref
-    );
+    return optionId === ref || optionText === ref;
 }
 
 
@@ -1108,24 +490,14 @@ function optionMatchesReference(
    FIND OPTION
 ========================================================= */
 
-function findOption(
-    question,
-    value
-) {
+function findOption(question, value) {
 
-    if (
-        !question ||
-        !Array.isArray(question.options)
-    ) {
+    if (!question || !Array.isArray(question.options)) {
         return null;
     }
 
     return question.options.find(
-        option =>
-            optionMatchesReference(
-                option,
-                value
-            )
+        option => optionMatchesReference(option, value)
     ) || null;
 }
 
@@ -1140,9 +512,7 @@ function getQuestionValue(q) {
         return "";
     }
 
-    if (
-        q.type === "radio"
-    ) {
+    if (q.type === "radio") {
 
         const checked =
             dynamicForm.querySelector(
@@ -1154,10 +524,7 @@ function getQuestionValue(q) {
             : "";
     }
 
-
-    if (
-        q.type === "checkbox"
-    ) {
+    if (q.type === "checkbox") {
 
         const checked =
             dynamicForm.querySelectorAll(
@@ -1165,24 +532,17 @@ function getQuestionValue(q) {
             );
 
         return Array.from(checked)
-            .map(input =>
-                normalizeValue(input.value)
-            );
+            .map(input => normalizeValue(input.value));
     }
 
-
     const element =
-        document.getElementById(
-            q.id
-        );
+        document.getElementById(q.id);
 
     if (!element) {
         return "";
     }
 
-    return normalizeValue(
-        element.value
-    );
+    return normalizeValue(element.value);
 }
 
 
@@ -1196,46 +556,34 @@ function clearQuestionValue(q) {
         return;
     }
 
-    if (
-        q.type === "radio"
-    ) {
+    if (q.type === "radio") {
 
         dynamicForm
             .querySelectorAll(
                 `input[name="question_${CSS.escape(String(q.id))}"]`
             )
-            .forEach(
-                radio => {
-                    radio.checked = false;
-                }
-            );
+            .forEach(radio => {
+                radio.checked = false;
+            });
 
         return;
     }
 
-
-    if (
-        q.type === "checkbox"
-    ) {
+    if (q.type === "checkbox") {
 
         dynamicForm
             .querySelectorAll(
                 `input[data-question-id="${CSS.escape(String(q.id))}"]`
             )
-            .forEach(
-                checkbox => {
-                    checkbox.checked = false;
-                }
-            );
+            .forEach(checkbox => {
+                checkbox.checked = false;
+            });
 
         return;
     }
 
-
     const element =
-        document.getElementById(
-            q.id
-        );
+        document.getElementById(q.id);
 
     if (element) {
         element.value = "";
@@ -1249,13 +597,10 @@ function clearQuestionValue(q) {
 
 function showError(message) {
 
-    errorMessage.classList.remove(
-        "hidden"
-    );
+    errorMessage.classList.remove("hidden");
 
     errorText.textContent =
-        message ||
-        "حدث خطأ غير معروف.";
+        message || "حدث خطأ غير معروف.";
 
     window.scrollTo({
         top: 0,
@@ -1266,10 +611,7 @@ function showError(message) {
 
 function hideError() {
 
-    errorMessage.classList.add(
-        "hidden"
-    );
-
+    errorMessage.classList.add("hidden");
     errorText.textContent = "";
 }
 
@@ -1278,35 +620,20 @@ function hideError() {
    LOADING MESSAGE
 ========================================================= */
 
-function setLoadingMessage(
-    icon,
-    title,
-    message,
-    color = "blue"
-) {
+function setLoadingMessage(icon, title, message, color = "blue") {
 
     loadingBox.innerHTML = `
-
-        <div class="
-            text-${color}-600
-            text-5xl
-            mb-3
-        ">
+        <div class="text-${color}-600 text-5xl mb-3">
             ${escapeHTML(icon)}
         </div>
 
-        <h2 class="
-            font-bold
-            text-xl
-            mb-2
-        ">
+        <h2 class="font-bold text-xl mb-2">
             ${escapeHTML(title)}
         </h2>
 
         <p class="text-gray-600">
             ${escapeHTML(message)}
         </p>
-
     `;
 }
 
@@ -1318,9 +645,7 @@ function setLoadingMessage(
 function isQuestionVisible(q) {
 
     const div =
-        document.getElementById(
-            "div_" + q.id
-        );
+        document.getElementById("div_" + q.id);
 
     if (!div) {
         return false;
@@ -1345,31 +670,20 @@ function hasCondition(q) {
 }
 
 
-function conditionMatches(
-    currentValue,
-    conditionValue
-) {
+function conditionMatches(currentValue, conditionValue) {
 
     const expected =
-        normalizeValue(
-            conditionValue
-        );
+        normalizeValue(conditionValue);
 
-    if (
-        Array.isArray(currentValue)
-    ) {
+    if (Array.isArray(currentValue)) {
 
         return currentValue.some(
             value =>
-                normalizeValue(value) ===
-                expected
+                normalizeValue(value) === expected
         );
     }
 
-    return (
-        normalizeValue(currentValue) ===
-        expected
-    );
+    return normalizeValue(currentValue) === expected;
 }
 
 
@@ -1380,21 +694,11 @@ function conditionMatches(
 function hasDependency(q) {
 
     return Boolean(
-
         q &&
-
         q.dependentOn &&
-
-        q.dependentOn.questionId !==
-            undefined &&
-
-        q.dependentOn.questionId !==
-            null &&
-
-        String(
-            q.dependentOn.questionId
-        ).trim() !== ""
-
+        q.dependentOn.questionId !== undefined &&
+        q.dependentOn.questionId !== null &&
+        String(q.dependentOn.questionId).trim() !== ""
     );
 }
 
@@ -1405,21 +709,15 @@ function hasDependency(q) {
 
 function getParentQuestion(q) {
 
-    if (
-        !hasDependency(q)
-    ) {
+    if (!hasDependency(q)) {
         return null;
     }
 
     const parentId =
-        String(
-            q.dependentOn.questionId
-        ).trim();
+        String(q.dependentOn.questionId).trim();
 
     return questions.find(
-        item =>
-            String(item.id) ===
-            parentId
+        item => String(item.id) === parentId
     ) || null;
 }
 
@@ -1438,17 +736,11 @@ function getMappingReferences(
         return [];
     }
 
-    const keys =
-        Object.keys(mappings);
+    const keys = Object.keys(mappings);
 
     if (!keys.length) {
         return [];
     }
-
-
-    /*
-     * البحث أولاً بالمفتاح كما هو
-     */
 
     let foundKey =
         keys.find(
@@ -1457,92 +749,50 @@ function getMappingReferences(
                 normalizeValue(parentValue)
         );
 
-
-    /*
-     * لو القيمة الموجودة في select
-     * هي ID بينما الـ mapping مكتوب بالنص
-     * أو العكس.
-     */
-
-    if (
-        !foundKey &&
-        parentQuestion
-    ) {
+    if (!foundKey && parentQuestion) {
 
         const parentOption =
-            findOption(
-                parentQuestion,
-                parentValue
-            );
+            findOption(parentQuestion, parentValue);
 
         if (parentOption) {
 
             const parentId =
-                getOptionId(
-                    parentOption
-                );
+                getOptionId(parentOption);
 
             const parentText =
-                getOptionValue(
-                    parentOption
-                );
+                getOptionValue(parentOption);
 
             foundKey =
-                keys.find(
-                    key => {
+                keys.find(key => {
 
-                        const normalizedKey =
-                            normalizeValue(key);
+                    const normalizedKey =
+                        normalizeValue(key);
 
-                        return (
-                            normalizedKey ===
-                            normalizeValue(parentId)
-                            ||
-                            normalizedKey ===
-                            normalizeValue(parentText)
-                        );
-
-                    }
-                );
+                    return (
+                        normalizedKey === normalizeValue(parentId) ||
+                        normalizedKey === normalizeValue(parentText)
+                    );
+                });
         }
     }
-
 
     if (!foundKey) {
         return [];
     }
 
+    const result = mappings[foundKey];
 
-    const result =
-        mappings[foundKey];
-
-
-    if (
-        Array.isArray(result)
-    ) {
+    if (Array.isArray(result)) {
         return result;
     }
 
-
-    if (
-        result &&
-        typeof result === "object"
-    ) {
-
-        return Object.values(
-            result
-        );
+    if (result && typeof result === "object") {
+        return Object.values(result);
     }
 
-
-    if (
-        result !== undefined &&
-        result !== null
-    ) {
-
+    if (result !== undefined && result !== null) {
         return [result];
     }
-
 
     return [];
 }
@@ -1552,83 +802,51 @@ function getMappingReferences(
    CHECK OPTION ALLOWED
 ========================================================= */
 
-function isOptionAllowed(
-    option,
-    allowedReferences
-) {
+function isOptionAllowed(option, allowedReferences) {
 
-    if (
-        !Array.isArray(
-            allowedReferences
-        )
-    ) {
+    if (!Array.isArray(allowedReferences)) {
         return false;
     }
 
     return allowedReferences.some(
         reference =>
-            optionMatchesReference(
-                option,
-                reference
-            )
+            optionMatchesReference(option, reference)
     );
 }
 
 
 /* =========================================================
    UPDATE DEPENDENT QUESTION
-   الجزء المهم الذي تم إصلاحه
 ========================================================= */
 
 function updateDependentQuestion(q) {
 
-    if (
-        !hasDependency(q)
-    ) {
+    if (!hasDependency(q)) {
         return false;
     }
-
 
     const select =
-        document.getElementById(
-            q.id
-        );
+        document.getElementById(q.id);
 
-    if (
-        !select
-    ) {
+    if (!select) {
         return false;
     }
-
 
     const parent =
         getParentQuestion(q);
 
-    if (
-        !parent
-    ) {
+    if (!parent) {
 
         select.innerHTML = `
-            <option value="">
-                اختر...
-            </option>
+            <option value="">اختر...</option>
         `;
 
         select.value = "";
-
         return false;
     }
 
-
     const parentValue =
-        getQuestionValue(
-            parent
-        );
-
-
-    /*
-     * لو الأب فاضي
-     */
+        getQuestionValue(parent);
 
     if (
         !parentValue ||
@@ -1638,15 +856,12 @@ function updateDependentQuestion(q) {
         )
     ) {
 
-        const oldValue =
-            select.value;
+        const oldValue = select.value;
 
         select.innerHTML = `
-
             <option value="">
                 اختر أولاً ${escapeHTML(parent.title)}
             </option>
-
         `;
 
         select.value = "";
@@ -1654,10 +869,8 @@ function updateDependentQuestion(q) {
         return oldValue !== "";
     }
 
-
     const mappings =
         q.dependentOn.mappings || {};
-
 
     const allowedReferences =
         getMappingReferences(
@@ -1666,107 +879,46 @@ function updateDependentQuestion(q) {
             parent
         );
 
-
-    /*
-     * بناء القائمة
-     */
-
     let html = `
-
-        <option value="">
-            اختر...
-        </option>
-
+        <option value="">اختر...</option>
     `;
 
+    const oldValue = select.value;
+    let optionStillExists = false;
 
-    const oldValue =
-        select.value;
+    if (Array.isArray(q.options)) {
 
+        q.options.forEach(option => {
 
-    let optionStillExists =
-        false;
-
-
-    if (
-        Array.isArray(q.options)
-    ) {
-
-        q.options.forEach(
-            option => {
-
-                if (
-                    !isOptionAllowed(
-                        option,
-                        allowedReferences
-                    )
-                ) {
-                    return;
-                }
-
-
-                const value =
-                    getOptionValue(
-                        option
-                    );
-
-                const label =
-                    getOptionLabel(
-                        option
-                    );
-
-
-                if (
-                    normalizeValue(value) ===
-                    normalizeValue(oldValue)
-                ) {
-
-                    optionStillExists =
-                        true;
-                }
-
-
-                html += `
-
-                    <option
-                        value="${escapeHTML(value)}"
-                    >
-                        ${escapeHTML(label)}
-                    </option>
-
-                `;
-
+            if (!isOptionAllowed(option, allowedReferences)) {
+                return;
             }
-        );
 
+            const value = getOptionValue(option);
+            const label = getOptionLabel(option);
+
+            if (
+                normalizeValue(value) ===
+                normalizeValue(oldValue)
+            ) {
+                optionStillExists = true;
+            }
+
+            html += `
+                <option value="${escapeHTML(value)}">
+                    ${escapeHTML(label)}
+                </option>
+            `;
+        });
     }
 
+    select.innerHTML = html;
 
-    select.innerHTML =
-        html;
-
-
-    /*
-     * الاحتفاظ بالقيمة فقط لو ما زالت
-     * موجودة في القائمة الجديدة
-     */
-
-    if (
-        oldValue &&
-        optionStillExists
-    ) {
-
-        select.value =
-            oldValue;
-
+    if (oldValue && optionStillExists) {
+        select.value = oldValue;
+    } else {
+        select.value = "";
     }
-    else {
-
-        select.value =
-            "";
-
-    }
-
 
     return true;
 }
@@ -1778,56 +930,26 @@ function updateDependentQuestion(q) {
 
 function refreshAllDependencies() {
 
-    /*
-     * نكرر عدة مرات لأن ممكن يكون:
-     *
-     * محافظة
-     *    ↓
-     * مركز
-     *    ↓
-     * مدرسة
-     *    ↓
-     * فصل
-     *
-     * وبالتالي نتيجة السؤال الأول
-     * تؤثر على الثاني والثاني على الثالث.
-     */
-
-    for (
-        let pass = 0;
-        pass < 10;
-        pass++
-    ) {
+    for (let pass = 0; pass < 10; pass++) {
 
         let changed = false;
 
+        questions.forEach(q => {
 
-        questions.forEach(
-            q => {
+            if (hasDependency(q)) {
 
-                if (
-                    hasDependency(q)
-                ) {
+                const result =
+                    updateDependentQuestion(q);
 
-                    const result =
-                        updateDependentQuestion(
-                            q
-                        );
-
-                    if (result) {
-                        changed = true;
-                    }
-
+                if (result) {
+                    changed = true;
                 }
-
             }
-        );
-
+        });
 
         if (!changed) {
             break;
         }
-
     }
 }
 
@@ -1839,18 +961,13 @@ function refreshAllDependencies() {
 function updateQuestionVisibility(q) {
 
     const targetDiv =
-        document.getElementById(
-            "div_" + q.id
-        );
+        document.getElementById("div_" + q.id);
 
     if (!targetDiv) {
         return;
     }
 
-
-    if (
-        hasCondition(q)
-    ) {
+    if (hasCondition(q)) {
 
         const parent =
             questions.find(
@@ -1859,23 +976,15 @@ function updateQuestionVisibility(q) {
                     String(q.conditionId)
             );
 
-
         if (!parent) {
 
-            targetDiv.style.display =
-                "none";
-
+            targetDiv.style.display = "none";
             clearQuestionValue(q);
-
             return;
         }
 
-
         const parentValue =
-            getQuestionValue(
-                parent
-            );
-
+            getQuestionValue(parent);
 
         const shouldShow =
             conditionMatches(
@@ -1883,24 +992,15 @@ function updateQuestionVisibility(q) {
                 q.conditionValue
             );
 
-
         targetDiv.style.display =
-            shouldShow
-                ? "block"
-                : "none";
-
+            shouldShow ? "block" : "none";
 
         if (!shouldShow) {
-
             clearQuestionValue(q);
         }
 
-    }
-    else {
-
-        targetDiv.style.display =
-            "block";
-
+    } else {
+        targetDiv.style.display = "block";
     }
 }
 
@@ -1911,52 +1011,23 @@ function updateQuestionVisibility(q) {
 
 function refreshAllConditions() {
 
-    /*
-     * أولاً شروط الظهور
-     */
+    for (let pass = 0; pass < 10; pass++) {
 
-    for (
-        let pass = 0;
-        pass < 10;
-        pass++
-    ) {
-
-        questions.forEach(
-            q => {
-
-                updateQuestionVisibility(
-                    q
-                );
-
-            }
-        );
-
+        questions.forEach(q => {
+            updateQuestionVisibility(q);
+        });
     }
-
-
-    /*
-     * ثانياً القوائم التابعة
-     */
 
     refreshAllDependencies();
 
+    questions.forEach(q => {
 
-    /*
-     * ثالثاً required
-     */
-
-    questions.forEach(
-        q => {
-
-            setRequired(
-                q,
-                q.required &&
-                isQuestionVisible(q)
-            );
-
-        }
-    );
-
+        setRequired(
+            q,
+            q.required &&
+            isQuestionVisible(q)
+        );
+    });
 }
 
 
@@ -1964,79 +1035,39 @@ function refreshAllConditions() {
    REQUIRED
 ========================================================= */
 
-function setRequired(
-    q,
-    required
-) {
+function setRequired(q, required) {
 
     const element =
-        document.getElementById(
-            q.id
-        );
-
+        document.getElementById(q.id);
 
     if (
         element &&
-        ![
-            "radio",
-            "checkbox"
-        ].includes(q.type)
+        !["radio", "checkbox"].includes(q.type)
     ) {
 
         if (required) {
-
-            element.setAttribute(
-                "required",
-                "required"
-            );
-
+            element.setAttribute("required", "required");
+        } else {
+            element.removeAttribute("required");
         }
-        else {
-
-            element.removeAttribute(
-                "required"
-            );
-
-        }
-
     }
 
-
-    if (
-        q.type === "radio" ||
-        q.type === "checkbox"
-    ) {
+    if (q.type === "radio" || q.type === "checkbox") {
 
         const controls =
             dynamicForm.querySelectorAll(
                 `input[data-question-id="${CSS.escape(String(q.id))}"]`
             );
 
+        controls.forEach(control => {
 
-        controls.forEach(
-            control => {
-
-                if (required) {
-
-                    control.setAttribute(
-                        "required",
-                        "required"
-                    );
-
-                }
-                else {
-
-                    control.removeAttribute(
-                        "required"
-                    );
-
-                }
-
+            if (required) {
+                control.setAttribute("required", "required");
+            } else {
+                control.removeAttribute("required");
             }
-        );
-
+        });
     }
-
 }
 
 
@@ -2047,7 +1078,6 @@ function setRequired(
 function getInputType(type) {
 
     const allowed = [
-
         "text",
         "number",
         "tel",
@@ -2057,12 +1087,9 @@ function getInputType(type) {
         "datetime-local",
         "url",
         "password"
-
     ];
 
-    return allowed.includes(type)
-        ? type
-        : "text";
+    return allowed.includes(type) ? type : "text";
 }
 
 
@@ -2070,21 +1097,12 @@ function getInputType(type) {
    RENDER QUESTION
 ========================================================= */
 
-function renderQuestion(
-    q,
-    index
-) {
+function renderQuestion(q, index) {
 
     const id =
-        String(
-            q.id ??
-            `q_${index + 1}`
-        );
+        String(q.id ?? `q_${index + 1}`);
 
-
-    q.id =
-        id;
-
+    q.id = id;
 
     const title =
         String(
@@ -2093,56 +1111,27 @@ function renderQuestion(
             `السؤال ${index + 1}`
         );
 
-
     const type =
-        String(
-            q.type ??
-            "text"
-        ).toLowerCase();
+        String(q.type ?? "text").toLowerCase();
 
+    q.type = type;
 
     const required =
-        Boolean(
-            q.required
-        );
-
+        Boolean(q.required);
 
     const visible =
         !hasCondition(q);
 
-
     let html = `
-
         <div
             id="div_${escapeHTML(id)}"
             data-question-id="${escapeHTML(id)}"
-            class="
-                question-card
-                p-4
-                md:p-5
-                border
-                border-gray-200
-                rounded-2xl
-                bg-gray-50
-            "
-            style="
-                display:${visible ? "block" : "none"};
-            "
+            class="question-card p-4 md:p-5 border border-gray-200 rounded-2xl bg-gray-50"
+            style="display:${visible ? "block" : "none"};"
         >
 
-            <label
-                class="
-                    block
-                    font-bold
-                    text-gray-800
-                    mb-3
-                "
-            >
-
-                <span class="
-                    text-blue-600
-                    ml-1
-                ">
+            <label class="block font-bold text-gray-800 mb-3">
+                <span class="text-blue-600 ml-1">
                     ${index + 1}.
                 </span>
 
@@ -2150,384 +1139,174 @@ function renderQuestion(
 
                 ${
                     required
-                    ?
-                    '<span class="text-red-500 mr-1">*</span>'
-                    :
-                    ''
+                    ? '<span class="text-red-500 mr-1">*</span>'
+                    : ''
                 }
-
             </label>
-
     `;
 
-
-    /* =====================================================
-       SELECT
-    ===================================================== */
-
-    if (
-        type === "select"
-    ) {
+    if (type === "select") {
 
         let initialOptions = "";
 
-
-        if (
-            hasDependency(q)
-        ) {
+        if (hasDependency(q)) {
 
             initialOptions = `
-
                 <option value="">
                     اختر أولاً القائمة السابقة...
                 </option>
-
             `;
 
-        }
-        else {
+        } else {
 
             initialOptions = `
-
-                <option value="">
-                    اختر...
-                </option>
-
+                <option value="">اختر...</option>
             `;
 
+            if (Array.isArray(q.options)) {
 
-            if (
-                Array.isArray(q.options)
-            ) {
+                q.options.forEach(option => {
 
-                q.options.forEach(
-                    option => {
+                    const value =
+                        getOptionValue(option);
 
-                        const value =
-                            getOptionValue(
-                                option
-                            );
+                    const label =
+                        getOptionLabel(option);
 
-                        const label =
-                            getOptionLabel(
-                                option
-                            );
-
-
-                        initialOptions += `
-
-                            <option
-                                value="${escapeHTML(value)}"
-                            >
-                                ${escapeHTML(label)}
-                            </option>
-
-                        `;
-
-                    }
-                );
-
+                    initialOptions += `
+                        <option value="${escapeHTML(value)}">
+                            ${escapeHTML(label)}
+                        </option>
+                    `;
+                });
             }
-
         }
 
-
         html += `
-
             <select
                 id="${escapeHTML(id)}"
                 name="${escapeHTML(id)}"
-                class="
-                    w-full
-                    p-3
-                    border
-                    border-gray-300
-                    rounded-xl
-                    bg-white
-                    focus:ring-2
-                    focus:ring-blue-500
-                    focus:border-blue-500
-                    outline-none
-                "
+                class="w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             >
-
                 ${initialOptions}
-
             </select>
-
         `;
 
-    }
-
-
-    /* =====================================================
-       TEXTAREA
-    ===================================================== */
-
-    else if (
-        type === "textarea"
-    ) {
+    } else if (type === "textarea") {
 
         html += `
-
             <textarea
                 id="${escapeHTML(id)}"
                 name="${escapeHTML(id)}"
                 rows="4"
-                class="
-                    w-full
-                    p-3
-                    border
-                    border-gray-300
-                    rounded-xl
-                    bg-white
-                    focus:ring-2
-                    focus:ring-blue-500
-                    focus:border-blue-500
-                    outline-none
-                    resize-y
-                "
-                placeholder="${escapeHTML(
-                    q.placeholder || ""
-                )}"
+                class="w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
+                placeholder="${escapeHTML(q.placeholder || "")}"
             ></textarea>
-
         `;
 
-    }
+    } else if (type === "radio") {
 
+        html += `<div class="space-y-2">`;
 
-    /* =====================================================
-       RADIO
-    ===================================================== */
+        if (Array.isArray(q.options)) {
 
-    else if (
-        type === "radio"
-    ) {
+            q.options.forEach((option, optionIndex) => {
 
-        html += `
+                const value =
+                    getOptionValue(option);
 
-            <div class="space-y-2">
+                const label =
+                    getOptionLabel(option);
 
-        `;
-
-
-        if (
-            Array.isArray(q.options)
-        ) {
-
-            q.options.forEach(
-                (option, optionIndex) => {
-
-                    const value =
-                        getOptionValue(
-                            option
-                        );
-
-                    const label =
-                        getOptionLabel(
-                            option
-                        );
-
-
-                    html += `
-
-                        <label
-                            class="
-                                option-item
-                                cursor-pointer
-                            "
+                html += `
+                    <label class="option-item cursor-pointer">
+                        <input
+                            type="radio"
+                            name="question_${escapeHTML(id)}"
+                            value="${escapeHTML(value)}"
+                            data-question-id="${escapeHTML(id)}"
+                            id="${escapeHTML(id)}_radio_${optionIndex}"
                         >
 
-                            <input
-                                type="radio"
-                                name="question_${escapeHTML(id)}"
-                                value="${escapeHTML(value)}"
-                                data-question-id="${escapeHTML(id)}"
-                                id="${escapeHTML(id)}_radio_${optionIndex}"
-                            >
-
-                            <span>
-                                ${escapeHTML(label)}
-                            </span>
-
-                        </label>
-
-                    `;
-
-                }
-            );
-
+                        <span>${escapeHTML(label)}</span>
+                    </label>
+                `;
+            });
         }
 
+        html += `</div>`;
 
-        html += `
-            </div>
-        `;
+    } else if (type === "checkbox") {
 
-    }
+        html += `<div class="space-y-2">`;
 
+        if (Array.isArray(q.options)) {
 
-    /* =====================================================
-       CHECKBOX
-    ===================================================== */
+            q.options.forEach((option, optionIndex) => {
 
-    else if (
-        type === "checkbox"
-    ) {
+                const value =
+                    getOptionValue(option);
 
-        html += `
+                const label =
+                    getOptionLabel(option);
 
-            <div class="space-y-2">
-
-        `;
-
-
-        if (
-            Array.isArray(q.options)
-        ) {
-
-            q.options.forEach(
-                (option, optionIndex) => {
-
-                    const value =
-                        getOptionValue(
-                            option
-                        );
-
-                    const label =
-                        getOptionLabel(
-                            option
-                        );
-
-
-                    html += `
-
-                        <label
-                            class="
-                                option-item
-                                cursor-pointer
-                            "
+                html += `
+                    <label class="option-item cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="question_${escapeHTML(id)}[]"
+                            value="${escapeHTML(value)}"
+                            data-question-id="${escapeHTML(id)}"
+                            id="${escapeHTML(id)}_check_${optionIndex}"
                         >
 
-                            <input
-                                type="checkbox"
-                                name="question_${escapeHTML(id)}[]"
-                                value="${escapeHTML(value)}"
-                                data-question-id="${escapeHTML(id)}"
-                                id="${escapeHTML(id)}_check_${optionIndex}"
-                            >
-
-                            <span>
-                                ${escapeHTML(label)}
-                            </span>
-
-                        </label>
-
-                    `;
-
-                }
-            );
-
+                        <span>${escapeHTML(label)}</span>
+                    </label>
+                `;
+            });
         }
 
+        html += `</div>`;
 
-        html += `
-            </div>
-        `;
-
-    }
-
-
-    /* =====================================================
-       NORMAL INPUT
-    ===================================================== */
-
-    else {
+    } else {
 
         const inputType =
             getInputType(type);
 
-
         let extraAttributes = "";
 
-
-        if (
-            title.includes("القومي")
-        ) {
+        if (title.includes("القومي")) {
 
             extraAttributes = `
-
                 pattern="\\d{14}"
-
                 maxlength="14"
-
                 minlength="14"
-
                 inputmode="numeric"
-
                 autocomplete="off"
-
             `;
-
         }
 
-
         html += `
-
             <input
-
                 type="${escapeHTML(inputType)}"
-
                 id="${escapeHTML(id)}"
-
                 name="${escapeHTML(id)}"
-
                 ${extraAttributes}
-
-                class="
-                    w-full
-                    p-3
-                    border
-                    border-gray-300
-                    rounded-xl
-                    bg-white
-                    focus:ring-2
-                    focus:ring-blue-500
-                    focus:border-blue-500
-                    outline-none
-                "
-
-                placeholder="${escapeHTML(
-                    q.placeholder || ""
-                )}"
-
+                class="w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="${escapeHTML(q.placeholder || "")}"
                 ${
                     title.includes("القومي")
-                    ?
-                    'title="يجب أن يكون الرقم القومي مكوناً من 14 رقمًا"'
-                    :
-                    ""
+                    ? 'title="يجب أن يكون الرقم القومي مكوناً من 14 رقمًا"'
+                    : ""
                 }
-
             >
-
         `;
-
     }
 
-
     html += `
-
-            <div
-                id="error_${escapeHTML(id)}"
-                class="field-error hidden"
-            ></div>
-
+            <div id="error_${escapeHTML(id)}" class="field-error hidden"></div>
         </div>
-
     `;
-
 
     return html;
 }
@@ -2541,70 +1320,29 @@ function renderForm() {
 
     let html = "";
 
-
-    questions.forEach(
-        (q, index) => {
-
-            html +=
-                renderQuestion(
-                    q,
-                    index
-                );
-
-        }
-    );
-
+    questions.forEach((q, index) => {
+        html += renderQuestion(q, index);
+    });
 
     html += `
-
         <div class="pt-3">
-
             <button
                 id="submitButton"
                 type="submit"
-                class="
-                    w-full
-                    bg-blue-600
-                    hover:bg-blue-700
-                    active:bg-blue-800
-                    text-white
-                    p-4
-                    rounded-xl
-                    font-bold
-                    text-lg
-                    transition
-                    shadow-md
-                    disabled:opacity-70
-                    disabled:cursor-not-allowed
-                "
+                class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white p-4 rounded-xl font-bold text-lg transition shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
             >
-
-                <span id="submitButtonText">
-                    تسليم البيانات
-                </span>
-
+                <span id="submitButtonText">تسليم البيانات</span>
             </button>
-
         </div>
-
     `;
 
+    dynamicForm.innerHTML = html;
 
-    dynamicForm.innerHTML =
-        html;
-
-
-    loadingBox.classList.add(
-        "hidden"
-    );
-
-
-    dynamicForm.classList.remove(
-        "hidden"
-    );
-
+    loadingBox.classList.add("hidden");
+    dynamicForm.classList.remove("hidden");
 
     attachQuestionEvents();
+    refreshAllConditions();
 }
 
 
@@ -2614,86 +1352,46 @@ function renderForm() {
 
 function attachQuestionEvents() {
 
-    questions.forEach(
-        q => {
+    questions.forEach(q => {
 
-            const element =
-                document.getElementById(
-                    q.id
-                );
+        const element =
+            document.getElementById(q.id);
 
+        if (element) {
 
-            if (element) {
+            element.addEventListener("input", () => {
 
-                element.addEventListener(
-                    "input",
-                    () => {
+                clearFieldError(q.id);
+                refreshAllConditions();
 
-                        clearFieldError(
-                            q.id
-                        );
+            });
 
-                        refreshAllConditions();
+            element.addEventListener("change", () => {
 
-                    }
-                );
+                clearFieldError(q.id);
+                refreshAllConditions();
 
-
-                element.addEventListener(
-                    "change",
-                    () => {
-
-                        clearFieldError(
-                            q.id
-                        );
-
-                        /*
-                         * هنا يتم تحديث القوائم التابعة
-                         * فور تغيير الكومبو
-                         */
-
-                        refreshAllConditions();
-
-                    }
-                );
-
-            }
-
-
-            if (
-                q.type === "radio" ||
-                q.type === "checkbox"
-            ) {
-
-                const controls =
-                    dynamicForm.querySelectorAll(
-                        `input[data-question-id="${CSS.escape(String(q.id))}"]`
-                    );
-
-
-                controls.forEach(
-                    control => {
-
-                        control.addEventListener(
-                            "change",
-                            () => {
-
-                                clearFieldError(
-                                    q.id
-                                );
-
-                                refreshAllConditions();
-
-                            }
-                        );
-
-                    }
-                );
-
-            }
-
+            });
         }
-    );
+
+        if (q.type === "radio" || q.type === "checkbox") {
+
+            const controls =
+                dynamicForm.querySelectorAll(
+                    `input[data-question-id="${CSS.escape(String(q.id))}"]`
+                );
+
+            controls.forEach(control => {
+
+                control.addEventListener("change", () => {
+
+                    clearFieldError(q.id);
+                    refreshAllConditions();
+
+                });
+            });
+        }
+    });
 }
 
 
@@ -2701,41 +1399,22 @@ function attachQuestionEvents() {
    FIELD ERRORS
 ========================================================= */
 
-function showFieldError(
-    q,
-    message
-) {
+function showFieldError(q, message) {
 
     const div =
-        document.getElementById(
-            "div_" + q.id
-        );
-
+        document.getElementById("div_" + q.id);
 
     if (div) {
-
-        div.classList.add(
-            "error-field"
-        );
-
+        div.classList.add("error-field");
     }
 
-
     const error =
-        document.getElementById(
-            "error_" + q.id
-        );
-
+        document.getElementById("error_" + q.id);
 
     if (error) {
 
-        error.textContent =
-            message;
-
-        error.classList.remove(
-            "hidden"
-        );
-
+        error.textContent = message;
+        error.classList.remove("hidden");
     }
 }
 
@@ -2743,50 +1422,28 @@ function showFieldError(
 function clearFieldError(qId) {
 
     const div =
-        document.getElementById(
-            "div_" + qId
-        );
-
+        document.getElementById("div_" + qId);
 
     if (div) {
-
-        div.classList.remove(
-            "error-field"
-        );
-
+        div.classList.remove("error-field");
     }
 
-
     const error =
-        document.getElementById(
-            "error_" + qId
-        );
-
+        document.getElementById("error_" + qId);
 
     if (error) {
 
-        error.textContent =
-            "";
-
-        error.classList.add(
-            "hidden"
-        );
-
+        error.textContent = "";
+        error.classList.add("hidden");
     }
 }
 
 
 function clearAllFieldErrors() {
 
-    questions.forEach(
-        q => {
-
-            clearFieldError(
-                q.id
-            );
-
-        }
-    );
+    questions.forEach(q => {
+        clearFieldError(q.id);
+    });
 }
 
 
@@ -2796,35 +1453,21 @@ function clearAllFieldErrors() {
 
 function validateQuestion(q) {
 
-    clearFieldError(
-        q.id
-    );
+    clearFieldError(q.id);
 
-
-    if (
-        !isQuestionVisible(q)
-    ) {
-
+    if (!isQuestionVisible(q)) {
         return true;
-
     }
-
 
     const value =
         getQuestionValue(q);
 
-
-    if (
-        q.required
-    ) {
+    if (q.required) {
 
         const empty =
             Array.isArray(value)
-                ?
-                value.length === 0
-                :
-                !String(value).trim();
-
+            ? value.length === 0
+            : !String(value).trim();
 
         if (empty) {
 
@@ -2833,117 +1476,74 @@ function validateQuestion(q) {
                 `يرجى إدخال "${q.title}".`
             );
 
-
             return false;
-
         }
-
     }
 
+    if (q.title && q.title.includes("القومي") && value) {
 
-    if (
-        q.title &&
-        q.title.includes("القومي") &&
-        value
-    ) {
-
-        if (
-            !/^\d{14}$/.test(
-                String(value)
-            )
-        ) {
+        if (!/^\d{14}$/.test(String(value))) {
 
             showFieldError(
                 q,
                 "الرقم القومي يجب أن يكون مكونًا من 14 رقمًا."
             );
 
-
             return false;
-
         }
-
     }
 
-
-    if (
-        q.type === "email" &&
-        value
-    ) {
+    if (q.type === "email" && value) {
 
         const emailRegex =
             /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
-        if (
-            !emailRegex.test(
-                String(value)
-            )
-        ) {
+        if (!emailRegex.test(String(value))) {
 
             showFieldError(
                 q,
                 "يرجى إدخال بريد إلكتروني صحيح."
             );
 
-
             return false;
-
         }
-
     }
 
+    if (q.minLength && value) {
 
-    if (
-        q.minLength &&
-        value
-    ) {
+        const length =
+            Array.isArray(value)
+            ? value.join("").length
+            : String(value).length;
 
-        if (
-            String(value).length <
-            Number(q.minLength)
-        ) {
+        if (length < Number(q.minLength)) {
 
             showFieldError(
                 q,
                 `يجب ألا تقل الإجابة عن ${q.minLength} أحرف.`
             );
 
-
             return false;
-
         }
-
     }
 
+    if (q.maxLength && value) {
 
-    if (
-        q.maxLength &&
-        value
-    ) {
+        const length =
+            Array.isArray(value)
+            ? value.join("").length
+            : String(value).length;
 
-        if (
-            String(value).length >
-            Number(q.maxLength)
-        ) {
+        if (length > Number(q.maxLength)) {
 
             showFieldError(
                 q,
                 `يجب ألا تزيد الإجابة عن ${q.maxLength} أحرف.`
             );
 
-
             return false;
-
         }
-
     }
-
-
-    /*
-     * التأكد من أن اختيار القائمة التابعة
-     * ما زال مسموحًا
-     */
 
     if (
         q.type === "select" &&
@@ -2954,14 +1554,10 @@ function validateQuestion(q) {
         const parent =
             getParentQuestion(q);
 
-
         if (parent) {
 
             const parentValue =
-                getQuestionValue(
-                    parent
-                );
-
+                getQuestionValue(parent);
 
             const allowedReferences =
                 getMappingReferences(
@@ -2970,13 +1566,8 @@ function validateQuestion(q) {
                     parent
                 );
 
-
             const selectedOption =
-                findOption(
-                    q,
-                    value
-                );
-
+                findOption(q, value);
 
             if (
                 !selectedOption ||
@@ -2991,15 +1582,10 @@ function validateQuestion(q) {
                     "يرجى اختيار قيمة صحيحة من القائمة الحالية."
                 );
 
-
                 return false;
-
             }
-
         }
-
     }
-
 
     return true;
 }
@@ -3013,28 +1599,17 @@ function collectAnswers() {
 
     const answers = {};
 
+    for (const q of questions) {
 
-    for (
-        const q of questions
-    ) {
+        if (!isQuestionVisible(q)) {
 
-        if (
-            !isQuestionVisible(q)
-        ) {
-
-            answers[q.id] =
-                "";
-
+            answers[q.id] = "";
             continue;
-
         }
-
 
         answers[q.id] =
             getQuestionValue(q);
-
     }
-
 
     return answers;
 }
@@ -3044,69 +1619,34 @@ function collectAnswers() {
    DUPLICATE
 ========================================================= */
 
-async function checkDuplicate(
-    q,
-    value
-) {
+async function checkDuplicate(q, value) {
 
-    if (
-        !q.unique ||
-        !value
-    ) {
-
+    if (!q.unique || !value) {
         return false;
-
     }
 
-
-    if (
-        Array.isArray(value)
-    ) {
-
+    if (Array.isArray(value)) {
         return false;
-
     }
-
 
     const fieldPath =
         `answers.${q.id}`;
-
 
     try {
 
         const dupQuery =
             query(
-
-                collection(
-                    db,
-                    "submissions"
-                ),
-
-                where(
-                    "formId",
-                    "==",
-                    formId
-                ),
-
-                where(
-                    fieldPath,
-                    "==",
-                    value
-                )
-
+                collection(db, "submissions"),
+                where("formId", "==", formId),
+                where(fieldPath, "==", value)
             );
-
 
         const snap =
-            await getDocs(
-                dupQuery
-            );
-
+            await getDocs(dupQuery);
 
         return !snap.empty;
 
-    }
-    catch(error) {
+    } catch (error) {
 
         console.error(
             "Duplicate Check Error:",
@@ -3114,7 +1654,6 @@ async function checkDuplicate(
         );
 
         throw error;
-
     }
 }
 
@@ -3128,72 +1667,34 @@ async function generateUniqueCode() {
     const chars =
         "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-
-    for (
-        let attempt = 0;
-        attempt < 20;
-        attempt++
-    ) {
+    for (let attempt = 0; attempt < 20; attempt++) {
 
         let result = "";
 
-
-        for (
-            let i = 0;
-            i < 8;
-            i++
-        ) {
+        for (let i = 0; i < 8; i++) {
 
             result +=
                 chars.charAt(
                     Math.floor(
-                        Math.random() *
-                        chars.length
+                        Math.random() * chars.length
                     )
                 );
-
         }
-
 
         const codeQuery =
             query(
-
-                collection(
-                    db,
-                    "submissions"
-                ),
-
-                where(
-                    "formId",
-                    "==",
-                    formId
-                ),
-
-                where(
-                    "uniqueId",
-                    "==",
-                    result
-                )
-
+                collection(db, "submissions"),
+                where("formId", "==", formId),
+                where("uniqueId", "==", result)
             );
-
 
         const snap =
-            await getDocs(
-                codeQuery
-            );
+            await getDocs(codeQuery);
 
-
-        if (
-            snap.empty
-        ) {
-
+        if (snap.empty) {
             return result;
-
         }
-
     }
-
 
     throw new Error(
         "تعذر إنشاء كود مميز جديد. حاول مرة أخرى."
@@ -3209,31 +1710,14 @@ async function getNextSerialNumber() {
 
     const countQuery =
         query(
-
-            collection(
-                db,
-                "submissions"
-            ),
-
-            where(
-                "formId",
-                "==",
-                formId
-            )
-
+            collection(db, "submissions"),
+            where("formId", "==", formId)
         );
-
 
     const countSnap =
-        await getDocs(
-            countQuery
-        );
+        await getDocs(countQuery);
 
-
-    return (
-        countSnap.size +
-        1
-    );
+    return countSnap.size + 1;
 }
 
 
@@ -3241,30 +1725,19 @@ async function getNextSerialNumber() {
    SUBMIT LOADING
 ========================================================= */
 
-function setSubmitLoading(
-    loading
-) {
+function setSubmitLoading(loading) {
 
     const button =
-        document.getElementById(
-            "submitButton"
-        );
-
+        document.getElementById("submitButton");
 
     const buttonText =
-        document.getElementById(
-            "submitButtonText"
-        );
-
+        document.getElementById("submitButtonText");
 
     if (!button) {
         return;
     }
 
-
-    button.disabled =
-        loading;
-
+    button.disabled = loading;
 
     if (loading) {
 
@@ -3273,16 +1746,630 @@ function setSubmitLoading(
             "cursor-not-allowed"
         );
 
-
         if (buttonText) {
 
             buttonText.innerHTML = `
+                <span class="inline-flex items-center justify-center gap-2">
+                    <span class="inline-block w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+                    جاري حفظ البيانات...
+                </span>
+            `;
+        }
 
-                <span class="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                ">
+    } else {
 
-                    <span class
+        button.classList.remove(
+            "opacity-70",
+            "cursor-not-allowed"
+        );
+
+        if (buttonText) {
+            buttonText.textContent =
+                "تسليم البيانات";
+        }
+    }
+}
+
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function formatDate(value) {
+
+    try {
+
+        let date;
+
+        if (
+            value &&
+            typeof value.toDate === "function"
+        ) {
+            date = value.toDate();
+        } else {
+            date = value ? new Date(value) : new Date();
+        }
+
+        return date.toLocaleString(
+            "ar-EG",
+            {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    } catch (e) {
+
+        return new Date().toLocaleString("ar-EG");
+    }
+}
+
+
+/* =========================================================
+   RECEIPT VALUE
+========================================================= */
+
+function receiptValue(value) {
+
+    if (Array.isArray(value)) {
+
+        return value
+            .map(v => normalizeValue(v))
+            .filter(Boolean)
+            .join("، ");
+    }
+
+    return normalizeValue(value);
+}
+
+
+/* =========================================================
+   BUILD RECEIPT
+========================================================= */
+
+function buildReceipt() {
+
+    document.getElementById("receiptTitle").textContent =
+        formDataLoaded?.title ||
+        formDataLoaded?.name ||
+        "إيصال تسجيل البيانات";
+
+    document.getElementById("receiptSerial").textContent =
+        submittedSerial ?? "-";
+
+    document.getElementById("receiptUnique").textContent =
+        submittedUniqueId ?? "-";
+
+    document.getElementById("receiptDate").textContent =
+        formatDate(submittedDate);
+
+    const tbody =
+        document.getElementById("receiptAnswers");
+
+    tbody.innerHTML = "";
+
+    questions.forEach(q => {
+
+        const value =
+            submittedAnswers[q.id];
+
+        const shownValue =
+            receiptValue(value);
+
+        if (
+            !shownValue &&
+            !q.showEmptyOnReceipt
+        ) {
+            return;
+        }
+
+        const tr =
+            document.createElement("tr");
+
+        const td1 =
+            document.createElement("td");
+
+        const td2 =
+            document.createElement("td");
+
+        td1.style.cssText =
+            "border:1px solid #9ca3af;padding:10px;font-weight:bold;background:#f9fafb;";
+
+        td2.style.cssText =
+            "border:1px solid #9ca3af;padding:10px;";
+
+        td1.textContent =
+            q.title || q.label || q.id;
+
+        td2.textContent =
+            shownValue || "—";
+
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+/* =========================================================
+   SHOW SUCCESS
+========================================================= */
+
+function showSuccess() {
+
+    buildReceipt();
+
+    document.getElementById("serialNumSpan").textContent =
+        submittedSerial ?? "-";
+
+    document.getElementById("uniqueIdSpan").textContent =
+        submittedUniqueId ?? "-";
+
+    dynamicForm.classList.add("hidden");
+    errorMessage.classList.add("hidden");
+    successMessage.classList.remove("hidden");
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+/* =========================================================
+   SUBMIT
+========================================================= */
+
+async function submitForm() {
+
+    if (isSubmitting) {
+        return;
+    }
+
+    hideError();
+    clearAllFieldErrors();
+
+    refreshAllConditions();
+
+    let valid = true;
+    let firstInvalid = null;
+
+    for (const q of questions) {
+
+        const result =
+            validateQuestion(q);
+
+        if (!result) {
+
+            valid = false;
+
+            if (!firstInvalid) {
+                firstInvalid = q;
+            }
+        }
+    }
+
+    if (!valid) {
+
+        if (firstInvalid) {
+
+            const div =
+                document.getElementById(
+                    "div_" + firstInvalid.id
+                );
+
+            if (div) {
+
+                div.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }
+        }
+
+        return;
+    }
+
+    const answers =
+        collectAnswers();
+
+    try {
+
+        isSubmitting = true;
+        setSubmitLoading(true);
+
+        /*
+         * فحص التكرار لكل سؤال محدد بأنه unique
+         */
+
+        for (const q of questions) {
+
+            if (!q.unique) {
+                continue;
+            }
+
+            if (!isQuestionVisible(q)) {
+                continue;
+            }
+
+            const value =
+                answers[q.id];
+
+            if (
+                Array.isArray(value) ||
+                !normalizeValue(value)
+            ) {
+                continue;
+            }
+
+            const duplicate =
+                await checkDuplicate(
+                    q,
+                    normalizeValue(value)
+                );
+
+            if (duplicate) {
+
+                showFieldError(
+                    q,
+                    "هذه البيانات مسجلة بالفعل ولا يمكن تكرارها."
+                );
+
+                const div =
+                    document.getElementById(
+                        "div_" + q.id
+                    );
+
+                if (div) {
+
+                    div.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                }
+
+                return;
+            }
+        }
+
+        /*
+         * إنشاء الرقم التسلسلي والكود
+         */
+
+        const serial =
+            await getNextSerialNumber();
+
+        const uniqueId =
+            await generateUniqueCode();
+
+        /*
+         * حفظ كل البيانات في Firestore
+         */
+
+        const submissionData = {
+
+            formId: formId,
+
+            answers: answers,
+
+            serialNumber: serial,
+
+            uniqueId: uniqueId,
+
+            formTitle:
+                formDataLoaded?.title ||
+                formDataLoaded?.name ||
+                "",
+
+            submittedAt:
+                serverTimestamp(),
+
+            createdAt:
+                new Date().toISOString()
+        };
+
+        const submissionRef =
+            await addDoc(
+                collection(db, "submissions"),
+                submissionData
+            );
+
+        /*
+         * حفظ القيم محليًا للإيصال
+         */
+
+        submittedAnswers =
+            answers;
+
+        submittedSerial =
+            serial;
+
+        submittedUniqueId =
+            uniqueId;
+
+        submittedDate =
+            new Date();
+
+        /*
+         * تخزين رقم المستند في sessionStorage
+         * ليسهل الرجوع له داخل نفس الجلسة
+         */
+
+        try {
+
+            sessionStorage.setItem(
+                "lastSubmission",
+                JSON.stringify({
+                    id: submissionRef.id,
+                    formId: formId,
+                    serialNumber: serial,
+                    uniqueId: uniqueId
+                })
+            );
+
+        } catch (e) {
+            console.warn(
+                "SessionStorage unavailable",
+                e
+            );
+        }
+
+        showSuccess();
+
+    } catch (error) {
+
+        console.error(
+            "Submit Error:",
+            error
+        );
+
+        let message =
+            "تعذر حفظ البيانات. حاول مرة أخرى.";
+
+        if (error?.code === "permission-denied") {
+
+            message =
+                "تم رفض عملية الحفظ من Firebase. راجع قواعد Firestore.";
+
+        } else if (
+            error?.code === "failed-precondition"
+        ) {
+
+            message =
+                "يوجد فهرس مطلوب في Firebase لهذا الاستعلام.";
+
+        } else if (
+            error?.message
+        ) {
+
+            message =
+                error.message;
+        }
+
+        showError(message);
+
+    } finally {
+
+        isSubmitting = false;
+        setSubmitLoading(false);
+    }
+}
+
+
+/* =========================================================
+   FORM SUBMIT EVENT
+========================================================= */
+
+dynamicForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+        submitForm();
+    }
+);
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+document
+    .getElementById("printButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            buildReceipt();
+
+            setTimeout(() => {
+
+                window.print();
+
+            }, 150);
+        }
+    );
+
+
+/* =========================================================
+   BACK
+========================================================= */
+
+document
+    .getElementById("backButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            if (window.history.length > 1) {
+
+                window.history.back();
+
+            } else {
+
+                window.location.href = "index.html";
+            }
+        }
+    );
+
+
+/* =========================================================
+   LOAD FORM
+========================================================= */
+
+async function loadForm() {
+
+    if (!formId) {
+
+        setLoadingMessage(
+            "⚠️",
+            "رابط غير صحيح",
+            "لم يتم العثور على formId في رابط النموذج.",
+            "red"
+        );
+
+        return;
+    }
+
+    try {
+
+        setLoadingMessage(
+            "⏳",
+            "جاري تحميل النموذج",
+            "يرجى الانتظار..."
+        );
+
+        /*
+         * الشكل الأساسي:
+         * forms/{formId}
+         */
+
+        const formRef =
+            doc(
+                db,
+                "forms",
+                formId
+            );
+
+        const formSnap =
+            await getDoc(formRef);
+
+        if (!formSnap.exists()) {
+
+            throw new Error(
+                "النموذج غير موجود في مجموعة forms."
+            );
+        }
+
+        formDataLoaded =
+            formSnap.data();
+
+        /*
+         * دعم أكثر من اسم محتمل لمصفوفة الأسئلة
+         */
+
+        const rawQuestions =
+            formDataLoaded.questions ??
+            formDataLoaded.fields ??
+            formDataLoaded.formQuestions ??
+            [];
+
+        if (!Array.isArray(rawQuestions)) {
+
+            throw new Error(
+                "بيانات الأسئلة داخل النموذج ليست مصفوفة صحيحة."
+            );
+        }
+
+        questions =
+            rawQuestions.map((q, index) => {
+
+                const item = {
+                    ...q
+                };
+
+                item.id =
+                    String(
+                        item.id ??
+                        item.questionId ??
+                        `q_${index + 1}`
+                    );
+
+                item.title =
+                    item.title ??
+                    item.label ??
+                    item.text ??
+                    `السؤال ${index + 1}`;
+
+                item.type =
+                    String(
+                        item.type ??
+                        "text"
+                    ).toLowerCase();
+
+                item.options =
+                    Array.isArray(item.options)
+                    ? item.options
+                    : [];
+
+                return item;
+            });
+
+        const title =
+            formDataLoaded.title ??
+            formDataLoaded.name ??
+            formDataLoaded.formTitle ??
+            "تسجيل البيانات";
+
+        document.getElementById(
+            "formTitle"
+        ).textContent = title;
+
+        document.title =
+            title;
+
+        if (!questions.length) {
+
+            throw new Error(
+                "النموذج موجود ولكن لا توجد أسئلة داخله."
+            );
+        }
+
+        renderForm();
+
+    } catch (error) {
+
+        console.error(
+            "Load Form Error:",
+            error
+        );
+
+        loadingBox.classList.remove("hidden");
+        dynamicForm.classList.add("hidden");
+
+        setLoadingMessage(
+            "❌",
+            "تعذر تحميل النموذج",
+            error?.message ||
+            "حدث خطأ أثناء تحميل بيانات النموذج.",
+            "red"
+        );
+    }
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+loadForm();
+
+</script>
+
+</body>
+</html>
