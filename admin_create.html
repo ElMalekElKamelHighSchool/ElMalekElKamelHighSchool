@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>أدمن - إنشاء فورم جديد</title>
+    <title>أدمن - إنشاء وإدارة الفورم</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -32,18 +32,6 @@
             transition: .15s;
         }
 
-        .option-item:hover {
-            background: #f8fafc;
-        }
-
-        .drag-handle {
-            cursor: grab;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
         .dependent-box {
             border-right: 4px solid #7c3aed;
         }
@@ -52,8 +40,9 @@
             border-right: 4px solid #2563eb;
         }
 
-        .edit-box {
-            border-right: 4px solid #f59e0b;
+        .edit-mode {
+            border: 2px solid #f59e0b;
+            background: #fffbeb;
         }
 
     </style>
@@ -61,26 +50,41 @@
 </head>
 
 
-<body class="bg-gray-100 p-3 md:p-8 font-sans">
+<body class="bg-gray-100 p-3 md:p-8">
 
 
 <div class="max-w-5xl mx-auto bg-white p-5 md:p-8 rounded-2xl shadow-md">
 
 
-    <!-- =========================================
-         العنوان
-    ========================================== -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-    <h1
-        class="text-2xl md:text-3xl font-bold mb-6 text-center text-blue-600"
-    >
-        منشئ النماذج (الفورم)
-    </h1>
+    <div class="flex flex-col md:flex-row justify-between gap-4 items-center mb-6 border-b pb-5">
+
+        <h1
+            id="pageTitle"
+            class="text-2xl md:text-3xl font-bold text-blue-600"
+        >
+            منشئ النماذج
+        </h1>
 
 
-    <!-- =========================================
-         اسم الفورم
-    ========================================== -->
+        <a
+            id="backManageBtn"
+            href="#"
+            class="hidden bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold"
+        >
+            ↩️ الرجوع لإدارة الفورم
+        </a>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FORM TITLE
+    ====================================================== -->
 
     <input
         type="text"
@@ -90,9 +94,10 @@
     >
 
 
-    <!-- =========================================
-         الأسئلة المضافة
-    ========================================== -->
+
+    <!-- =====================================================
+         QUESTIONS
+    ====================================================== -->
 
     <div
         id="questionsContainer"
@@ -100,17 +105,17 @@
     ></div>
 
 
-    <!-- =========================================
-         إضافة / تعديل سؤال
-    ========================================== -->
+
+    <!-- =====================================================
+         QUESTION EDITOR
+    ====================================================== -->
 
     <div
+        id="questionEditor"
         class="bg-blue-50 p-4 md:p-5 rounded-xl border border-blue-200 mb-6"
     >
 
-        <div
-            class="flex justify-between items-center mb-4"
-        >
+        <div class="flex justify-between items-center mb-4">
 
             <h3
                 id="questionEditorTitle"
@@ -123,7 +128,7 @@
             <button
                 id="cancelEditBtn"
                 onclick="cancelEdit()"
-                class="hidden bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm"
+                class="hidden bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg"
             >
                 إلغاء التعديل
             </button>
@@ -131,49 +136,41 @@
         </div>
 
 
-        <div
-            class="grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
 
-            <!-- =================================
-                 عنوان السؤال
-            ================================== -->
+            <!-- TITLE -->
 
             <div>
 
-                <label
-                    class="block mb-1 text-sm font-bold"
-                >
+                <label class="block mb-1 font-bold text-sm">
                     عنوان السؤال
                 </label>
 
                 <input
                     type="text"
                     id="qTitle"
-                    placeholder="مثال: المحافظة"
-                    class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="عنوان السؤال"
+                    class="w-full p-3 border rounded-lg"
                 >
 
             </div>
 
 
-            <!-- =================================
-                 نوع السؤال
-            ================================== -->
+
+            <!-- TYPE -->
 
             <div>
 
-                <label
-                    class="block mb-1 text-sm font-bold"
-                >
+                <label class="block mb-1 font-bold text-sm">
                     نوع السؤال
                 </label>
 
                 <select
                     id="qType"
-                    class="w-full p-3 border rounded-lg"
                     onchange="toggleOptionsUI()"
+                    class="w-full p-3 border rounded-lg"
                 >
 
                     <option value="text">
@@ -181,7 +178,7 @@
                     </option>
 
                     <option value="number">
-                        رقم (مثل الرقم القومي)
+                        رقم
                     </option>
 
                     <option value="tel">
@@ -193,7 +190,7 @@
                     </option>
 
                     <option value="select">
-                        قائمة منسدلة (ListBox)
+                        قائمة منسدلة ListBox
                     </option>
 
                 </select>
@@ -202,63 +199,38 @@
 
 
 
-            <!-- =================================
-                 خيارات الـ ListBox
-            ================================== -->
+            <!-- OPTIONS -->
 
             <div
                 id="optionsDiv"
                 class="md:col-span-2 hidden bg-white p-4 border rounded-xl"
             >
 
-                <div
-                    class="flex flex-col md:flex-row justify-between gap-2 mb-3"
-                >
-
-                    <div>
-
-                        <h3
-                            class="font-bold text-purple-700"
-                        >
-                            خيارات القائمة
-                        </h3>
-
-                        <p
-                            class="text-xs text-gray-500 mt-1"
-                        >
-                            أضف الخيارات ورتبها كما تريد.
-                        </p>
-
-                    </div>
-
-                </div>
+                <h3 class="font-bold text-purple-700 mb-3">
+                    خيارات القائمة
+                </h3>
 
 
-                <!-- إضافة خيار -->
-
-                <div
-                    class="flex gap-2 mb-3"
-                >
+                <div class="flex gap-2 mb-3">
 
                     <input
                         type="text"
                         id="newOptionText"
-                        placeholder="اكتب خيارًا جديدًا"
-                        class="p-3 border rounded-lg flex-1 outline-none focus:ring-2 focus:ring-green-400"
+                        placeholder="اكتب الخيار"
+                        class="p-3 border rounded-lg flex-1"
                         onkeydown="handleOptionEnter(event)"
                     >
 
+
                     <button
                         onclick="addOptionToList()"
-                        class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-bold"
+                        class="bg-green-600 hover:bg-green-700 text-white px-5 rounded-lg font-bold"
                     >
                         + إضافة
                     </button>
 
                 </div>
 
-
-                <!-- قائمة الخيارات -->
 
                 <div
                     id="optionsList"
@@ -268,23 +240,18 @@
 
                 <div
                     id="noOptionsMessage"
-                    class="text-center text-gray-400 py-4 text-sm"
+                    class="text-center text-gray-400 py-4"
                 >
                     لا توجد خيارات حتى الآن
                 </div>
 
 
-                <!-- =================================
-                     جعل القائمة تابعة
-                ================================== -->
 
-                <div
-                    class="mt-5 pt-5 border-t"
-                >
+                <!-- DEPENDENCY -->
 
-                    <label
-                        class="flex items-center gap-2 font-bold cursor-pointer"
-                    >
+                <div class="border-t mt-5 pt-5">
+
+                    <label class="flex items-center gap-2 font-bold">
 
                         <input
                             type="checkbox"
@@ -293,9 +260,10 @@
                             class="w-5 h-5"
                         >
 
-                        هذه القائمة تعتمد على إجابة ListBox آخر
+                        هذه القائمة تعتمد على ListBox آخر
 
                     </label>
+
 
 
                     <div
@@ -303,10 +271,8 @@
                         class="hidden mt-4 dependent-box bg-purple-50 p-4 rounded-lg"
                     >
 
-                        <label
-                            class="block font-bold text-purple-800 mb-2"
-                        >
-                            اختر السؤال الأب
+                        <label class="block font-bold mb-2">
+                            السؤال الأب
                         </label>
 
 
@@ -317,39 +283,23 @@
                         >
 
                             <option value="">
-                                اختر السؤال الذي تعتمد عليه القائمة
+                                اختر السؤال الأب
                             </option>
 
                         </select>
 
-
-                        <p
-                            class="text-xs text-purple-700 mt-2"
-                        >
-                            مثال: لو السؤال الأب = المحافظة، فسيظهر في القائمة التابعة فقط الخيارات المرتبطة بالمحافظة التي اختارها الطالب.
-                        </p>
-
-
-                        <!-- =================================
-                             ربط إجابات السؤال الأب بالخيارات
-                        ================================== -->
 
                         <div
                             id="parentMappingsBox"
                             class="hidden parent-map-box bg-white mt-4 p-4 rounded-lg"
                         >
 
-                            <h4
-                                class="font-bold text-blue-700 mb-3"
-                            >
-                                تحديد الخيارات لكل إجابة
+                            <h4 class="font-bold text-blue-700 mb-2">
+                                ربط الخيارات
                             </h4>
 
-
-                            <p
-                                class="text-xs text-gray-500 mb-4"
-                            >
-                                لكل إجابة من السؤال الأب، حدد الخيارات التي تظهر للطالب.
+                            <p class="text-xs text-gray-500 mb-4">
+                                حدد الخيارات التي تظهر لكل إجابة من السؤال الأب.
                             </p>
 
 
@@ -368,17 +318,11 @@
 
 
 
-            <!-- =================================
-                 الشروط
-            ================================== -->
+            <!-- REQUIRED / UNIQUE -->
 
-            <div
-                class="md:col-span-2 flex flex-wrap gap-5 items-center"
-            >
+            <div class="md:col-span-2 flex flex-wrap gap-6">
 
-                <label
-                    class="flex items-center gap-2"
-                >
+                <label class="flex items-center gap-2">
 
                     <input
                         type="checkbox"
@@ -391,9 +335,7 @@
                 </label>
 
 
-                <label
-                    class="flex items-center gap-2"
-                >
+                <label class="flex items-center gap-2">
 
                     <input
                         type="checkbox"
@@ -409,28 +351,22 @@
 
 
 
-            <!-- =================================
-                 شرط الظهور
-            ================================== -->
+            <!-- CONDITION -->
 
-            <div
-                class="md:col-span-2 border-t pt-4"
-            >
+            <div class="md:col-span-2 border-t pt-4">
 
-                <label
-                    class="text-sm font-bold text-gray-700 block mb-2"
-                >
-                    شرط الظهور (اختياري)
+                <label class="font-bold text-sm block mb-2">
+                    شرط الظهور
                 </label>
 
 
                 <select
                     id="qConditionId"
-                    class="p-3 border rounded-lg w-full mb-2"
+                    class="w-full p-3 border rounded-lg mb-2"
                 >
 
                     <option value="">
-                        يظهر دائماً (بدون شرط)
+                        يظهر دائماً
                     </option>
 
                 </select>
@@ -439,19 +375,15 @@
                 <input
                     type="text"
                     id="qConditionValue"
-                    placeholder="يظهر إذا كانت إجابة السؤال المحدد تساوي..."
-                    class="p-3 border rounded-lg w-full"
+                    placeholder="يظهر إذا كانت الإجابة تساوي..."
+                    class="w-full p-3 border rounded-lg"
                 >
 
             </div>
 
-
         </div>
 
 
-        <!-- =================================
-             زر إضافة / تعديل
-        ================================== -->
 
         <button
             id="addQuestionBtn"
@@ -461,16 +393,16 @@
             إضافة السؤال للفورم
         </button>
 
-
     </div>
 
 
 
-    <!-- =========================================
-         حفظ الفورم
-    ========================================== -->
+    <!-- =====================================================
+         SAVE FORM
+    ====================================================== -->
 
     <button
+        id="saveFormButton"
         onclick="saveForm()"
         class="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg font-bold text-lg"
     >
@@ -479,13 +411,11 @@
 
 
 
-    <!-- =========================================
-         الفورمات المتاحة
-    ========================================== -->
+    <!-- =====================================================
+         EXISTING FORMS
+    ====================================================== -->
 
-    <h2
-        class="text-2xl font-bold mt-10 mb-4 border-b pb-2"
-    >
+    <h2 class="text-2xl font-bold mt-10 mb-4 border-b pb-2">
         الفورمات المتاحة
     </h2>
 
@@ -495,7 +425,6 @@
         class="space-y-3"
     ></ul>
 
-
 </div>
 
 
@@ -503,640 +432,783 @@
 <script type="module">
 
 
-    // =========================================================
-    // Firebase
-    // =========================================================
+// ============================================================
+// FIREBASE
+// ============================================================
 
-    import {
-        initializeApp
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    getDoc,
+    doc,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+
+    authDomain:
+        "hazoma-60ed2.firebaseapp.com",
+
+    projectId:
+        "hazoma-60ed2",
+
+    storageBucket:
+        "hazoma-60ed2.firebasestorage.app",
+
+    messagingSenderId:
+        "962438384604",
+
+    appId:
+        "1:962438384604:web:52db16e5723a8f6d3bdd19"
+
+};
+
+
+const app =
+    initializeApp(firebaseConfig);
+
+
+const db =
+    getFirestore(app);
+
+
+
+// ============================================================
+// URL
+// ============================================================
+
+const urlParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const editFormId =
+    urlParams.get("formId");
+
+
+
+// ============================================================
+// VARIABLES
+// ============================================================
+
+let questions = [];
+
+let tempOptions = [];
+
+let editingQuestionIndex = -1;
+
+
+
+// ============================================================
+// ESCAPE
+// ============================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
     }
-    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
 
 
-    import {
-        getFirestore,
-        collection,
-        addDoc,
-        getDocs,
-        serverTimestamp
-    }
-    from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+// ============================================================
+// TYPE NAME
+// ============================================================
 
-    const firebaseConfig = {
+function getTypeName(type) {
 
-        apiKey:
-            "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+    const names = {
 
-        authDomain:
-            "hazoma-60ed2.firebaseapp.com",
+        text: "نص",
 
-        projectId:
-            "hazoma-60ed2",
+        number: "رقم",
 
-        storageBucket:
-            "hazoma-60ed2.firebasestorage.app",
+        tel: "هاتف",
 
-        messagingSenderId:
-            "962438384604",
+        date: "تاريخ",
 
-        appId:
-            "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        select: "ListBox"
 
     };
 
+    return names[type] || type;
 
-    const app =
-        initializeApp(firebaseConfig);
-
-
-    const db =
-        getFirestore(app);
+}
 
 
 
-    // =========================================================
-    // المتغيرات
-    // =========================================================
+// ============================================================
+// TOGGLE OPTIONS
+// ============================================================
 
-    let questions = [];
+window.toggleOptionsUI = function() {
 
-    let tempOptions = [];
-
-    let editingQuestionIndex = -1;
-
-    /*
-        شكل العلاقات:
-
-        dependentOn:
-        {
-            questionId: "q_xxx",
-
-            mappings: {
-                "القاهرة": ["مدينة نصر", "المعادي"],
-                "الدقهلية": ["المنصورة", "ميت غمر"]
-            }
-        }
-    */
+    const type =
+        document.getElementById(
+            "qType"
+        ).value;
 
 
-
-    // =========================================================
-    // حماية HTML
-    // =========================================================
-
-    function escapeHTML(value) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-
-            return "";
-
-        }
+    const div =
+        document.getElementById(
+            "optionsDiv"
+        );
 
 
-        return String(value)
+    if (type === "select") {
 
-            .replace(
-                /&/g,
-                "&amp;"
-            )
+        div.classList.remove("hidden");
 
-            .replace(
-                /</g,
-                "&lt;"
-            )
+        populateParentSelect();
 
-            .replace(
-                />/g,
-                "&gt;"
-            )
+    }
+    else {
 
-            .replace(
-                /"/g,
-                "&quot;"
-            )
+        div.classList.add("hidden");
 
-            .replace(
-                /'/g,
-                "&#039;"
-            );
+        document.getElementById(
+            "qIsDependent"
+        ).checked = false;
+
+        toggleDependentUI();
+
+    }
+
+};
+
+
+
+// ============================================================
+// ENTER OPTION
+// ============================================================
+
+window.handleOptionEnter = function(event) {
+
+    if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        addOptionToList();
+
+    }
+
+};
+
+
+
+// ============================================================
+// ADD OPTION
+// ============================================================
+
+window.addOptionToList = function() {
+
+    const input =
+        document.getElementById(
+            "newOptionText"
+        );
+
+
+    const value =
+        input.value.trim();
+
+
+    if (!value) {
+
+        return;
 
     }
 
 
+    if (
+        tempOptions.some(
+            o => o.text === value
+        )
+    ) {
 
-    // =========================================================
-    // إظهار / إخفاء خيارات ListBox
-    // =========================================================
+        alert("الخيار موجود بالفعل");
 
-    window.toggleOptionsUI = function() {
+        return;
 
-        const type =
-            document.getElementById(
-                "qType"
-            ).value;
-
-
-        const optionsDiv =
-            document.getElementById(
-                "optionsDiv"
-            );
+    }
 
 
-        if (type === "select") {
+    tempOptions.push({
 
-            optionsDiv.classList.remove(
-                "hidden"
-            );
-
-
-            populateParentSelect();
-
-
-            toggleDependentUI();
-
-        }
-        else {
-
-            optionsDiv.classList.add(
-                "hidden"
-            );
-
-        }
-
-    };
-
-
-
-    // =========================================================
-    // Enter لإضافة خيار
-    // =========================================================
-
-    window.handleOptionEnter = function(event) {
-
-        if (
-            event.key === "Enter"
-        ) {
-
-            event.preventDefault();
-
-            addOptionToList();
-
-        }
-
-    };
-
-
-
-    // =========================================================
-    // إضافة خيار
-    // =========================================================
-
-    window.addOptionToList = function() {
-
-        const input =
-            document.getElementById(
-                "newOptionText"
-            );
-
-
-        const value =
-            input.value.trim();
-
-
-        if (!value) {
-
-            return;
-
-        }
-
-
-        /*
-            منع التكرار
-        */
-
-        if (
-            tempOptions.some(
-                option =>
-                    option.text === value
-            )
-        ) {
-
-            alert(
-                "هذا الخيار موجود بالفعل"
-            );
-
-            return;
-
-        }
-
-
-        tempOptions.push({
-
-            id:
-                "opt_" +
-                Date.now() +
-                "_" +
-                Math.random()
+        id:
+            "opt_" +
+            Date.now() +
+            "_" +
+            Math.random()
                 .toString(36)
                 .substring(2, 8),
 
-            text:
-                value
+        text:
+            value
 
-        });
-
-
-        input.value = "";
+    });
 
 
-        renderTempOptions();
+    input.value = "";
 
+    renderTempOptions();
 
-        /*
-            إذا كانت القائمة تابعة
-            نعيد بناء العلاقات
-        */
+    renderParentMappings();
 
-        renderParentMappings();
-
-    };
+};
 
 
 
-    // =========================================================
-    // عرض الخيارات
-    // =========================================================
+// ============================================================
+// RENDER OPTIONS
+// ============================================================
 
-    function renderTempOptions() {
+function renderTempOptions() {
 
-        const list =
-            document.getElementById(
-                "optionsList"
-            );
-
-
-        const noMessage =
-            document.getElementById(
-                "noOptionsMessage"
-            );
-
-
-        if (
-            tempOptions.length === 0
-        ) {
-
-            list.innerHTML = "";
-
-            noMessage.classList.remove(
-                "hidden"
-            );
-
-            return;
-
-        }
-
-
-        noMessage.classList.add(
-            "hidden"
+    const list =
+        document.getElementById(
+            "optionsList"
         );
 
 
-        list.innerHTML =
-            tempOptions.map(
-                (option, index) => {
-
-                    return `
-
-                    <div
-                        class="option-item bg-gray-50 border rounded-lg p-2 flex items-center gap-2"
-                    >
-
-                        <span
-                            class="drag-handle text-gray-400 text-lg px-1"
-                            title="اسحب لترتيب الخيار"
-                        >
-                            ☰
-                        </span>
+    const empty =
+        document.getElementById(
+            "noOptionsMessage"
+        );
 
 
-                        <span
-                            class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold"
-                        >
-                            ${index + 1}
-                        </span>
+    if (
+        tempOptions.length === 0
+    ) {
 
+        list.innerHTML = "";
 
-                        <input
-                            type="text"
-                            value="${escapeHTML(option.text)}"
-                            onchange="updateOptionText(${index}, this.value)"
-                            class="flex-1 p-2 border rounded bg-white"
-                        >
+        empty.classList.remove("hidden");
 
-
-                        <button
-                            onclick="moveOption(${index}, -1)"
-                            class="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded"
-                            title="تحريك لأعلى"
-                        >
-                            ↑
-                        </button>
-
-
-                        <button
-                            onclick="moveOption(${index}, 1)"
-                            class="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded"
-                            title="تحريك لأسفل"
-                        >
-                            ↓
-                        </button>
-
-
-                        <button
-                            onclick="deleteOption(${index})"
-                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded"
-                            title="حذف"
-                        >
-                            حذف
-                        </button>
-
-                    </div>
-
-                    `;
-
-                }
-            )
-            .join("");
+        return;
 
     }
 
 
+    empty.classList.add("hidden");
 
-    // =========================================================
-    // تعديل اسم خيار
-    // =========================================================
 
-    window.updateOptionText = function(
-        index,
-        value
+    list.innerHTML =
+        tempOptions.map(
+            (option, index) => `
+
+            <div
+                class="option-item bg-gray-50 border rounded-lg p-2 flex items-center gap-2"
+            >
+
+                <span class="text-gray-400">
+                    ☰
+                </span>
+
+                <span
+                    class="bg-blue-100 text-blue-700 rounded-full w-7 h-7 flex items-center justify-center font-bold"
+                >
+                    ${index + 1}
+                </span>
+
+                <input
+                    type="text"
+                    value="${escapeHTML(option.text)}"
+                    onchange="updateOptionText(${index}, this.value)"
+                    class="flex-1 p-2 border rounded bg-white"
+                >
+
+                <button
+                    onclick="moveOption(${index}, -1)"
+                    class="bg-gray-200 px-3 py-2 rounded"
+                >
+                    ↑
+                </button>
+
+                <button
+                    onclick="moveOption(${index}, 1)"
+                    class="bg-gray-200 px-3 py-2 rounded"
+                >
+                    ↓
+                </button>
+
+                <button
+                    onclick="deleteOption(${index})"
+                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded"
+                >
+                    حذف
+                </button>
+
+            </div>
+
+        `
+        ).join("");
+
+}
+
+
+
+// ============================================================
+// UPDATE OPTION
+// ============================================================
+
+window.updateOptionText = function(
+    index,
+    value
+) {
+
+    value = value.trim();
+
+
+    if (!value) {
+
+        alert("الخيار لا يمكن أن يكون فارغاً");
+
+        renderTempOptions();
+
+        return;
+
+    }
+
+
+    if (
+        tempOptions.some(
+            (o, i) =>
+                i !== index &&
+                o.text === value
+        )
     ) {
 
-        value =
-            value.trim();
+        alert("الخيار موجود بالفعل");
+
+        renderTempOptions();
+
+        return;
+
+    }
 
 
-        if (!value) {
+    tempOptions[index].text = value;
 
-            alert(
-                "لا يمكن أن يكون الخيار فارغًا"
-            );
+    renderParentMappings();
 
-            renderTempOptions();
-
-            return;
-
-        }
-
-
-        const duplicate =
-            tempOptions.some(
-                (option, i) =>
-                    i !== index &&
-                    option.text === value
-            );
-
-
-        if (duplicate) {
-
-            alert(
-                "هذا الخيار موجود بالفعل"
-            );
-
-            renderTempOptions();
-
-            return;
-
-        }
-
-
-        tempOptions[index].text =
-            value;
-
-
-        renderParentMappings();
-
-    };
+};
 
 
 
-    // =========================================================
-    // حذف خيار
-    // =========================================================
+// ============================================================
+// DELETE OPTION
+// ============================================================
 
-    window.deleteOption = function(index) {
+window.deleteOption = function(index) {
 
-        const option =
-            tempOptions[index];
+    if (!confirm("هل تريد حذف هذا الخيار؟")) {
 
+        return;
 
-        if (!option) {
-
-            return;
-
-        }
+    }
 
 
-        if (
-            !confirm(
-                `هل تريد حذف الخيار "${option.text}"؟`
-            )
-        ) {
-
-            return;
-
-        }
+    tempOptions.splice(
+        index,
+        1
+    );
 
 
-        tempOptions.splice(
-            index,
-            1
+    renderTempOptions();
+
+    renderParentMappings();
+
+};
+
+
+
+// ============================================================
+// MOVE OPTION
+// ============================================================
+
+window.moveOption = function(
+    index,
+    direction
+) {
+
+    const newIndex =
+        index + direction;
+
+
+    if (
+        newIndex < 0 ||
+        newIndex >= tempOptions.length
+    ) {
+
+        return;
+
+    }
+
+
+    const temp =
+        tempOptions[index];
+
+
+    tempOptions[index] =
+        tempOptions[newIndex];
+
+
+    tempOptions[newIndex] =
+        temp;
+
+
+    renderTempOptions();
+
+    renderParentMappings();
+
+};
+
+
+
+// ============================================================
+// DEPENDENCY UI
+// ============================================================
+
+window.toggleDependentUI = function() {
+
+    const checked =
+        document.getElementById(
+            "qIsDependent"
+        ).checked;
+
+
+    const box =
+        document.getElementById(
+            "dependentUI"
         );
 
 
-        renderTempOptions();
+    if (checked) {
 
+        box.classList.remove("hidden");
+
+        populateParentSelect();
 
         renderParentMappings();
 
-    };
+    }
+    else {
+
+        box.classList.add("hidden");
+
+        document.getElementById(
+            "parentMappingsBox"
+        ).classList.add("hidden");
+
+    }
+
+};
 
 
 
-    // =========================================================
-    // ترتيب الخيارات
-    // =========================================================
+// ============================================================
+// POPULATE PARENT
+// ============================================================
 
-    window.moveOption = function(
-        index,
-        direction
+function populateParentSelect() {
+
+    const select =
+        document.getElementById(
+            "qDependsOn"
+        );
+
+
+    const oldValue =
+        select.value;
+
+
+    select.innerHTML = `
+        <option value="">
+            اختر السؤال الأب
+        </option>
+    `;
+
+
+    questions.forEach(
+        (q, index) => {
+
+            if (
+                index === editingQuestionIndex
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                q.type === "select"
+            ) {
+
+                select.innerHTML += `
+                    <option value="${escapeHTML(q.id)}">
+                        ${escapeHTML(q.title)}
+                    </option>
+                `;
+
+            }
+
+        }
+    );
+
+
+    if (
+        oldValue &&
+        [...select.options].some(
+            o => o.value === oldValue
+        )
     ) {
 
-        const newIndex =
-            index + direction;
+        select.value = oldValue;
+
+    }
+
+}
+
+
+
+// ============================================================
+// PARENT MAPPINGS
+// ============================================================
+
+window.renderParentMappings = function() {
+
+    const parentId =
+        document.getElementById(
+            "qDependsOn"
+        ).value;
+
+
+    const box =
+        document.getElementById(
+            "parentMappingsBox"
+        );
+
+
+    const container =
+        document.getElementById(
+            "parentMappings"
+        );
+
+
+    if (!parentId) {
+
+        box.classList.add("hidden");
+
+        container.innerHTML = "";
+
+        return;
+
+    }
+
+
+    const parent =
+        questions.find(
+            q => q.id === parentId
+        );
+
+
+    if (
+        !parent ||
+        parent.type !== "select"
+    ) {
+
+        box.classList.add("hidden");
+
+        return;
+
+    }
+
+
+    box.classList.remove("hidden");
+
+
+    let oldMappings = {};
+
+
+    if (
+        editingQuestionIndex >= 0
+    ) {
+
+        const currentQ =
+            questions[
+                editingQuestionIndex
+            ];
 
 
         if (
-            newIndex < 0 ||
-            newIndex >= tempOptions.length
+            currentQ.dependentOn &&
+            currentQ.dependentOn.mappings
         ) {
 
-            return;
+            oldMappings =
+                currentQ.dependentOn.mappings;
 
         }
 
-
-        const temp =
-            tempOptions[index];
+    }
 
 
-        tempOptions[index] =
-            tempOptions[newIndex];
+    container.innerHTML =
+        (parent.options || [])
+        .map(
+            parentOption => {
+
+                const selected =
+                    oldMappings[
+                        parentOption.text
+                    ] || [];
 
 
-        tempOptions[newIndex] =
-            temp;
+                return `
+
+                <div
+                    class="border rounded-xl p-4 bg-gray-50"
+                >
+
+                    <div class="font-bold text-blue-700 mb-3">
+
+                        عندما تكون الإجابة:
+
+                        <span class="text-purple-700">
+                            ${escapeHTML(parentOption.text)}
+                        </span>
+
+                    </div>
 
 
-        renderTempOptions();
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"
+                    >
+
+                        ${
+                            tempOptions.length
+
+                            ?
+
+                            tempOptions.map(
+                                child => {
+
+                                    const checked =
+                                        selected.includes(
+                                            child.text
+                                        );
 
 
-        renderParentMappings();
+                                    return `
 
-    };
+                                    <label
+                                        class="flex items-center gap-2 bg-white border rounded-lg p-2 cursor-pointer"
+                                    >
 
+                                        <input
+                                            type="checkbox"
+                                            class="dependent-option-checkbox w-4 h-4"
+                                            data-parent="${escapeHTML(parentOption.text)}"
+                                            value="${escapeHTML(child.text)}"
+                                            ${checked ? "checked" : ""}
+                                        >
 
+                                        <span>
+                                            ${escapeHTML(child.text)}
+                                        </span>
 
-    // =========================================================
-    // إظهار إعداد التبعية
-    // =========================================================
+                                    </label>
 
-    window.toggleDependentUI = function() {
+                                    `;
 
-        const checkbox =
-            document.getElementById(
-                "qIsDependent"
-            );
+                                }
+                            ).join("")
 
+                            :
 
-        const box =
-            document.getElementById(
-                "dependentUI"
-            );
+                            `
+                            <div class="col-span-full text-gray-400">
+                                أضف خيارات القائمة أولاً.
+                            </div>
+                            `
+                        }
 
+                    </div>
 
-        if (
-            document.getElementById(
-                "qType"
-            ).value !== "select"
-        ) {
+                </div>
 
-            checkbox.checked = false;
+                `;
 
-        }
+            }
+        )
+        .join("");
 
-
-        if (
-            checkbox.checked
-        ) {
-
-            box.classList.remove(
-                "hidden"
-            );
-
-
-            populateParentSelect();
-
-            renderParentMappings();
-
-        }
-        else {
-
-            box.classList.add(
-                "hidden"
-            );
-
-            document.getElementById(
-                "parentMappingsBox"
-            ).classList.add(
-                "hidden"
-            );
-
-        }
-
-    };
+};
 
 
 
-    // =========================================================
-    // الأسئلة التي يمكن استخدامها كـ Parent
-    // =========================================================
+// ============================================================
+// COLLECT MAPPINGS
+// ============================================================
 
-    function populateParentSelect() {
+function collectMappings() {
 
-        const select =
-            document.getElementById(
-                "qDependsOn"
-            );
+    const mappings = {};
 
 
-        const currentValue =
-            select.value;
+    document
+        .querySelectorAll(
+            ".dependent-option-checkbox"
+        )
+        .forEach(
+            checkbox => {
 
+                const parent =
+                    checkbox.dataset.parent;
 
-        select.innerHTML =
-            `
-            <option value="">
-                اختر السؤال الذي تعتمد عليه القائمة
-            </option>
-            `;
-
-
-        questions.forEach(
-            (q, index) => {
-
-                /*
-                    لا يمكن للسؤال أن يعتمد على نفسه
-                */
 
                 if (
-                    index === editingQuestionIndex
+                    !mappings[parent]
                 ) {
 
-                    return;
+                    mappings[parent] = [];
 
                 }
 
 
-                /*
-                    فقط ListBox
-                */
-
                 if (
-                    q.type === "select"
+                    checkbox.checked
                 ) {
 
-                    select.innerHTML +=
-                        `
-                        <option
-                            value="${escapeHTML(q.id)}"
-                        >
-                            ${escapeHTML(q.title)}
-                        </option>
-                        `;
+                    mappings[parent].push(
+                        checkbox.value
+                    );
 
                 }
 
@@ -1144,29 +1216,62 @@
         );
 
 
-        if (
-            currentValue &&
-            [...select.options]
-                .some(
-                    option =>
-                        option.value === currentValue
-                )
-        ) {
+    return mappings;
 
-            select.value =
-                currentValue;
+}
 
-        }
+
+
+// ============================================================
+// ADD / UPDATE QUESTION
+// ============================================================
+
+window.addQuestion = function() {
+
+    const title =
+        document.getElementById(
+            "qTitle"
+        ).value.trim();
+
+
+    if (!title) {
+
+        alert("أدخل عنوان السؤال");
+
+        return;
 
     }
 
 
+    const type =
+        document.getElementById(
+            "qType"
+        ).value;
 
-    // =========================================================
-    // بناء خريطة العلاقات
-    // =========================================================
 
-    window.renderParentMappings = function() {
+    if (
+        type === "select" &&
+        tempOptions.length === 0
+    ) {
+
+        alert(
+            "أضف خياراً واحداً على الأقل"
+        );
+
+        return;
+
+    }
+
+
+    let dependentOn = null;
+
+
+    if (
+        type === "select" &&
+        document.getElementById(
+            "qIsDependent"
+        ).checked
+    ) {
 
         const parentId =
             document.getElementById(
@@ -1174,1297 +1279,142 @@
             ).value;
 
 
-        const box =
-            document.getElementById(
-                "parentMappingsBox"
-            );
-
-
-        const container =
-            document.getElementById(
-                "parentMappings"
-            );
-
-
         if (!parentId) {
 
-            box.classList.add(
-                "hidden"
-            );
-
-            container.innerHTML = "";
+            alert("اختر السؤال الأب");
 
             return;
 
         }
 
 
-        const parent =
-            questions.find(
-                q =>
-                    q.id === parentId
-            );
+        dependentOn = {
 
+            questionId:
+                parentId,
 
-        if (!parent) {
+            mappings:
+                collectMappings()
 
-            box.classList.add(
-                "hidden"
-            );
-
-            return;
-
-        }
-
-
-        if (
-            parent.type !== "select"
-        ) {
-
-            box.classList.add(
-                "hidden"
-            );
-
-            return;
-
-        }
-
-
-        box.classList.remove(
-            "hidden"
-        );
-
-
-        /*
-            الحصول على الـ mappings القديمة
-        */
-
-        let oldMappings = {};
-
-
-        if (
-            editingQuestionIndex >= 0
-        ) {
-
-            const editingQ =
-                questions[
-                    editingQuestionIndex
-                ];
-
-
-            if (
-                editingQ.dependentOn &&
-                editingQ.dependentOn.mappings
-            ) {
-
-                oldMappings =
-                    editingQ.dependentOn.mappings;
-
-            }
-
-        }
-
-
-        /*
-            كل خيار في السؤال الأب
-        */
-
-        container.innerHTML =
-            (parent.options || [])
-                .map(
-                    parentOption => {
-
-                        const selected =
-                            oldMappings[
-                                parentOption.text
-                            ] || [];
-
-
-                        return `
-
-                        <div
-                            class="border rounded-xl p-4 bg-gray-50"
-                        >
-
-                            <div
-                                class="font-bold text-blue-700 mb-3"
-                            >
-
-                                عندما تكون إجابة
-                                <span class="text-purple-700">
-                                    "${escapeHTML(parentOption.text)}"
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"
-                            >
-
-                                ${
-                                    tempOptions.length
-                                    ?
-                                    tempOptions
-                                        .map(
-                                            childOption => {
-
-                                                const isChecked =
-                                                    selected.includes(
-                                                        childOption.text
-                                                    );
-
-
-                                                return `
-
-                                                <label
-                                                    class="flex items-center gap-2 bg-white border rounded-lg p-2 cursor-pointer hover:bg-blue-50"
-                                                >
-
-                                                    <input
-                                                        type="checkbox"
-                                                        class="dependent-option-checkbox w-4 h-4"
-                                                        data-parent="${escapeHTML(parentOption.text)}"
-                                                        value="${escapeHTML(childOption.text)}"
-                                                        ${isChecked ? "checked" : ""}
-                                                    >
-
-                                                    <span>
-                                                        ${escapeHTML(childOption.text)}
-                                                    </span>
-
-                                                </label>
-
-                                                `;
-
-                                            }
-                                        )
-                                        .join("")
-                                    :
-                                    `
-                                    <div
-                                        class="col-span-full text-gray-400 text-sm"
-                                    >
-                                        أضف خيارات للقائمة التابعة أولاً.
-                                    </div>
-                                    `
-                                }
-
-                            </div>
-
-                        </div>
-
-                        `;
-
-                    }
-                )
-                .join("");
-
-    };
-
-
-
-    // =========================================================
-    // قراءة الـ mappings
-    // =========================================================
-
-    function collectMappings() {
-
-        const mappings = {};
-
-
-        document
-            .querySelectorAll(
-                ".dependent-option-checkbox"
-            )
-            .forEach(
-                checkbox => {
-
-                    const parent =
-                        checkbox.dataset.parent;
-
-
-                    if (
-                        !mappings[parent]
-                    ) {
-
-                        mappings[parent] = [];
-
-                    }
-
-
-                    if (
-                        checkbox.checked
-                    ) {
-
-                        mappings[parent].push(
-                            checkbox.value
-                        );
-
-                    }
-
-                }
-            );
-
-
-        return mappings;
+        };
 
     }
 
 
+    const q = {
 
-    // =========================================================
-    // إضافة سؤال
-    // =========================================================
-
-    window.addQuestion = function() {
-
-        const title =
-            document.getElementById(
-                "qTitle"
-            ).value.trim();
-
-
-        if (!title) {
-
-            alert(
-                "أدخل عنوان السؤال"
-            );
-
-            return;
-
-        }
-
-
-        const type =
-            document.getElementById(
-                "qType"
-            ).value;
-
-
-        if (
-            type === "select" &&
-            tempOptions.length === 0
-        ) {
-
-            alert(
-                "أضف خيارًا واحدًا على الأقل للقائمة"
-            );
-
-            return;
-
-        }
-
-
-        const isDependent =
-            type === "select" &&
-            document.getElementById(
-                "qIsDependent"
-            ).checked;
-
-
-        let parentId = "";
-
-
-        let mappings = {};
-
-
-        if (isDependent) {
-
-            parentId =
-                document.getElementById(
-                    "qDependsOn"
-                ).value;
-
-
-            if (!parentId) {
-
-                alert(
-                    "اختر السؤال الأب للقائمة التابعة"
-                );
-
-                return;
-
-            }
-
-
-            const parent =
-                questions.find(
-                    q =>
-                        q.id === parentId
-                );
-
-
-            if (!parent) {
-
-                alert(
-                    "السؤال الأب غير موجود"
-                );
-
-                return;
-
-            }
-
-
-            if (
-                parent.type !== "select"
-            ) {
-
-                alert(
-                    "السؤال الأب يجب أن يكون ListBox"
-                );
-
-                return;
-
-            }
-
-
-            mappings =
-                collectMappings();
-
-        }
-
-
-        /*
-            البيانات الأساسية
-        */
-
-        const q = {
-
-            id:
-                editingQuestionIndex >= 0
-                ?
-                questions[
-                    editingQuestionIndex
-                ].id
-                :
-                "q_" +
-                Date.now() +
-                "_" +
-                Math.random()
-                    .toString(36)
-                    .substring(2, 8),
-
-            title:
-                title,
-
-            type:
-                type,
-
-            required:
-                document.getElementById(
-                    "qRequired"
-                ).checked,
-
-            unique:
-                document.getElementById(
-                    "qUnique"
-                ).checked,
-
-            options:
-                type === "select"
-                ?
-                tempOptions.map(
-                    option => ({
-                        id: option.id,
-                        text: option.text
-                    })
-                )
-                :
-                [],
-
-            conditionId:
-                document.getElementById(
-                    "qConditionId"
-                ).value,
-
-            conditionValue:
-                document.getElementById(
-                    "qConditionValue"
-                ).value.trim()
-
-        };
-
-
-        /*
-            إضافة التبعية
-        */
-
-        if (isDependent) {
-
-            q.dependentOn = {
-
-                questionId:
-                    parentId,
-
-                mappings:
-                    mappings
-
-            };
-
-        }
-        else {
-
-            /*
-                لو ألغى التبعية
-                نحذفها تمامًا
-            */
-
-            delete q.dependentOn;
-
-        }
-
-
-
-        // ==============================================
-        // إضافة أو تعديل
-        // ==============================================
-
-        if (
+        id:
             editingQuestionIndex >= 0
-        ) {
+
+            ?
 
             questions[
                 editingQuestionIndex
-            ] = q;
+            ].id
 
-        }
-        else {
+            :
 
-            questions.push(q);
+            "q_" +
+            Date.now() +
+            "_" +
+            Math.random()
+                .toString(36)
+                .substring(2, 8),
 
-        }
+        title:
+            title,
 
+        type:
+            type,
 
-        /*
-            إعادة الوضع الطبيعي
-        */
-
-        editingQuestionIndex = -1;
-
-        clearQuestionEditor();
-
-        updateQuestionsUI();
-
-        updateConditionSelects();
-
-    };
-
-
-
-    // =========================================================
-    // عرض الأسئلة
-    // =========================================================
-
-    function updateQuestionsUI() {
-
-        let html = "";
-
-
-        questions.forEach(
-            (q, index) => {
-
-                let dependencyText = "";
-
-
-                if (
-                    q.dependentOn
-                ) {
-
-                    const parent =
-                        questions.find(
-                            item =>
-                                item.id ===
-                                q.dependentOn.questionId
-                        );
-
-
-                    if (parent) {
-
-                        dependencyText =
-                            `
-                            <div
-                                class="mt-2 text-xs bg-purple-50 text-purple-700 p-2 rounded-lg"
-                            >
-                                🔗 قائمة تابعة لـ:
-                                <strong>
-                                    ${escapeHTML(parent.title)}
-                                </strong>
-                            </div>
-                            `;
-
-                    }
-
-                }
-
-
-                let optionsPreview = "";
-
-
-                if (
-                    q.type === "select"
-                ) {
-
-                    optionsPreview =
-                        `
-                        <div
-                            class="mt-2 text-xs text-gray-500"
-                        >
-                            الخيارات:
-                            ${
-                                (q.options || [])
-                                    .map(
-                                        o =>
-                                            escapeHTML(
-                                                o.text
-                                            )
-                                    )
-                                    .join(" ← ")
-                            }
-                        </div>
-                        `;
-
-                }
-
-
-                html +=
-                    `
-
-                    <div
-                        class="question-card p-4 border rounded-xl bg-gray-50"
-                    >
-
-                        <div
-                            class="flex flex-col md:flex-row justify-between gap-4"
-                        >
-
-                            <div class="flex-1">
-
-                                <div
-                                    class="flex flex-wrap items-center gap-2"
-                                >
-
-                                    <span
-                                        class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold"
-                                    >
-                                        ${index + 1}
-                                    </span>
-
-
-                                    <span
-                                        class="font-bold text-lg"
-                                    >
-                                        ${escapeHTML(q.title)}
-                                    </span>
-
-
-                                    <span
-                                        class="text-xs bg-gray-200 px-2 py-1 rounded"
-                                    >
-                                        ${getTypeName(q.type)}
-                                    </span>
-
-
-                                    ${
-                                        q.required
-                                        ?
-                                        `
-                                        <span
-                                            class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded"
-                                        >
-                                            إجباري
-                                        </span>
-                                        `
-                                        :
-                                        ""
-                                    }
-
-
-                                    ${
-                                        q.unique
-                                        ?
-                                        `
-                                        <span
-                                            class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded"
-                                        >
-                                            يمنع التكرار
-                                        </span>
-                                        `
-                                        :
-                                        ""
-                                    }
-
-                                </div>
-
-
-                                ${optionsPreview}
-
-
-                                ${dependencyText}
-
-
-                                ${
-                                    q.conditionId
-                                    ?
-                                    `
-                                    <div
-                                        class="mt-2 text-xs bg-blue-50 text-blue-600 p-2 rounded-lg"
-                                    >
-                                        👁️ شرط ظهور:
-                                        ${escapeHTML(
-                                            q.conditionValue
-                                        )}
-                                    </div>
-                                    `
-                                    :
-                                    ""
-                                }
-
-                            </div>
-
-
-                            <div
-                                class="flex flex-wrap gap-2 items-start"
-                            >
-
-                                <button
-                                    onclick="moveQ(${index}, -1)"
-                                    class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-lg"
-                                    title="تحريك لأعلى"
-                                >
-                                    ↑
-                                </button>
-
-
-                                <button
-                                    onclick="moveQ(${index}, 1)"
-                                    class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-lg"
-                                    title="تحريك لأسفل"
-                                >
-                                    ↓
-                                </button>
-
-
-                                <button
-                                    onclick="editQuestion(${index})"
-                                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg"
-                                >
-                                    ✏️ تعديل
-                                </button>
-
-
-                                <button
-                                    onclick="deleteQ(${index})"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
-                                >
-                                    🗑 حذف
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    `;
-
-            }
-        );
-
-
-        document.getElementById(
-            "questionsContainer"
-        ).innerHTML =
-            html;
-
-    }
-
-
-
-    // =========================================================
-    // تعديل سؤال
-    // =========================================================
-
-    window.editQuestion = function(index) {
-
-        const q =
-            questions[index];
-
-
-        if (!q) {
-
-            return;
-
-        }
-
-
-        editingQuestionIndex =
-            index;
-
-
-        document.getElementById(
-            "questionEditorTitle"
-        ).innerText =
-            "✏️ تعديل السؤال";
-
-
-        document.getElementById(
-            "addQuestionBtn"
-        ).innerText =
-            "💾 حفظ تعديل السؤال";
-
-
-        document.getElementById(
-            "cancelEditBtn"
-        ).classList.remove(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "qTitle"
-        ).value =
-            q.title || "";
-
-
-        document.getElementById(
-            "qType"
-        ).value =
-            q.type || "text";
-
-
-        document.getElementById(
-            "qRequired"
-        ).checked =
-            !!q.required;
-
-
-        document.getElementById(
-            "qUnique"
-        ).checked =
-            !!q.unique;
-
-
-        document.getElementById(
-            "qConditionId"
-        ).value =
-            q.conditionId || "";
-
-
-        document.getElementById(
-            "qConditionValue"
-        ).value =
-            q.conditionValue || "";
-
-
-        tempOptions =
-            (q.options || []).map(
-                option => ({
-
-                    id:
-                        option.id ||
-                        "opt_" +
-                        Date.now() +
-                        Math.random(),
-
-                    text:
-                        option.text ??
-                        option
-
-                })
-            );
-
-
-        document.getElementById(
-            "qIsDependent"
-        ).checked =
-            !!q.dependentOn;
-
-
-        toggleOptionsUI();
-
-
-        /*
-            بعد تحميل الأسئلة
-            نختار السؤال الأب
-        */
-
-        populateParentSelect();
-
-
-        if (
-            q.dependentOn
-        ) {
-
+        required:
             document.getElementById(
-                "qDependsOn"
-            ).value =
-                q.dependentOn.questionId || "";
-
-        }
-
-
-        toggleDependentUI();
-
-
-        renderTempOptions();
-
-
-        renderParentMappings();
-
-
-        /*
-            نرجع أعلى الصفحة
-        */
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-
-    };
-
-
-
-    // =========================================================
-    // إلغاء التعديل
-    // =========================================================
-
-    window.cancelEdit = function() {
-
-        editingQuestionIndex = -1;
-
-
-        clearQuestionEditor();
-
-
-        updateQuestionsUI();
-
-    };
-
-
-
-    // =========================================================
-    // تنظيف محرر السؤال
-    // =========================================================
-
-    function clearQuestionEditor() {
-
-        document.getElementById(
-            "questionEditorTitle"
-        ).innerText =
-            "إضافة حقل جديد";
-
-
-        document.getElementById(
-            "addQuestionBtn"
-        ).innerText =
-            "إضافة السؤال للفورم";
-
-
-        document.getElementById(
-            "cancelEditBtn"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "qTitle"
-        ).value = "";
-
-
-        document.getElementById(
-            "qType"
-        ).value =
-            "text";
-
-
-        document.getElementById(
-            "qRequired"
-        ).checked =
-            false;
-
-
-        document.getElementById(
-            "qUnique"
-        ).checked =
-            false;
-
-
-        document.getElementById(
-            "qConditionId"
-        ).value =
-            "";
-
-
-        document.getElementById(
-            "qConditionValue"
-        ).value =
-            "";
-
-
-        document.getElementById(
-            "qIsDependent"
-        ).checked =
-            false;
-
-
-        document.getElementById(
-            "qDependsOn"
-        ).innerHTML =
-            `
-            <option value="">
-                اختر السؤال الذي تعتمد عليه القائمة
-            </option>
-            `;
-
-
-        tempOptions = [];
-
-
-        renderTempOptions();
-
-
-        document.getElementById(
-            "optionsDiv"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "dependentUI"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "parentMappingsBox"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "parentMappings"
-        ).innerHTML = "";
-
-    }
-
-
-
-    // =========================================================
-    // تحريك السؤال
-    // =========================================================
-
-    window.moveQ = function(
-        index,
-        direction
-    ) {
-
-        const newIndex =
-            index + direction;
-
-
-        if (
-            newIndex < 0 ||
-            newIndex >= questions.length
-        ) {
-
-            return;
-
-        }
-
-
-        const temp =
-            questions[index];
-
-
-        questions[index] =
-            questions[newIndex];
-
-
-        questions[newIndex] =
-            temp;
-
-
-        /*
-            تحديث العلاقات والشروط
-        */
-
-        updateQuestionsUI();
-
-        updateConditionSelects();
-
-    };
-
-
-
-    // =========================================================
-    // حذف سؤال
-    // =========================================================
-
-    window.deleteQ = function(index) {
-
-        const q =
-            questions[index];
-
-
-        if (!q) {
-
-            return;
-
-        }
-
-
-        if (
-            !confirm(
-                `هل تريد حذف السؤال "${q.title}"؟`
+                "qRequired"
+            ).checked,
+
+        unique:
+            document.getElementById(
+                "qUnique"
+            ).checked,
+
+        options:
+            type === "select"
+            ?
+            tempOptions.map(
+                o => ({
+                    id: o.id,
+                    text: o.text
+                })
             )
-        ) {
+            :
+            [],
 
-            return;
-
-        }
-
-
-        /*
-            لو أسئلة أخرى تعتمد عليه
-            نحذر المستخدم
-        */
-
-        const children =
-            questions.filter(
-                question =>
-                    question.dependentOn &&
-                    question.dependentOn.questionId ===
-                    q.id
-            );
-
-
-        if (
-            children.length > 0
-        ) {
-
-            const names =
-                children
-                    .map(
-                        child =>
-                            child.title
-                    )
-                    .join("، ");
-
-
-            const answer =
-                confirm(
-                    `تنبيه:\n\nالأسئلة التالية تعتمد على هذا السؤال:\n${names}\n\nسيتم إزالة العلاقة منها.\n\nهل تريد الاستمرار؟`
-                );
-
-
-            if (!answer) {
-
-                return;
-
-            }
-
-        }
-
-
-        questions.splice(
-            index,
-            1
-        );
-
-
-        /*
-            إزالة العلاقات التي تشير
-            للسؤال المحذوف
-        */
-
-        questions.forEach(
-            question => {
-
-                if (
-                    question.dependentOn &&
-                    question.dependentOn.questionId ===
-                    q.id
-                ) {
-
-                    delete question.dependentOn;
-
-                }
-
-            }
-        );
-
-
-        editingQuestionIndex = -1;
-
-
-        clearQuestionEditor();
-
-        updateQuestionsUI();
-
-        updateConditionSelects();
-
-    };
-
-
-
-    // =========================================================
-    // تحديث شروط الظهور
-    // =========================================================
-
-    function updateConditionSelects() {
-
-        const select =
+        conditionId:
             document.getElementById(
                 "qConditionId"
-            );
+            ).value,
 
-
-        const current =
-            select.value;
-
-
-        select.innerHTML =
-            `
-            <option value="">
-                يظهر دائماً (بدون شرط)
-            </option>
-            `;
-
-
-        questions.forEach(
-            (q, index) => {
-
-                /*
-                    السؤال لا يعتمد على نفسه
-                */
-
-                if (
-                    index === editingQuestionIndex
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    q.type === "select"
-                ) {
-
-                    select.innerHTML +=
-                        `
-                        <option
-                            value="${escapeHTML(q.id)}"
-                        >
-                            ${escapeHTML(q.title)}
-                        </option>
-                        `;
-
-                }
-
-            }
-        );
-
-
-        if (
-            current &&
-            [...select.options]
-                .some(
-                    option =>
-                        option.value === current
-                )
-        ) {
-
-            select.value =
-                current;
-
-        }
-
-    }
-
-
-
-    // =========================================================
-    // أسماء أنواع الأسئلة
-    // =========================================================
-
-    function getTypeName(type) {
-
-        const names = {
-
-            text:
-                "نص",
-
-            number:
-                "رقم",
-
-            tel:
-                "هاتف",
-
-            date:
-                "تاريخ",
-
-            select:
-                "ListBox"
-
-        };
-
-
-        return (
-            names[type] ||
-            type
-        );
-
-    }
-
-
-
-    // =========================================================
-    // حفظ الفورم
-    // =========================================================
-
-    window.saveForm = async function() {
-
-        const title =
+        conditionValue:
             document.getElementById(
-                "formTitle"
-            )
-            .value
-            .trim();
+                "qConditionValue"
+            ).value.trim()
+
+    };
 
 
-        if (
-            !title ||
-            questions.length === 0
-        ) {
+    if (dependentOn) {
 
-            alert(
-                "أدخل اسم الفورم وقم بإضافة أسئلة"
-            );
+        q.dependentOn =
+            dependentOn;
 
-            return;
-
-        }
+    }
 
 
-        /*
-            فحص العلاقات قبل الحفظ
-        */
+    if (
+        editingQuestionIndex >= 0
+    ) {
 
-        for (
-            const q
-            of questions
-        ) {
+        questions[
+            editingQuestionIndex
+        ] = q;
 
-            if (
-                q.dependentOn
-            ) {
+    }
+    else {
+
+        questions.push(q);
+
+    }
+
+
+    editingQuestionIndex = -1;
+
+
+    clearQuestionEditor();
+
+    updateQuestionsUI();
+
+    updateConditionSelects();
+
+};
+
+
+
+// ============================================================
+// QUESTIONS UI
+// ============================================================
+
+function updateQuestionsUI() {
+
+    let html = "";
+
+
+    questions.forEach(
+        (q, index) => {
+
+            let dependency = "";
+
+
+            if (q.dependentOn) {
 
                 const parent =
                     questions.find(
@@ -2474,120 +1424,737 @@
                     );
 
 
-                if (!parent) {
+                if (parent) {
 
-                    alert(
-                        `السؤال "${q.title}" مرتبط بسؤال أب غير موجود.`
-                    );
-
-                    return;
-
-                }
-
-
-                if (
-                    parent.type !== "select"
-                ) {
-
-                    alert(
-                        `السؤال "${q.title}" يجب أن يعتمد على ListBox.`
-                    );
-
-                    return;
+                    dependency = `
+                        <div class="mt-2 text-xs bg-purple-50 text-purple-700 p-2 rounded">
+                            🔗 تابع لـ:
+                            <strong>
+                                ${escapeHTML(parent.title)}
+                            </strong>
+                        </div>
+                    `;
 
                 }
 
             }
 
+
+            let options = "";
+
+
+            if (q.type === "select") {
+
+                options = `
+                    <div class="text-xs text-gray-500 mt-2">
+                        الخيارات:
+                        ${
+                            (q.options || [])
+                            .map(
+                                o =>
+                                    escapeHTML(o.text)
+                            )
+                            .join(" ← ")
+                        }
+                    </div>
+                `;
+
+            }
+
+
+            html += `
+
+            <div
+                class="question-card border rounded-xl p-4 bg-gray-50"
+            >
+
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+
+                    <div class="flex-1">
+
+                        <div class="flex flex-wrap items-center gap-2">
+
+                            <span
+                                class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold"
+                            >
+                                ${index + 1}
+                            </span>
+
+
+                            <span class="font-bold text-lg">
+                                ${escapeHTML(q.title)}
+                            </span>
+
+
+                            <span class="text-xs bg-gray-200 px-2 py-1 rounded">
+                                ${getTypeName(q.type)}
+                            </span>
+
+
+                            ${
+                                q.required
+                                ?
+                                `
+                                <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
+                                    إجباري
+                                </span>
+                                `
+                                :
+                                ""
+                            }
+
+
+                            ${
+                                q.unique
+                                ?
+                                `
+                                <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
+                                    يمنع التكرار
+                                </span>
+                                `
+                                :
+                                ""
+                            }
+
+                        </div>
+
+
+                        ${options}
+
+
+                        ${dependency}
+
+                    </div>
+
+
+                    <div class="flex flex-wrap gap-2 items-start">
+
+                        <button
+                            onclick="moveQ(${index}, -1)"
+                            class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-lg"
+                        >
+                            ↑
+                        </button>
+
+
+                        <button
+                            onclick="moveQ(${index}, 1)"
+                            class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-lg"
+                        >
+                            ↓
+                        </button>
+
+
+                        <button
+                            onclick="editQuestion(${index})"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg"
+                        >
+                            ✏️ تعديل
+                        </button>
+
+
+                        <button
+                            onclick="deleteQ(${index})"
+                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
+                        >
+                            🗑 حذف
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            `;
+
         }
+    );
 
 
-        try {
+    document.getElementById(
+        "questionsContainer"
+    ).innerHTML = html;
 
-            /*
-                نسخة نظيفة من الأسئلة
-            */
+}
 
-            const cleanQuestions =
-                questions.map(
-                    q => {
 
-                        const clean = {
+
+// ============================================================
+// EDIT QUESTION
+// ============================================================
+
+window.editQuestion = function(index) {
+
+    const q =
+        questions[index];
+
+
+    if (!q) {
+
+        return;
+
+    }
+
+
+    editingQuestionIndex =
+        index;
+
+
+    document.getElementById(
+        "questionEditorTitle"
+    ).innerText =
+        "✏️ تعديل السؤال";
+
+
+    document.getElementById(
+        "addQuestionBtn"
+    ).innerText =
+        "💾 حفظ تعديل السؤال";
+
+
+    document.getElementById(
+        "cancelEditBtn"
+    ).classList.remove(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "qTitle"
+    ).value =
+        q.title || "";
+
+
+    document.getElementById(
+        "qType"
+    ).value =
+        q.type || "text";
+
+
+    document.getElementById(
+        "qRequired"
+    ).checked =
+        !!q.required;
+
+
+    document.getElementById(
+        "qUnique"
+    ).checked =
+        !!q.unique;
+
+
+    document.getElementById(
+        "qConditionId"
+    ).value =
+        q.conditionId || "";
+
+
+    document.getElementById(
+        "qConditionValue"
+    ).value =
+        q.conditionValue || "";
+
+
+    tempOptions =
+        (q.options || [])
+        .map(
+            option => {
+
+                if (
+                    typeof option === "string"
+                ) {
+
+                    return {
+
+                        id:
+                            "opt_" +
+                            Date.now() +
+                            Math.random(),
+
+                        text:
+                            option
+
+                    };
+
+                }
+
+
+                return {
+
+                    id:
+                        option.id ||
+                        "opt_" +
+                        Date.now() +
+                        Math.random(),
+
+                    text:
+                        option.text || ""
+
+                };
+
+            }
+        );
+
+
+    document.getElementById(
+        "qIsDependent"
+    ).checked =
+        !!q.dependentOn;
+
+
+    toggleOptionsUI();
+
+    populateParentSelect();
+
+
+    if (q.dependentOn) {
+
+        document.getElementById(
+            "qDependsOn"
+        ).value =
+            q.dependentOn.questionId || "";
+
+    }
+
+
+    toggleDependentUI();
+
+    renderTempOptions();
+
+    renderParentMappings();
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+};
+
+
+
+// ============================================================
+// CANCEL EDIT
+// ============================================================
+
+window.cancelEdit = function() {
+
+    editingQuestionIndex = -1;
+
+    clearQuestionEditor();
+
+};
+
+
+
+// ============================================================
+// CLEAR EDITOR
+// ============================================================
+
+function clearQuestionEditor() {
+
+    document.getElementById(
+        "questionEditorTitle"
+    ).innerText =
+        "إضافة حقل جديد";
+
+
+    document.getElementById(
+        "addQuestionBtn"
+    ).innerText =
+        "إضافة السؤال للفورم";
+
+
+    document.getElementById(
+        "cancelEditBtn"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "qTitle"
+    ).value = "";
+
+
+    document.getElementById(
+        "qType"
+    ).value =
+        "text";
+
+
+    document.getElementById(
+        "qRequired"
+    ).checked =
+        false;
+
+
+    document.getElementById(
+        "qUnique"
+    ).checked =
+        false;
+
+
+    document.getElementById(
+        "qConditionId"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "qConditionValue"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "qIsDependent"
+    ).checked =
+        false;
+
+
+    document.getElementById(
+        "qDependsOn"
+    ).innerHTML = `
+        <option value="">
+            اختر السؤال الأب
+        </option>
+    `;
+
+
+    tempOptions = [];
+
+
+    renderTempOptions();
+
+
+    document.getElementById(
+        "optionsDiv"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "dependentUI"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "parentMappingsBox"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "parentMappings"
+    ).innerHTML = "";
+
+}
+
+
+
+// ============================================================
+// MOVE QUESTION
+// ============================================================
+
+window.moveQ = function(
+    index,
+    direction
+) {
+
+    const newIndex =
+        index + direction;
+
+
+    if (
+        newIndex < 0 ||
+        newIndex >= questions.length
+    ) {
+
+        return;
+
+    }
+
+
+    const temp =
+        questions[index];
+
+
+    questions[index] =
+        questions[newIndex];
+
+
+    questions[newIndex] =
+        temp;
+
+
+    updateQuestionsUI();
+
+    updateConditionSelects();
+
+};
+
+
+
+// ============================================================
+// DELETE QUESTION
+// ============================================================
+
+window.deleteQ = function(index) {
+
+    const q =
+        questions[index];
+
+
+    if (!q) {
+
+        return;
+
+    }
+
+
+    if (
+        !confirm(
+            `هل تريد حذف السؤال "${q.title}"؟`
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    questions
+        .filter(
+            child =>
+                child.dependentOn &&
+                child.dependentOn.questionId === q.id
+        )
+        .forEach(
+            child => {
+
+                delete child.dependentOn;
+
+            }
+        );
+
+
+    questions.splice(
+        index,
+        1
+    );
+
+
+    editingQuestionIndex = -1;
+
+
+    clearQuestionEditor();
+
+    updateQuestionsUI();
+
+    updateConditionSelects();
+
+};
+
+
+
+// ============================================================
+// CONDITIONS
+// ============================================================
+
+function updateConditionSelects() {
+
+    const select =
+        document.getElementById(
+            "qConditionId"
+        );
+
+
+    const oldValue =
+        select.value;
+
+
+    select.innerHTML = `
+        <option value="">
+            يظهر دائماً
+        </option>
+    `;
+
+
+    questions.forEach(
+        (q, index) => {
+
+            if (
+                index === editingQuestionIndex
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                q.type === "select"
+            ) {
+
+                select.innerHTML += `
+                    <option value="${escapeHTML(q.id)}">
+                        ${escapeHTML(q.title)}
+                    </option>
+                `;
+
+            }
+
+        }
+    );
+
+
+    if (
+        oldValue &&
+        [...select.options].some(
+            o => o.value === oldValue
+        )
+    ) {
+
+        select.value =
+            oldValue;
+
+    }
+
+}
+
+
+
+// ============================================================
+// CLEAN QUESTIONS
+// ============================================================
+
+function getCleanQuestions() {
+
+    return questions.map(
+        q => {
+
+            const clean = {
+
+                id:
+                    q.id,
+
+                title:
+                    q.title,
+
+                type:
+                    q.type,
+
+                required:
+                    !!q.required,
+
+                unique:
+                    !!q.unique,
+
+                options:
+                    Array.isArray(q.options)
+                    ?
+                    q.options.map(
+                        o => ({
 
                             id:
-                                q.id,
+                                o.id,
 
-                            title:
-                                q.title,
+                            text:
+                                o.text
 
-                            type:
-                                q.type,
+                        })
+                    )
+                    :
+                    [],
 
-                            required:
-                                !!q.required,
+                conditionId:
+                    q.conditionId || "",
 
-                            unique:
-                                !!q.unique,
+                conditionValue:
+                    q.conditionValue || ""
 
-                            options:
-                                Array.isArray(
-                                    q.options
-                                )
-                                ?
-                                q.options.map(
-                                    option => ({
-
-                                        id:
-                                            option.id,
-
-                                        text:
-                                            option.text
-
-                                    })
-                                )
-                                :
-                                [],
-
-                            conditionId:
-                                q.conditionId ||
-                                "",
-
-                            conditionValue:
-                                q.conditionValue ||
-                                ""
-
-                        };
+            };
 
 
-                        if (
-                            q.dependentOn
-                        ) {
+            if (
+                q.dependentOn
+            ) {
 
-                            clean.dependentOn = {
+                clean.dependentOn = {
 
-                                questionId:
-                                    q.dependentOn.questionId,
+                    questionId:
+                        q.dependentOn.questionId,
 
-                                mappings:
-                                    q.dependentOn.mappings ||
-                                    {}
+                    mappings:
+                        q.dependentOn.mappings || {}
 
-                            };
+                };
 
-                        }
-
-
-                        return clean;
-
-                    }
-                );
+            }
 
 
-            await addDoc(
+            return clean;
 
-                collection(
+        }
+    );
+
+}
+
+
+
+// ============================================================
+// SAVE FORM
+// ============================================================
+
+window.saveForm = async function() {
+
+    const title =
+        document.getElementById(
+            "formTitle"
+        ).value.trim();
+
+
+    if (
+        !title ||
+        questions.length === 0
+    ) {
+
+        alert(
+            "أدخل اسم الفورم وأضف الأسئلة"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const cleanQuestions =
+            getCleanQuestions();
+
+
+        // =========================================
+        // EDIT EXISTING
+        // =========================================
+
+        if (editFormId) {
+
+            await updateDoc(
+
+                doc(
                     db,
-                    "forms"
+                    "forms",
+                    editFormId
                 ),
 
                 {
@@ -2598,10 +2165,7 @@
                     questions:
                         cleanQuestions,
 
-                    allowEdit:
-                        true,
-
-                    createdAt:
+                    updatedAt:
                         serverTimestamp()
 
                 }
@@ -2610,171 +2174,339 @@
 
 
             alert(
-                "تم حفظ الفورم بنجاح! ✅"
+                "تم تعديل الفورم بنجاح ✅"
             );
 
 
-            location.reload();
-
-        }
-        catch (e) {
-
-            console.error(e);
-
-
-            alert(
-                "خطأ: " +
-                e.message
-            );
-
-        }
-
-    };
-
-
-
-    // =========================================================
-    // تحميل الفورمات
-    // =========================================================
-
-    async function loadForms() {
-
-        try {
-
-            const querySnapshot =
-                await getDocs(
-                    collection(
-                        db,
-                        "forms"
-                    )
+            window.location.href =
+                "admin_manage.html?formId=" +
+                encodeURIComponent(
+                    editFormId
                 );
 
 
-            let html = "";
+            return;
+
+        }
 
 
-            querySnapshot.forEach(
-                docSnap => {
+        // =========================================
+        // CREATE NEW
+        // =========================================
 
-                    const data =
-                        docSnap.data();
+        await addDoc(
 
+            collection(
+                db,
+                "forms"
+            ),
 
-                    html +=
-                        `
+            {
 
-                        <li
-                            class="p-4 bg-white border rounded-xl shadow-sm flex flex-col md:flex-row justify-between gap-3"
-                        >
+                title:
+                    title,
 
-                            <div>
+                questions:
+                    cleanQuestions,
 
-                                <div
-                                    class="font-bold text-lg"
-                                >
-                                    ${escapeHTML(
-                                        data.title ||
-                                        "فورم بدون اسم"
-                                    )}
-                                </div>
+                allowEdit:
+                    true,
 
-
-                                <div
-                                    class="text-xs text-gray-500 mt-1"
-                                >
-                                    عدد الأسئلة:
-                                    ${
-                                        Array.isArray(
-                                            data.questions
-                                        )
-                                        ?
-                                        data.questions.length
-                                        :
-                                        0
-                                    }
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                class="flex flex-wrap gap-2"
-                            >
-
-                                <a
-                                    href="admin_manage.html?formId=${encodeURIComponent(docSnap.id)}"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center"
-                                >
-                                    📊 إدارة الإجابات
-                                </a>
-
-                            </div>
-
-                        </li>
-
-                        `;
-
-                }
-            );
-
-
-            if (!html) {
-
-                html =
-                    `
-                    <li
-                        class="text-center text-gray-400 py-8"
-                    >
-                        لا توجد فورمات محفوظة حتى الآن
-                    </li>
-                    `;
+                createdAt:
+                    serverTimestamp()
 
             }
 
-
-            document.getElementById(
-                "formsList"
-            ).innerHTML =
-                html;
-
-        }
-        catch(error) {
-
-            console.error(error);
+        );
 
 
-            document.getElementById(
-                "formsList"
-            ).innerHTML =
-                `
-                <li class="text-red-500">
-                    تعذر تحميل الفورمات:
-                    ${escapeHTML(error.message)}
-                </li>
-                `;
+        alert(
+            "تم إنشاء الفورم بنجاح ✅"
+        );
 
-        }
+
+        location.reload();
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "حدث خطأ: " +
+            error.message
+        );
+
+    }
+
+};
+
+
+
+// ============================================================
+// LOAD FORM FOR EDIT
+// ============================================================
+
+async function loadFormForEdit() {
+
+    if (!editFormId) {
+
+        return;
 
     }
 
 
+    try {
 
-    // =========================================================
-    // تشغيل الصفحة
-    // =========================================================
+        const formSnap =
+            await getDoc(
+                doc(
+                    db,
+                    "forms",
+                    editFormId
+                )
+            );
 
-    renderTempOptions();
 
-    updateQuestionsUI();
+        if (!formSnap.exists()) {
 
-    updateConditionSelects();
+            alert(
+                "الفورم غير موجود"
+            );
 
-    loadForms();
+            return;
+
+        }
+
+
+        const data =
+            formSnap.data();
+
+
+        document.getElementById(
+            "formTitle"
+        ).value =
+            data.title || "";
+
+
+        questions =
+            Array.isArray(
+                data.questions
+            )
+            ?
+            data.questions.map(
+                q => ({
+
+                    ...q,
+
+                    options:
+                        Array.isArray(q.options)
+                        ?
+                        q.options.map(
+                            option => {
+
+                                if (
+                                    typeof option === "string"
+                                ) {
+
+                                    return {
+
+                                        id:
+                                            "opt_" +
+                                            Date.now() +
+                                            Math.random(),
+
+                                        text:
+                                            option
+
+                                    };
+
+                                }
+
+
+                                return {
+
+                                    id:
+                                        option.id ||
+                                        "opt_" +
+                                        Date.now() +
+                                        Math.random(),
+
+                                    text:
+                                        option.text || ""
+
+                                };
+
+                            }
+                        )
+                        :
+                        []
+
+                })
+            )
+            :
+            [];
+
+
+        document.getElementById(
+            "pageTitle"
+        ).innerText =
+            "✏️ تعديل الفورم";
+
+
+        document.getElementById(
+            "saveFormButton"
+        ).innerText =
+            "💾 حفظ تعديلات الفورم";
+
+
+        document.getElementById(
+            "backManageBtn"
+        ).href =
+            "admin_manage.html?formId=" +
+            encodeURIComponent(
+                editFormId
+            );
+
+
+        document.getElementById(
+            "backManageBtn"
+        ).classList.remove(
+            "hidden"
+        );
+
+
+        updateQuestionsUI();
+
+        updateConditionSelects();
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "تعذر تحميل الفورم: " +
+            error.message
+        );
+
+    }
+
+}
+
+
+
+// ============================================================
+// LOAD FORMS
+// ============================================================
+
+async function loadForms() {
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "forms"
+                )
+            );
+
+
+        let html = "";
+
+
+        snapshot.forEach(
+            snap => {
+
+                const data =
+                    snap.data();
+
+
+                html += `
+
+                <li
+                    class="p-4 bg-white border rounded-xl shadow-sm flex flex-col md:flex-row justify-between gap-3"
+                >
+
+                    <div>
+
+                        <div class="font-bold text-lg">
+                            ${escapeHTML(
+                                data.title ||
+                                "فورم بدون اسم"
+                            )}
+                        </div>
+
+
+                        <div class="text-xs text-gray-500">
+                            عدد الأسئلة:
+                            ${
+                                Array.isArray(
+                                    data.questions
+                                )
+                                ?
+                                data.questions.length
+                                :
+                                0
+                            }
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="admin_manage.html?formId=${encodeURIComponent(snap.id)}"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center"
+                    >
+                        📊 إدارة الإجابات
+                    </a>
+
+                </li>
+
+                `;
+
+            }
+        );
+
+
+        document.getElementById(
+            "formsList"
+        ).innerHTML =
+            html ||
+            `
+            <li class="text-center text-gray-400 py-6">
+                لا توجد فورمات محفوظة
+            </li>
+            `;
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+
+// ============================================================
+// START
+// ============================================================
+
+renderTempOptions();
+
+updateQuestionsUI();
+
+updateConditionSelects();
+
+loadFormForEdit();
+
+loadForms();
 
 
 </script>
 
-
 </body>
-
 </html>
