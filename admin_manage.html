@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>أدمن - إدارة الفورم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-gray-100 p-10 font-sans">
+    <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h1 id="formTitleDisplay" class="text-3xl font-bold text-blue-600">جاري التحميل...</h1>
+            <div>
+                <label class="mr-4 font-bold"><input type="checkbox" id="allowEditToggle" onchange="toggleEditAccess()"> السماح للطلاب بتعديل إجاباتهم</label>
+                <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded">تصدير إكسيل</button>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-right border-collapse border" id="dataTable">
+                <thead id="tableHead" class="bg-gray-200"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = { /* استخدم نفس الكونفيج هنا */ 
+            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4", authDomain: "hazoma-60ed2.firebaseapp.com", projectId: "hazoma-60ed2", storageBucket: "hazoma-60ed2.firebasestorage.app", messagingSenderId: "962438384604", appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const formId = urlParams.get('formId');
+        let formQuestions = [];
+        let allSubmissions = [];
+
+        async function loadData() {
+            const formDoc = await getDoc(doc(db, "forms", formId));
+            if(!formDoc.exists()) return alert("الفورم غير موجود");
+            
+            const formData = formDoc.data();
+            document.getElementById('formTitleDisplay').innerText = "إدارة: " + formData.title;
+            document.getElementById('allowEditToggle').checked = formData.allowEdit;
+            formQuestions = formData.questions;
+
+            let thHtml = '<tr><th>الكود التسلسلي</th><th>الكود المميز</th>';
+            formQuestions.forEach(q => thHtml += `<th>${q.title}</th>`);
+            thHtml += '</tr>';
+            document.getElementById('tableHead').innerHTML = thHtml;
+
+            const qSnap = await getDocs(query(collection(db, "submissions"), where("formId", "==", formId)));
+            let tbHtml = '';
+            allSubmissions = [];
+            qSnap.forEach(docSnap => {
+                let data = docSnap.data();
+                allSubmissions.push(data);
+                tbHtml += `<tr><td class="border p-2">${data.serialNumber}</td><td class="border p-2">${data.uniqueId}</td>`;
+                formQuestions.forEach(q => {
+                    tbHtml += `<td class="border p-2">${data.answers[q.id] || '-'}</td>`;
+                });
+                tbHtml += '</tr>';
+            });
+            document.getElementById('tableBody').innerHTML = tbHtml;
+        }
+
+        window.toggleEditAccess = async function() {
+            let allow = document.getElementById('allowEditToggle').checked;
+            await updateDoc(doc(db, "forms", formId), { allowEdit: allow });
+            alert("تم تحديث الصلاحيات");
+        }
+
+        window.exportToExcel = function() {
+            let wb = XLSX.utils.table_to_book(document.getElementById('dataTable'), {sheet:"البيانات"});
+            XLSX.writeFile(wb, 'بيانات_الطلاب.xlsx');
+        }
+
+        if(formId) loadData();
+    </script>
+</body>
+</html>
