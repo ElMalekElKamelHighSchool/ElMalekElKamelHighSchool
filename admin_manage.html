@@ -12,9 +12,14 @@
 
     <title>أدمن - إدارة الفورم</title>
 
+
     <script src="https://cdn.tailwindcss.com"></script>
 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 
     <style>
@@ -23,123 +28,53 @@
             font-family: Arial, Tahoma, sans-serif;
         }
 
-        .table-wrapper {
-            max-height: 65vh;
-            overflow: auto;
-            border-radius: 12px;
-        }
-
-        table {
-            min-width: max-content;
-        }
-
-        thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            white-space: nowrap;
-        }
-
-        .table-input {
-            min-width: 140px;
-            width: 100%;
-        }
-
-        .loading {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: .5;
-            }
-
-            100% {
-                opacity: 1;
-            }
-
-        }
-
-        .stat-card {
-            transition: .2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
-
-
-        /* ===============================
-           إعدادات الطباعة / PDF
-        =============================== */
 
         @media print {
-
-            @page {
-                size: A4 landscape;
-                margin: 10mm;
-            }
 
             body {
                 background: white !important;
                 padding: 0 !important;
-                margin: 0 !important;
             }
 
-            body * {
-                visibility: hidden;
-            }
-
-            #printArea,
-            #printArea * {
-                visibility: visible;
-            }
-
-            #printArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white;
-            }
-
-            #printArea table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 9px;
-            }
-
-            #printArea thead {
-                display: table-header-group;
-            }
-
-            #printArea tr {
-                page-break-inside: avoid;
-            }
-
-            #printArea th,
-            #printArea td {
-                border: 1px solid #000 !important;
-                padding: 5px;
-                text-align: right;
-                vertical-align: middle;
-            }
-
-            #printArea th {
-                background: #e5e7eb !important;
-                color: #000 !important;
-                font-weight: bold;
-            }
 
             .no-print {
                 display: none !important;
             }
 
+
+            #printArea {
+                width: 100%;
+            }
+
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+
+            thead {
+                display: table-header-group;
+            }
+
+
+            tr {
+                page-break-inside: avoid;
+            }
+
+
+            th,
+            td {
+                border: 1px solid #000 !important;
+                padding: 5px !important;
+                font-size: 10px !important;
+            }
+
+        }
+
+
+        .answer-cell {
+            min-width: 120px;
         }
 
     </style>
@@ -147,345 +82,186 @@
 </head>
 
 
-<body class="bg-gray-100 p-3 md:p-8 font-sans">
+<body class="bg-gray-100 p-3 md:p-8">
 
 
-    <!-- ===============================
-         الصفحة الرئيسية
-    =============================== -->
+<div class="max-w-7xl mx-auto bg-white p-4 md:p-8 rounded-2xl shadow-md">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <div
-        class="max-w-[1500px] mx-auto bg-white p-4 md:p-7 rounded-2xl shadow-md"
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b pb-5 no-print"
     >
 
+        <div>
 
-        <!-- ===============================
-             رأس الصفحة
-        =============================== -->
-
-        <div
-            class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b pb-5 no-print"
-        >
-
-            <div>
-
-                <h1
-                    id="formTitleDisplay"
-                    class="text-2xl md:text-3xl font-bold text-blue-600"
-                >
-                    جاري التحميل...
-                </h1>
-
-                <p
-                    id="formIdDisplay"
-                    class="text-xs text-gray-400 mt-1"
-                ></p>
-
-            </div>
+            <h1
+                id="formTitleDisplay"
+                class="text-2xl md:text-3xl font-bold text-blue-600"
+            >
+                جاري التحميل...
+            </h1>
 
 
-            <div class="flex flex-wrap gap-2">
-
-                <!-- العودة -->
-
-                <button
-                    onclick="goBack()"
-                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold"
-                >
-                    ← العودة
-                </button>
-
-
-                <!-- تحديث -->
-
-                <button
-                    onclick="loadData()"
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-bold"
-                >
-                    🔄 تحديث
-                </button>
-
-
-                <!-- Excel -->
-
-                <button
-                    onclick="exportToExcel()"
-                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold"
-                >
-                    📊 Excel
-                </button>
-
-
-                <!-- PDF -->
-
-                <button
-                    onclick="printPDF()"
-                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold"
-                >
-                    📄 PDF
-                </button>
-
-
-                <!-- حذف -->
-
-                <button
-                    onclick="deleteForm()"
-                    class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-lg font-bold"
-                >
-                    🗑 حذف الفورم
-                </button>
-
-            </div>
+            <p
+                id="recordsCount"
+                class="text-sm text-gray-500 mt-1"
+            ></p>
 
         </div>
 
 
-
-        <!-- ===============================
-             الصلاحيات
-        =============================== -->
-
         <div
-            class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 no-print"
+            class="flex flex-wrap gap-2"
         >
 
-            <div class="flex flex-col md:flex-row justify-between gap-4">
-
-                <label
-                    class="flex items-center gap-2 font-bold cursor-pointer"
-                >
-
-                    <input
-                        type="checkbox"
-                        id="allowEditToggle"
-                        onchange="toggleEditAccess()"
-                        class="w-5 h-5"
-                    >
-
-                    السماح للطلاب بتعديل إجاباتهم
-
-                </label>
+            <a
+                href="admin_create.html"
+                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+                ➕ فورم جديد
+            </a>
 
 
-                <div
-                    id="saveStatus"
-                    class="text-sm text-gray-500"
-                >
-                    جاهز
-                </div>
+            <button
+                onclick="editQuestions()"
+                class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-bold"
+            >
+                ✏️ تعديل الأسئلة
+            </button>
 
-            </div>
+
+            <button
+                onclick="exportToExcel()"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+                📊 Excel
+            </button>
+
+
+            <button
+                onclick="exportToPDF()"
+                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+                📄 PDF
+            </button>
+
+
+            <button
+                onclick="window.print()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+                🖨️ طباعة
+            </button>
+
+
+            <button
+                onclick="deleteForm()"
+                class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-lg font-bold"
+            >
+                🗑️ حذف الفورم
+            </button>
 
         </div>
 
+    </div>
 
 
-        <!-- ===============================
-             الإحصائيات
-        =============================== -->
+
+    <!-- =====================================================
+         SETTINGS
+    ====================================================== -->
+
+    <div
+        class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 no-print"
+    >
+
+        <label class="flex items-center gap-2 font-bold">
+
+            <input
+                type="checkbox"
+                id="allowEditToggle"
+                onchange="toggleEditAccess()"
+                class="w-5 h-5"
+            >
+
+            السماح للطلاب بتعديل إجاباتهم
+
+        </label>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <div
+        class="bg-gray-50 border rounded-xl p-4 mb-5 no-print"
+    >
 
         <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5 no-print"
+            class="grid grid-cols-1 md:grid-cols-4 gap-3"
         >
 
-            <div
-                class="stat-card bg-blue-50 border border-blue-200 rounded-xl p-4"
+            <input
+                type="text"
+                id="searchInput"
+                oninput="applyFilters()"
+                placeholder="🔎 بحث في جميع البيانات..."
+                class="p-3 border rounded-lg md:col-span-2"
             >
 
-                <div class="text-sm text-blue-600">
-                    عدد الطلاب
-                </div>
 
-                <div
-                    id="totalStudents"
-                    class="text-2xl font-bold text-blue-800"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div
-                class="stat-card bg-green-50 border border-green-200 rounded-xl p-4"
+            <select
+                id="searchColumn"
+                onchange="applyFilters()"
+                class="p-3 border rounded-lg"
             >
 
-                <div class="text-sm text-green-600">
-                    النتائج الظاهرة
-                </div>
+                <option value="">
+                    جميع الأعمدة
+                </option>
 
-                <div
-                    id="visibleStudents"
-                    class="text-2xl font-bold text-green-800"
-                >
-                    0
-                </div>
-
-            </div>
+            </select>
 
 
-            <div
-                class="stat-card bg-purple-50 border border-purple-200 rounded-xl p-4"
+            <button
+                onclick="clearSearch()"
+                class="bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-bold"
             >
-
-                <div class="text-sm text-purple-600">
-                    عدد الحقول
-                </div>
-
-                <div
-                    id="totalQuestions"
-                    class="text-2xl font-bold text-purple-800"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div
-                class="stat-card bg-orange-50 border border-orange-200 rounded-xl p-4"
-            >
-
-                <div class="text-sm text-orange-600">
-                    آخر تحديث
-                </div>
-
-                <div
-                    id="lastUpdate"
-                    class="text-sm font-bold text-orange-800 mt-1"
-                >
-                    -
-                </div>
-
-            </div>
+                مسح البحث
+            </button>
 
         </div>
 
+    </div>
 
 
-        <!-- ===============================
-             البحث والفلاتر
-        =============================== -->
+
+    <!-- =====================================================
+         PRINT AREA
+    ====================================================== -->
+
+    <div id="printArea">
+
 
         <div
-            class="bg-gray-50 border rounded-xl p-4 mb-5 no-print"
-        >
-
-            <div
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3"
-            >
-
-                <!-- البحث العام -->
-
-                <div class="lg:col-span-2">
-
-                    <label
-                        class="block text-sm font-bold mb-1"
-                    >
-                        🔎 بحث شامل
-                    </label>
-
-                    <input
-                        type="text"
-                        id="searchInput"
-                        oninput="applyFilters()"
-                        placeholder="ابحث بالاسم أو الكود أو الهاتف أو أي إجابة..."
-                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-                    >
-
-                </div>
+            id="printTitle"
+            class="hidden print:block text-center font-bold text-xl mb-4"
+        ></div>
 
 
-                <!-- اختيار الحقل -->
+        <div class="overflow-x-auto">
 
-                <div>
-
-                    <label
-                        class="block text-sm font-bold mb-1"
-                    >
-                        البحث داخل حقل محدد
-                    </label>
-
-                    <select
-                        id="filterQuestion"
-                        onchange="applyFilters()"
-                        class="w-full p-3 border rounded-lg"
-                    >
-
-                        <option value="">
-                            كل الحقول
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- القيمة -->
-
-                <div>
-
-                    <label
-                        class="block text-sm font-bold mb-1"
-                    >
-                        القيمة
-                    </label>
-
-                    <input
-                        type="text"
-                        id="filterValue"
-                        oninput="applyFilters()"
-                        placeholder="القيمة المطلوبة..."
-                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <div class="flex flex-wrap gap-2 mt-3">
-
-                <button
-                    onclick="clearFilters()"
-                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
-                >
-                    🧹 مسح البحث والفلاتر
-                </button>
-
-
-                <button
-                    onclick="exportFilteredToExcel()"
-                    class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg"
-                >
-                    📊 تصدير النتائج الظاهرة فقط
-                </button>
-
-
-                <button
-                    onclick="printPDF()"
-                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-                >
-                    🖨 طباعة النتائج
-                </button>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ===============================
-             الجدول
-        =============================== -->
-
-        <div
-            class="table-wrapper border"
-        >
 
             <table
-                class="w-full text-right border-collapse"
                 id="dataTable"
+                class="w-full text-right border-collapse border"
             >
 
                 <thead
@@ -493,11 +269,13 @@
                     class="bg-gray-200"
                 ></thead>
 
+
                 <tbody
                     id="tableBody"
                 ></tbody>
 
             </table>
+
 
         </div>
 
@@ -506,1702 +284,1414 @@
 
 
 
-    <!-- ===============================
-         منطقة الطباعة
-    =============================== -->
+    <!-- =====================================================
+         EDIT ANSWER MODAL
+    ====================================================== -->
 
     <div
-        id="printArea"
-        class="hidden"
+        id="editModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 no-print"
     >
 
-        <h2
-            id="printTitle"
-            class="text-center font-bold text-xl mb-4"
-        ></h2>
-
         <div
-            id="printInfo"
-            class="text-sm mb-3"
-        ></div>
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6"
+        >
 
-        <table>
+            <div class="flex justify-between items-center mb-5">
 
-            <thead id="printTableHead"></thead>
+                <h2 class="text-xl font-bold text-blue-600">
+                    ✏️ تعديل بيانات الطالب
+                </h2>
 
-            <tbody id="printTableBody"></tbody>
 
-        </table>
+                <button
+                    onclick="closeEditModal()"
+                    class="text-gray-500 text-2xl"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="editFields"
+                class="space-y-4"
+            ></div>
+
+
+            <div class="flex gap-2 mt-6">
+
+                <button
+                    onclick="saveStudentEdit()"
+                    class="flex-1 bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold"
+                >
+                    💾 حفظ
+                </button>
+
+
+                <button
+                    onclick="closeEditModal()"
+                    class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg font-bold"
+                >
+                    إلغاء
+                </button>
+
+            </div>
+
+        </div>
 
     </div>
 
-
-
-    <!-- ===============================
-         Firebase
-    =============================== -->
-
-    <script type="module">
-
-        import {
-            initializeApp
-        }
-        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-
-
-        import {
-            getFirestore,
-            doc,
-            getDoc,
-            updateDoc,
-            deleteDoc,
-            collection,
-            query,
-            where,
-            getDocs
-        }
-        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-
-        // ==========================================
-        // Firebase Config
-        // ==========================================
-
-        const firebaseConfig = {
-
-            apiKey:
-                "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
-
-            authDomain:
-                "hazoma-60ed2.firebaseapp.com",
-
-            projectId:
-                "hazoma-60ed2",
-
-            storageBucket:
-                "hazoma-60ed2.firebasestorage.app",
-
-            messagingSenderId:
-                "962438384604",
-
-            appId:
-                "1:962438384604:web:52db16e5723a8f6d3bdd19"
-
-        };
-
-
-        const app =
-            initializeApp(firebaseConfig);
-
-
-        const db =
-            getFirestore(app);
+</div>
 
 
 
-        // ==========================================
-        // البيانات
-        // ==========================================
+<script type="module">
 
-        const urlParams =
-            new URLSearchParams(
-                window.location.search
+
+// ============================================================
+// FIREBASE
+// ============================================================
+
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+
+
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    updateDoc,
+    deleteDoc,
+    collection,
+    query,
+    where,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+
+    authDomain:
+        "hazoma-60ed2.firebaseapp.com",
+
+    projectId:
+        "hazoma-60ed2",
+
+    storageBucket:
+        "hazoma-60ed2.firebasestorage.app",
+
+    messagingSenderId:
+        "962438384604",
+
+    appId:
+        "1:962438384604:web:52db16e5723a8f6d3bdd19"
+
+};
+
+
+const app =
+    initializeApp(firebaseConfig);
+
+
+const db =
+    getFirestore(app);
+
+
+
+// ============================================================
+// URL
+// ============================================================
+
+const urlParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const formId =
+    urlParams.get("formId");
+
+
+
+// ============================================================
+// VARIABLES
+// ============================================================
+
+let formQuestions = [];
+
+let allSubmissions = [];
+
+let filteredSubmissions = [];
+
+let editingSubmission = null;
+
+
+
+// ============================================================
+// ESCAPE
+// ============================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+
+// ============================================================
+// LOAD DATA
+// ============================================================
+
+async function loadData() {
+
+    if (!formId) {
+
+        alert(
+            "لم يتم تحديد الفورم"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        // ============================================
+        // FORM
+        // ============================================
+
+        const formDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "forms",
+                    formId
+                )
             );
 
 
-        const formId =
-            urlParams.get("formId");
+        if (!formDoc.exists()) {
 
+            alert(
+                "الفورم غير موجود"
+            );
 
-        let formQuestions = [];
-
-        let allSubmissions = [];
-
-        let filteredSubmissions = [];
-
-        let formDataGlobal = null;
-
-
-
-        // ==========================================
-        // حماية HTML
-        // ==========================================
-
-        function escapeHTML(value) {
-
-            if (
-                value === null ||
-                value === undefined
-            ) {
-
-                return "";
-
-            }
-
-
-            return String(value)
-
-                .replace(
-                    /&/g,
-                    "&amp;"
-                )
-
-                .replace(
-                    /</g,
-                    "&lt;"
-                )
-
-                .replace(
-                    />/g,
-                    "&gt;"
-                )
-
-                .replace(
-                    /"/g,
-                    "&quot;"
-                )
-
-                .replace(
-                    /'/g,
-                    "&#039;"
-                );
+            return;
 
         }
 
 
+        const formData =
+            formDoc.data();
 
-        // ==========================================
-        // تحميل البيانات
-        // ==========================================
 
-        window.loadData = async function() {
+        document.getElementById(
+            "formTitleDisplay"
+        ).innerText =
+            "إدارة: " +
+            (
+                formData.title ||
+                "بدون اسم"
+            );
 
-            if (!formId) {
 
-                alert(
-                    "لم يتم تحديد رقم الفورم"
-                );
+        document.getElementById(
+            "printTitle"
+        ).innerText =
+            formData.title || "";
 
-                return;
+
+        document.getElementById(
+            "allowEditToggle"
+        ).checked =
+            !!formData.allowEdit;
+
+
+        formQuestions =
+            Array.isArray(
+                formData.questions
+            )
+            ?
+            formData.questions
+            :
+            [];
+
+
+
+        // ============================================
+        // TABLE HEADER
+        // ============================================
+
+        let thHtml =
+            `
+            <tr>
+
+                <th class="border p-2">
+                    #
+                </th>
+
+                <th class="border p-2">
+                    الكود التسلسلي
+                </th>
+
+                <th class="border p-2">
+                    الكود المميز
+                </th>
+            `;
+
+
+        formQuestions.forEach(
+            q => {
+
+                thHtml += `
+                    <th class="border p-2">
+                        ${escapeHTML(q.title)}
+                    </th>
+                `;
 
             }
+        );
 
 
-            try {
+        thHtml += `
+                <th class="border p-2 no-print">
+                    إجراءات
+                </th>
 
-                setStatus(
-                    "جاري تحميل البيانات..."
-                );
-
-
-                // --------------------------------------
-                // بيانات الفورم
-                // --------------------------------------
-
-                const formDoc =
-                    await getDoc(
-                        doc(
-                            db,
-                            "forms",
-                            formId
-                        )
-                    );
+            </tr>
+        `;
 
 
-                if (!formDoc.exists()) {
-
-                    alert(
-                        "الفورم غير موجود"
-                    );
-
-                    return;
-
-                }
+        document.getElementById(
+            "tableHead"
+        ).innerHTML =
+            thHtml;
 
 
-                formDataGlobal =
-                    formDoc.data();
+
+        // ============================================
+        // SEARCH COLUMNS
+        // ============================================
+
+        const searchColumn =
+            document.getElementById(
+                "searchColumn"
+            );
 
 
-                document.getElementById(
-                    "formTitleDisplay"
-                ).innerText =
-                    "إدارة: " +
-                    (
-                        formDataGlobal.title ||
-                        "فورم بدون اسم"
-                    );
+        searchColumn.innerHTML = `
+            <option value="">
+                جميع الأعمدة
+            </option>
+
+            <option value="serialNumber">
+                الكود التسلسلي
+            </option>
+
+            <option value="uniqueId">
+                الكود المميز
+            </option>
+        `;
 
 
-                document.getElementById(
-                    "formIdDisplay"
-                ).innerText =
-                    "Form ID: " +
-                    formId;
+        formQuestions.forEach(
+            q => {
+
+                searchColumn.innerHTML += `
+                    <option value="${escapeHTML(q.id)}">
+                        ${escapeHTML(q.title)}
+                    </option>
+                `;
+
+            }
+        );
 
 
-                document.getElementById(
-                    "allowEditToggle"
-                ).checked =
-                    !!formDataGlobal.allowEdit;
 
+        // ============================================
+        // SUBMISSIONS
+        // ============================================
 
-                formQuestions =
-                    Array.isArray(
-                        formDataGlobal.questions
+        const qSnap =
+            await getDocs(
+                query(
+                    collection(
+                        db,
+                        "submissions"
+                    ),
+                    where(
+                        "formId",
+                        "==",
+                        formId
                     )
-                    ?
-                    formDataGlobal.questions
-                    :
-                    [];
+                )
+            );
 
 
-                document.getElementById(
-                    "totalQuestions"
-                ).innerText =
-                    formQuestions.length;
+        allSubmissions = [];
+
+
+        qSnap.forEach(
+            snap => {
+
+                allSubmissions.push({
+
+                    docId:
+                        snap.id,
+
+                    ...snap.data()
+
+                });
+
+            }
+        );
+
+
+        filteredSubmissions =
+            [...allSubmissions];
+
+
+        renderTable();
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "حدث خطأ أثناء تحميل البيانات: " +
+            error.message
+        );
+
+    }
+
+}
 
 
 
-                // --------------------------------------
-                // بناء فلتر الحقول
-                // --------------------------------------
+// ============================================================
+// RENDER TABLE
+// ============================================================
 
-                buildQuestionFilter();
+function renderTable() {
 
-
-                // --------------------------------------
-                // رؤوس الجدول
-                // --------------------------------------
-
-                renderTableHead();
+    const tbody =
+        document.getElementById(
+            "tableBody"
+        );
 
 
-
-                // --------------------------------------
-                // تحميل الإجابات
-                // --------------------------------------
-
-                const qSnap =
-                    await getDocs(
-
-                        query(
-
-                            collection(
-                                db,
-                                "submissions"
-                            ),
-
-                            where(
-                                "formId",
-                                "==",
-                                formId
-                            )
-
-                        )
-
-                    );
+    let html = "";
 
 
-                allSubmissions = [];
+    filteredSubmissions.forEach(
+        (data, index) => {
+
+            html += `
+                <tr class="hover:bg-gray-50">
+
+                    <td class="border p-2">
+                        ${index + 1}
+                    </td>
 
 
-                qSnap.forEach(
-                    docSnap => {
-
-                        const data =
-                            docSnap.data();
-
-
-                        /*
-                            نحتفظ بمعرف المستند
-                            حتى نقدر نعدله لاحقًا
-                        */
-
-                        data._docId =
-                            docSnap.id;
+                    <td class="border p-2">
+                        ${escapeHTML(
+                            data.serialNumber || "-"
+                        )}
+                    </td>
 
 
-                        allSubmissions.push(
-                            data
-                        );
+                    <td class="border p-2">
+                        ${escapeHTML(
+                            data.uniqueId || "-"
+                        )}
+                    </td>
+            `;
+
+
+            formQuestions.forEach(
+                q => {
+
+                    let value = "-";
+
+
+                    if (
+                        data.answers &&
+                        data.answers[q.id] !== undefined &&
+                        data.answers[q.id] !== null &&
+                        data.answers[q.id] !== ""
+                    ) {
+
+                        value =
+                            data.answers[q.id];
 
                     }
-                );
 
 
-                filteredSubmissions =
-                    [...allSubmissions];
-
-
-                document.getElementById(
-                    "totalStudents"
-                ).innerText =
-                    allSubmissions.length;
-
-
-                renderTable();
-
-
-                updateLastUpdate();
-
-
-                setStatus(
-                    "تم تحميل البيانات بنجاح"
-                );
-
-
-            }
-            catch(error) {
-
-                console.error(error);
-
-
-                alert(
-                    "حدث خطأ أثناء تحميل البيانات:\n" +
-                    error.message
-                );
-
-
-                setStatus(
-                    "حدث خطأ"
-                );
-
-            }
-
-        };
-
-
-
-        // ==========================================
-        // بناء فلتر الحقول
-        // ==========================================
-
-        function buildQuestionFilter() {
-
-            const select =
-                document.getElementById(
-                    "filterQuestion"
-                );
-
-
-            select.innerHTML =
-                `
-                <option value="">
-                    كل الحقول
-                </option>
-                `;
-
-
-            formQuestions.forEach(
-                q => {
-
-                    select.innerHTML +=
-                        `
-                        <option value="${escapeHTML(q.id)}">
-                            ${escapeHTML(q.title)}
-                        </option>
-                        `;
-
-                }
-            );
-
-        }
-
-
-
-        // ==========================================
-        // رأس الجدول
-        // ==========================================
-
-        function renderTableHead() {
-
-            let html =
-                `
-                <tr>
-
-                    <th
-                        class="border p-3 bg-gray-200 cursor-pointer"
-                        onclick="sortBy('__serial')"
-                    >
-                        الكود التسلسلي ↕
-                    </th>
-
-                    <th
-                        class="border p-3 bg-gray-200 cursor-pointer"
-                        onclick="sortBy('__unique')"
-                    >
-                        الكود المميز ↕
-                    </th>
-                `;
-
-
-            formQuestions.forEach(
-                q => {
-
-                    html +=
-                        `
-                        <th
-                            class="border p-3 bg-gray-200 cursor-pointer"
-                            onclick="sortBy('${escapeHTML(q.id)}')"
-                        >
-                            ${escapeHTML(q.title)} ↕
-                        </th>
-                        `;
-
-                }
-            );
-
-
-            html +=
-                `
-                    <th
-                        class="border p-3 bg-gray-200 no-print"
-                    >
-                        الإجراءات
-                    </th>
-
-                </tr>
-                `;
-
-
-            document.getElementById(
-                "tableHead"
-            ).innerHTML =
-                html;
-
-        }
-
-
-
-        // ==========================================
-        // عرض الجدول
-        // ==========================================
-
-        function renderTable() {
-
-            let html = "";
-
-
-            if (
-                filteredSubmissions.length === 0
-            ) {
-
-                html =
-                    `
-                    <tr>
-
-                        <td
-                            colspan="${formQuestions.length + 3}"
-                            class="border p-10 text-center text-gray-500"
-                        >
-
-                            لا توجد بيانات مطابقة للبحث
-
+                    html += `
+                        <td class="border p-2 answer-cell">
+                            ${escapeHTML(value)}
                         </td>
-
-                    </tr>
                     `;
 
-            }
-
-
-            filteredSubmissions.forEach(
-                data => {
-
-                    html +=
-                        `
-                        <tr
-                            id="row-${escapeHTML(data._docId)}"
-                            class="hover:bg-gray-50"
-                        >
-
-                            <td
-                                class="border p-2 align-top font-bold"
-                            >
-                                ${escapeHTML(
-                                    data.serialNumber || "-"
-                                )}
-                            </td>
-
-
-                            <td
-                                class="border p-2 align-top"
-                            >
-                                ${escapeHTML(
-                                    data.uniqueId || "-"
-                                )}
-                            </td>
-                        `;
-
-
-                    formQuestions.forEach(
-                        q => {
-
-                            const answer =
-                                getAnswer(
-                                    data,
-                                    q.id
-                                );
-
-
-                            html +=
-                                `
-                                <td
-                                    class="border p-2 align-top"
-                                >
-
-                                    <input
-                                        type="text"
-                                        class="table-input p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                                        id="input-${escapeHTML(data._docId)}-${escapeHTML(q.id)}"
-                                        value="${escapeHTML(answer)}"
-                                    >
-
-                                </td>
-                                `;
-
-                        }
-                    );
-
-
-                    html +=
-                        `
-                            <td
-                                class="border p-2 align-top no-print"
-                            >
-
-                                <div
-                                    class="flex flex-col gap-2"
-                                >
-
-                                    <button
-                                        onclick="saveStudent('${escapeHTML(data._docId)}')"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-bold whitespace-nowrap"
-                                    >
-                                        💾 حفظ
-                                    </button>
-
-
-                                    <button
-                                        onclick="resetStudent('${escapeHTML(data._docId)}')"
-                                        class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg whitespace-nowrap"
-                                    >
-                                        ↩ إلغاء
-                                    </button>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-                        `;
-
                 }
             );
 
 
-            document.getElementById(
-                "tableBody"
-            ).innerHTML =
-                html;
+            html += `
+
+                    <td class="border p-2 no-print">
+
+                        <div class="flex gap-2">
+
+                            <button
+                                onclick="openEditModal('${escapeHTML(data.docId)}')"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg"
+                            >
+                                ✏️
+                            </button>
 
 
-            document.getElementById(
-                "visibleStudents"
-            ).innerText =
-                filteredSubmissions.length;
+                            <button
+                                onclick="deleteSubmission('${escapeHTML(data.docId)}')"
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
+                            >
+                                🗑
+                            </button>
 
-        }
+                        </div>
 
+                    </td>
 
+                </tr>
 
-        // ==========================================
-        // الحصول على الإجابة
-        // ==========================================
-
-        function getAnswer(
-            data,
-            questionId
-        ) {
-
-            if (
-                !data.answers
-            ) {
-
-                return "";
-
-            }
-
-
-            const value =
-                data.answers[questionId];
-
-
-            if (
-                value === null ||
-                value === undefined
-            ) {
-
-                return "";
-
-            }
-
-
-            if (
-                typeof value === "object"
-            ) {
-
-                return JSON.stringify(value);
-
-            }
-
-
-            return String(value);
+            `;
 
         }
+    );
+
+
+    if (!html) {
+
+        html = `
+            <tr>
+
+                <td
+                    colspan="${formQuestions.length + 4}"
+                    class="text-center text-gray-400 p-8"
+                >
+                    لا توجد بيانات
+                </td>
+
+            </tr>
+        `;
+
+    }
+
+
+    tbody.innerHTML =
+        html;
+
+
+    document.getElementById(
+        "recordsCount"
+    ).innerText =
+        `عدد النتائج: ${filteredSubmissions.length} من ${allSubmissions.length}`;
+
+}
 
 
 
-        // ==========================================
-        // تعديل بيانات الطالب
-        // ==========================================
+// ============================================================
+// SEARCH
+// ============================================================
 
-        window.saveStudent = async function(docId) {
+window.applyFilters = function() {
 
-            const student =
-                allSubmissions.find(
-                    item =>
-                        item._docId === docId
-                );
-
-
-            if (!student) {
-
-                alert(
-                    "تعذر العثور على بيانات الطالب"
-                );
-
-                return;
-
-            }
+    const search =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .trim()
+        .toLowerCase();
 
 
-            try {
+    const column =
+        document.getElementById(
+            "searchColumn"
+        ).value;
 
-                setStatus(
-                    "جاري حفظ التعديل..."
-                );
+
+    if (!search) {
+
+        filteredSubmissions =
+            [...allSubmissions];
+
+        renderTable();
+
+        return;
+
+    }
 
 
-                const newAnswers = {};
+    filteredSubmissions =
+        allSubmissions.filter(
+            data => {
+
+                if (column) {
+
+                    let value = "";
+
+
+                    if (
+                        column === "serialNumber"
+                    ) {
+
+                        value =
+                            data.serialNumber || "";
+
+                    }
+                    else if (
+                        column === "uniqueId"
+                    ) {
+
+                        value =
+                            data.uniqueId || "";
+
+                    }
+                    else {
+
+                        value =
+                            data.answers &&
+                            data.answers[column]
+                            ?
+                            data.answers[column]
+                            :
+                            "";
+
+                    }
+
+
+                    return String(value)
+                        .toLowerCase()
+                        .includes(search);
+
+                }
+
+
+                let values = [
+
+                    data.serialNumber || "",
+
+                    data.uniqueId || ""
+
+                ];
 
 
                 formQuestions.forEach(
                     q => {
 
-                        const input =
-                            document.getElementById(
-                                `input-${docId}-${q.id}`
-                            );
+                        values.push(
 
-
-                        newAnswers[q.id] =
-                            input
+                            data.answers &&
+                            data.answers[q.id]
                             ?
-                            input.value
+                            data.answers[q.id]
                             :
-                            "";
+                            ""
 
-                    }
-                );
-
-
-                await updateDoc(
-
-                    doc(
-                        db,
-                        "submissions",
-                        docId
-                    ),
-
-                    {
-                        answers: newAnswers
-                    }
-
-                );
-
-
-                /*
-                    تحديث النسخة المحلية
-                */
-
-                student.answers =
-                    newAnswers;
-
-
-                alert(
-                    "تم حفظ بيانات الطالب بنجاح ✅"
-                );
-
-
-                setStatus(
-                    "تم الحفظ"
-                );
-
-
-                updateLastUpdate();
-
-
-            }
-            catch(error) {
-
-                console.error(error);
-
-
-                alert(
-                    "تعذر حفظ التعديل:\n" +
-                    error.message
-                );
-
-
-                setStatus(
-                    "حدث خطأ أثناء الحفظ"
-                );
-
-            }
-
-        };
-
-
-
-        // ==========================================
-        // إلغاء تعديلات الطالب
-        // ==========================================
-
-        window.resetStudent = function(docId) {
-
-            const student =
-                allSubmissions.find(
-                    item =>
-                        item._docId === docId
-                );
-
-
-            if (!student) {
-
-                return;
-
-            }
-
-
-            formQuestions.forEach(
-                q => {
-
-                    const input =
-                        document.getElementById(
-                            `input-${docId}-${q.id}`
                         );
 
-
-                    if (input) {
-
-                        input.value =
-                            getAnswer(
-                                student,
-                                q.id
-                            );
-
                     }
+                );
 
-                }
+
+                return values.some(
+                    value =>
+                        String(value)
+                            .toLowerCase()
+                            .includes(search)
+                );
+
+            }
+        );
+
+
+    renderTable();
+
+};
+
+
+
+// ============================================================
+// CLEAR SEARCH
+// ============================================================
+
+window.clearSearch = function() {
+
+    document.getElementById(
+        "searchInput"
+    ).value = "";
+
+
+    document.getElementById(
+        "searchColumn"
+    ).value = "";
+
+
+    filteredSubmissions =
+        [...allSubmissions];
+
+
+    renderTable();
+
+};
+
+
+
+// ============================================================
+// EDIT QUESTIONS
+// ============================================================
+
+window.editQuestions = function() {
+
+    window.location.href =
+        "admin_create.html?formId=" +
+        encodeURIComponent(
+            formId
+        );
+
+};
+
+
+
+// ============================================================
+// TOGGLE EDIT
+// ============================================================
+
+window.toggleEditAccess = async function() {
+
+    try {
+
+        const allow =
+            document.getElementById(
+                "allowEditToggle"
+            ).checked;
+
+
+        await updateDoc(
+
+            doc(
+                db,
+                "forms",
+                formId
+            ),
+
+            {
+
+                allowEdit:
+                    allow
+
+            }
+
+        );
+
+
+        alert(
+            allow
+            ?
+            "تم السماح للطلاب بالتعديل ✅"
+            :
+            "تم منع الطلاب من التعديل ✅"
+        );
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "تعذر تحديث الصلاحية: " +
+            error.message
+        );
+
+    }
+
+};
+
+
+
+// ============================================================
+// DELETE FORM
+// ============================================================
+
+window.deleteForm = async function() {
+
+    const first =
+        confirm(
+            "⚠️ هل أنت متأكد من حذف الفورم بالكامل؟"
+        );
+
+
+    if (!first) {
+
+        return;
+
+    }
+
+
+    const second =
+        confirm(
+            "سيتم حذف الفورم نفسه. هل تريد الاستمرار؟"
+        );
+
+
+    if (!second) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await deleteDoc(
+            doc(
+                db,
+                "forms",
+                formId
+            )
+        );
+
+
+        /*
+            نحذف submissions التابعة للفورم
+        */
+
+        const qSnap =
+            await getDocs(
+                query(
+                    collection(
+                        db,
+                        "submissions"
+                    ),
+                    where(
+                        "formId",
+                        "==",
+                        formId
+                    )
+                )
             );
 
-        };
 
+        for (
+            const snap
+            of qSnap.docs
+        ) {
 
-
-        // ==========================================
-        // البحث والفلاتر
-        // ==========================================
-
-        window.applyFilters = function() {
-
-            const search =
-                document.getElementById(
-                    "searchInput"
+            await deleteDoc(
+                doc(
+                    db,
+                    "submissions",
+                    snap.id
                 )
-                .value
-                .trim()
-                .toLowerCase();
+            );
+
+        }
 
 
-            const filterQuestion =
-                document.getElementById(
-                    "filterQuestion"
-                ).value;
+        alert(
+            "تم حذف الفورم وبياناته بنجاح ✅"
+        );
 
 
-            const filterValue =
-                document.getElementById(
-                    "filterValue"
-                )
-                .value
-                .trim()
-                .toLowerCase();
+        window.location.href =
+            "admin_create.html";
 
+    }
+    catch(error) {
 
-            filteredSubmissions =
-                allSubmissions.filter(
-                    data => {
+        console.error(error);
 
+        alert(
+            "تعذر حذف الفورم: " +
+            error.message
+        );
 
-                        // ----------------------------------
-                        // البحث الشامل
-                        // ----------------------------------
+    }
 
-                        let matchesSearch =
-                            true;
-
-
-                        if (search) {
-
-                            let searchable = "";
-
-
-                            searchable +=
-                                " " +
-                                (
-                                    data.serialNumber ||
-                                    ""
-                                );
-
-
-                            searchable +=
-                                " " +
-                                (
-                                    data.uniqueId ||
-                                    ""
-                                );
-
-
-                            formQuestions.forEach(
-                                q => {
-
-                                    searchable +=
-                                        " " +
-                                        getAnswer(
-                                            data,
-                                            q.id
-                                        );
-
-                                }
-                            );
-
-
-                            matchesSearch =
-                                searchable
-                                    .toLowerCase()
-                                    .includes(
-                                        search
-                                    );
-
-                        }
+};
 
 
 
-                        // ----------------------------------
-                        // الفلتر المحدد
-                        // ----------------------------------
+// ============================================================
+// OPEN EDIT MODAL
+// ============================================================
 
-                        let matchesFilter =
-                            true;
+window.openEditModal = function(docId) {
 
-
-                        if (
-                            filterQuestion &&
-                            filterValue
-                        ) {
-
-                            const answer =
-                                getAnswer(
-                                    data,
-                                    filterQuestion
-                                )
-                                .toLowerCase();
+    const data =
+        allSubmissions.find(
+            item =>
+                item.docId === docId
+        );
 
 
-                            matchesFilter =
-                                answer.includes(
-                                    filterValue
-                                );
+    if (!data) {
 
-                        }
+        alert(
+            "البيانات غير موجودة"
+        );
 
+        return;
 
-                        return (
-                            matchesSearch &&
-                            matchesFilter
-                        );
-
-                    }
-                );
+    }
 
 
-            renderTable();
-
-        };
+    editingSubmission = data;
 
 
-
-        // ==========================================
-        // مسح الفلاتر
-        // ==========================================
-
-        window.clearFilters = function() {
-
-            document.getElementById(
-                "searchInput"
-            ).value = "";
+    let html = "";
 
 
-            document.getElementById(
-                "filterQuestion"
-            ).value = "";
+    formQuestions.forEach(
+        q => {
 
+            const value =
+                data.answers &&
+                data.answers[q.id] !== undefined
+                ?
+                data.answers[q.id]
+                :
+                "";
 
-            document.getElementById(
-                "filterValue"
-            ).value = "";
-
-
-            filteredSubmissions =
-                [...allSubmissions];
-
-
-            renderTable();
-
-        };
-
-
-
-        // ==========================================
-        // ترتيب الأعمدة
-        // ==========================================
-
-        let sortDirection =
-            "asc";
-
-
-        let lastSortField =
-            "";
-
-
-        window.sortBy = function(field) {
 
             if (
-                lastSortField === field
+                q.type === "select"
             ) {
 
-                sortDirection =
-                    sortDirection === "asc"
-                    ?
-                    "desc"
-                    :
-                    "asc";
+                html += `
+
+                    <div>
+
+                        <label class="block font-bold mb-2">
+                            ${escapeHTML(q.title)}
+                        </label>
+
+                        <select
+                            id="edit_${escapeHTML(q.id)}"
+                            class="w-full p-3 border rounded-lg"
+                        >
+
+                            <option value="">
+                                اختر
+                            </option>
+
+                            ${
+                                (q.options || [])
+                                .map(
+                                    option => {
+
+                                        const text =
+                                            typeof option === "string"
+                                            ?
+                                            option
+                                            :
+                                            option.text;
+
+
+                                        return `
+
+                                        <option
+                                            value="${escapeHTML(text)}"
+                                            ${
+                                                String(value) ===
+                                                String(text)
+                                                ?
+                                                "selected"
+                                                :
+                                                ""
+                                            }
+                                        >
+                                            ${escapeHTML(text)}
+                                        </option>
+
+                                        `;
+
+                                    }
+                                )
+                                .join("")
+                            }
+
+                        </select>
+
+                    </div>
+
+                `;
 
             }
             else {
 
-                sortDirection = "asc";
+                html += `
 
-                lastSortField = field;
+                    <div>
 
-            }
-
-
-            filteredSubmissions.sort(
-                (a, b) => {
-
-                    let av = "";
-
-                    let bv = "";
-
-
-                    if (
-                        field === "__serial"
-                    ) {
-
-                        av =
-                            a.serialNumber ||
-                            "";
-
-                        bv =
-                            b.serialNumber ||
-                            "";
-
-                    }
-                    else if (
-                        field === "__unique"
-                    ) {
-
-                        av =
-                            a.uniqueId ||
-                            "";
-
-                        bv =
-                            b.uniqueId ||
-                            "";
-
-                    }
-                    else {
-
-                        av =
-                            getAnswer(
-                                a,
-                                field
-                            );
-
-                        bv =
-                            getAnswer(
-                                b,
-                                field
-                            );
-
-                    }
-
-
-                    av =
-                        String(av)
-                        .toLowerCase();
-
-
-                    bv =
-                        String(bv)
-                        .toLowerCase();
-
-
-                    if (
-                        av < bv
-                    ) {
-
-                        return sortDirection === "asc"
-                            ? -1
-                            : 1;
-
-                    }
-
-
-                    if (
-                        av > bv
-                    ) {
-
-                        return sortDirection === "asc"
-                            ? 1
-                            : -1;
-
-                    }
-
-
-                    return 0;
-
-                }
-            );
-
-
-            renderTable();
-
-        };
-
-
-
-        // ==========================================
-        // السماح بالتعديل
-        // ==========================================
-
-        window.toggleEditAccess = async function() {
-
-            const allow =
-                document.getElementById(
-                    "allowEditToggle"
-                ).checked;
-
-
-            try {
-
-                setStatus(
-                    "جاري تحديث الصلاحيات..."
-                );
-
-
-                await updateDoc(
-
-                    doc(
-                        db,
-                        "forms",
-                        formId
-                    ),
-
-                    {
-                        allowEdit: allow
-                    }
-
-                );
-
-
-                alert(
-                    allow
-                    ?
-                    "تم السماح للطلاب بتعديل إجاباتهم ✅"
-                    :
-                    "تم منع الطلاب من تعديل إجاباتهم ✅"
-                );
-
-
-                setStatus(
-                    "تم تحديث الصلاحيات"
-                );
-
-            }
-            catch(error) {
-
-                console.error(error);
-
-
-                alert(
-                    "تعذر تحديث الصلاحيات:\n" +
-                    error.message
-                );
-
-            }
-
-        };
-
-
-
-        // ==========================================
-        // تصدير Excel
-        // ==========================================
-
-        window.exportToExcel = function() {
-
-            if (
-                allSubmissions.length === 0
-            ) {
-
-                alert(
-                    "لا توجد بيانات لتصديرها"
-                );
-
-                return;
-
-            }
-
-
-            const rows =
-                buildExportRows(
-                    allSubmissions
-                );
-
-
-            const worksheet =
-                XLSX.utils.json_to_sheet(
-                    rows
-                );
-
-
-            const workbook =
-                XLSX.utils.book_new();
-
-
-            XLSX.utils.book_append_sheet(
-                workbook,
-                worksheet,
-                "البيانات"
-            );
-
-
-            const safeTitle =
-                (
-                    formDataGlobal?.title ||
-                    "بيانات_الفورم"
-                )
-                .replace(
-                    /[\\/:*?"<>|]/g,
-                    "_"
-                );
-
-
-            XLSX.writeFile(
-                workbook,
-                `${safeTitle}.xlsx`
-            );
-
-        };
-
-
-
-        // ==========================================
-        // تصدير النتائج الظاهرة فقط
-        // ==========================================
-
-        window.exportFilteredToExcel = function() {
-
-            if (
-                filteredSubmissions.length === 0
-            ) {
-
-                alert(
-                    "لا توجد نتائج ظاهرة للتصدير"
-                );
-
-                return;
-
-            }
-
-
-            const rows =
-                buildExportRows(
-                    filteredSubmissions
-                );
-
-
-            const worksheet =
-                XLSX.utils.json_to_sheet(
-                    rows
-                );
-
-
-            const workbook =
-                XLSX.utils.book_new();
-
-
-            XLSX.utils.book_append_sheet(
-                workbook,
-                worksheet,
-                "النتائج"
-            );
-
-
-            XLSX.writeFile(
-                workbook,
-                "نتائج_البحث.xlsx"
-            );
-
-        };
-
-
-
-        // ==========================================
-        // بناء بيانات Excel
-        // ==========================================
-
-        function buildExportRows(
-            submissions
-        ) {
-
-            return submissions.map(
-                data => {
-
-                    const row = {};
-
-
-                    row["الكود التسلسلي"] =
-                        data.serialNumber ||
-                        "";
-
-
-                    row["الكود المميز"] =
-                        data.uniqueId ||
-                        "";
-
-
-                    formQuestions.forEach(
-                        q => {
-
-                            row[q.title] =
-                                getAnswer(
-                                    data,
-                                    q.id
-                                );
-
-                        }
-                    );
-
-
-                    return row;
-
-                }
-            );
-
-        }
-
-
-
-        // ==========================================
-        // تجهيز PDF
-        // ==========================================
-
-        window.printPDF = function() {
-
-            if (
-                filteredSubmissions.length === 0
-            ) {
-
-                alert(
-                    "لا توجد بيانات للطباعة"
-                );
-
-                return;
-
-            }
-
-
-            buildPrintTable();
-
-
-            /*
-                نستخدم print بدل مكتبات PDF
-                لضمان دعم العربية وتكرار رأس الجدول.
-            */
-
-            window.print();
-
-        };
-
-
-
-        // ==========================================
-        // بناء جدول PDF
-        // ==========================================
-
-        function buildPrintTable() {
-
-            document.getElementById(
-                "printTitle"
-            ).innerText =
-                formDataGlobal?.title
-                ?
-                "نتائج: " +
-                formDataGlobal.title
-                :
-                "نتائج الفورم";
-
-
-            document.getElementById(
-                "printInfo"
-            ).innerText =
-                `عدد الطلاب: ${filteredSubmissions.length} | تاريخ الطباعة: ${new Date().toLocaleString("ar-EG")}`;
-
-
-            let head =
-                `
-                <tr>
-
-                    <th>
-                        الكود التسلسلي
-                    </th>
-
-                    <th>
-                        الكود المميز
-                    </th>
-                `;
-
-
-            formQuestions.forEach(
-                q => {
-
-                    head +=
-                        `
-                        <th>
+                        <label class="block font-bold mb-2">
                             ${escapeHTML(q.title)}
-                        </th>
-                        `;
+                        </label>
 
-                }
-            );
+                        <input
+                            type="${q.type === "date" ? "date" : "text"}"
+                            id="edit_${escapeHTML(q.id)}"
+                            value="${escapeHTML(value)}"
+                            class="w-full p-3 border rounded-lg"
+                        >
 
+                    </div>
 
-            head +=
-                `
-                </tr>
                 `;
 
-
-            document.getElementById(
-                "printTableHead"
-            ).innerHTML =
-                head;
-
-
-            let body = "";
-
-
-            filteredSubmissions.forEach(
-                data => {
-
-                    body +=
-                        `
-                        <tr>
-
-                            <td>
-                                ${escapeHTML(
-                                    data.serialNumber || "-"
-                                )}
-                            </td>
-
-                            <td>
-                                ${escapeHTML(
-                                    data.uniqueId || "-"
-                                )}
-                            </td>
-                        `;
-
-
-                    formQuestions.forEach(
-                        q => {
-
-                            body +=
-                                `
-                                <td>
-                                    ${escapeHTML(
-                                        getAnswer(
-                                            data,
-                                            q.id
-                                        ) || "-"
-                                    )}
-                                </td>
-                                `;
-
-                        }
-                    );
-
-
-                    body +=
-                        `
-                        </tr>
-                        `;
-
-                }
-            );
-
-
-            document.getElementById(
-                "printTableBody"
-            ).innerHTML =
-                body;
+            }
 
         }
+    );
+
+
+    document.getElementById(
+        "editFields"
+    ).innerHTML =
+        html;
+
+
+    document.getElementById(
+        "editModal"
+    ).classList.remove(
+        "hidden"
+    );
+
+};
 
 
 
-        // ==========================================
-        // حذف الفورم بالكامل
-        // ==========================================
+// ============================================================
+// CLOSE MODAL
+// ============================================================
 
-        window.deleteForm = async function() {
+window.closeEditModal = function() {
 
-            if (!formId) {
-
-                return;
-
-            }
+    editingSubmission = null;
 
 
-            const formName =
-                formDataGlobal?.title ||
-                "هذا الفورم";
+    document.getElementById(
+        "editModal"
+    ).classList.add(
+        "hidden"
+    );
+
+};
 
 
-            const firstConfirm =
-                confirm(
-                    `⚠️ تحذير\n\nهل أنت متأكد من حذف الفورم:\n\n"${formName}"؟\n\nسيتم حذف الفورم وجميع إجابات الطلاب المرتبطة به.`
-                );
+
+// ============================================================
+// SAVE STUDENT EDIT
+// ============================================================
+
+window.saveStudentEdit = async function() {
+
+    if (!editingSubmission) {
+
+        return;
+
+    }
 
 
-            if (!firstConfirm) {
+    try {
 
-                return;
-
-            }
+        const answers = {};
 
 
-            const secondConfirm =
-                confirm(
-                    "هذا الإجراء نهائي ولا يمكن التراجع عنه.\n\nاضغط موافق للحذف النهائي."
-                );
+        formQuestions.forEach(
+            q => {
 
-
-            if (!secondConfirm) {
-
-                return;
-
-            }
-
-
-            try {
-
-                setStatus(
-                    "جاري حذف الفورم وإجابات الطلاب..."
-                );
-
-
-                // --------------------------------------
-                // الحصول على الإجابات
-                // --------------------------------------
-
-                const qSnap =
-                    await getDocs(
-
-                        query(
-
-                            collection(
-                                db,
-                                "submissions"
-                            ),
-
-                            where(
-                                "formId",
-                                "==",
-                                formId
-                            )
-
-                        )
-
+                const input =
+                    document.getElementById(
+                        "edit_" + q.id
                     );
 
 
-                // --------------------------------------
-                // حذف الإجابات
-                // --------------------------------------
+                if (input) {
 
-                for (
-                    const docSnap
-                    of qSnap.docs
-                ) {
-
-                    await deleteDoc(
-                        doc(
-                            db,
-                            "submissions",
-                            docSnap.id
-                        )
-                    );
+                    answers[q.id] =
+                        input.value;
 
                 }
 
-
-                // --------------------------------------
-                // حذف الفورم
-                // --------------------------------------
-
-                await deleteDoc(
-
-                    doc(
-                        db,
-                        "forms",
-                        formId
-                    )
-
-                );
-
-
-                alert(
-                    "تم حذف الفورم وجميع الإجابات بنجاح ✅"
-                );
-
-
-                window.location.href =
-                    "admin_create.html";
-
-
             }
-            catch(error) {
-
-                console.error(error);
+        );
 
 
-                alert(
-                    "حدث خطأ أثناء حذف الفورم:\n" +
-                    error.message
-                );
+        await updateDoc(
 
+            doc(
+                db,
+                "submissions",
+                editingSubmission.docId
+            ),
 
-                setStatus(
-                    "تعذر حذف الفورم"
-                );
+            {
+
+                answers:
+                    answers
 
             }
 
-        };
+        );
 
 
+        /*
+            تحديث البيانات محلياً
+        */
 
-        // ==========================================
-        // العودة لإنشاء الفورم
-        // ==========================================
-
-        window.goBack = function() {
-
-            window.location.href =
-                "admin_create.html";
-
-        };
-
-
-
-        // ==========================================
-        // حالة الصفحة
-        // ==========================================
-
-        function setStatus(text) {
-
-            document.getElementById(
-                "saveStatus"
-            ).innerText =
-                text;
-
-        }
-
-
-
-        // ==========================================
-        // آخر تحديث
-        // ==========================================
-
-        function updateLastUpdate() {
-
-            document.getElementById(
-                "lastUpdate"
-            ).innerText =
-                new Date().toLocaleTimeString(
-                    "ar-EG"
-                );
-
-        }
-
-
-
-        // ==========================================
-        // تشغيل الصفحة
-        // ==========================================
-
-        if (formId) {
-
-            loadData();
-
-        }
-        else {
-
-            alert(
-                "لم يتم إرسال formId في الرابط"
+        const index =
+            allSubmissions.findIndex(
+                item =>
+                    item.docId ===
+                    editingSubmission.docId
             );
 
+
+        if (index >= 0) {
+
+            allSubmissions[index].answers =
+                answers;
+
         }
 
-    </script>
 
+        filteredSubmissions =
+            [...allSubmissions];
+
+
+        renderTable();
+
+
+        closeEditModal();
+
+
+        alert(
+            "تم تعديل بيانات الطالب بنجاح ✅"
+        );
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "تعذر حفظ التعديل: " +
+            error.message
+        );
+
+    }
+
+};
+
+
+
+// ============================================================
+// DELETE SUBMISSION
+// ============================================================
+
+window.deleteSubmission = async function(docId) {
+
+    if (
+        !confirm(
+            "هل تريد حذف بيانات هذا الطالب؟"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await deleteDoc(
+            doc(
+                db,
+                "submissions",
+                docId
+            )
+        );
+
+
+        allSubmissions =
+            allSubmissions.filter(
+                item =>
+                    item.docId !== docId
+            );
+
+
+        filteredSubmissions =
+            filteredSubmissions.filter(
+                item =>
+                    item.docId !== docId
+            );
+
+
+        renderTable();
+
+
+        alert(
+            "تم حذف البيانات ✅"
+        );
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "تعذر حذف البيانات: " +
+            error.message
+        );
+
+    }
+
+};
+
+
+
+// ============================================================
+// EXPORT EXCEL
+// ============================================================
+
+window.exportToExcel = function() {
+
+    const table =
+        document.getElementById(
+            "dataTable"
+        );
+
+
+    /*
+        نسخة بدون عمود الإجراءات
+    */
+
+    const clone =
+        table.cloneNode(true);
+
+
+    clone
+        .querySelectorAll(
+            ".no-print"
+        )
+        .forEach(
+            element =>
+                element.remove()
+        );
+
+
+    const wb =
+        XLSX.utils.table_to_book(
+            clone,
+            {
+                sheet:
+                    "البيانات"
+            }
+        );
+
+
+    XLSX.writeFile(
+        wb,
+        "بيانات_الطلاب.xlsx"
+    );
+
+};
+
+
+
+// ============================================================
+// PDF
+// ============================================================
+
+window.exportToPDF = async function() {
+
+    const printArea =
+        document.getElementById(
+            "printArea"
+        );
+
+
+    const clone =
+        printArea.cloneNode(true);
+
+
+    clone
+        .querySelectorAll(
+            ".no-print"
+        )
+        .forEach(
+            element =>
+                element.remove()
+        );
+
+
+    clone.style.background =
+        "#ffffff";
+
+
+    clone.style.padding =
+        "10px";
+
+
+    const wrapper =
+        document.createElement(
+            "div"
+        );
+
+
+    wrapper.style.background =
+        "#ffffff";
+
+
+    wrapper.style.direction =
+        "rtl";
+
+
+    wrapper.appendChild(
+        clone
+    );
+
+
+    document.body.appendChild(
+        wrapper
+    );
+
+
+    try {
+
+        await html2pdf()
+            .set({
+
+                margin:
+                    [10, 8, 10, 8],
+
+                filename:
+                    "بيانات_الطلاب.pdf",
+
+                image: {
+
+                    type:
+                        "jpeg",
+
+                    quality:
+                        0.98
+
+                },
+
+                html2canvas: {
+
+                    scale:
+                        2,
+
+                    useCORS:
+                        true
+
+                },
+
+                jsPDF: {
+
+                    unit:
+                        "mm",
+
+                    format:
+                        "a4",
+
+                    orientation:
+                        "landscape"
+
+                },
+
+                pagebreak: {
+
+                    mode:
+                        [
+                            "css",
+                            "legacy"
+                        ]
+
+                }
+
+            })
+            .from(wrapper)
+            .save();
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "تعذر إنشاء ملف PDF: " +
+            error.message
+        );
+
+    }
+    finally {
+
+        wrapper.remove();
+
+    }
+
+};
+
+
+
+// ============================================================
+// START
+// ============================================================
+
+if (formId) {
+
+    loadData();
+
+}
+else {
+
+    alert(
+        "افتح صفحة إدارة الفورم من خلال admin_create.html"
+    );
+
+}
+
+
+</script>
 
 </body>
-
 </html>
