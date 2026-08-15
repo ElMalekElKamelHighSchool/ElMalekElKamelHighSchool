@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تعديل بيانات التسجيل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-10 font-sans">
+    <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mb-6" id="loginSection">
+        <h1 class="text-2xl font-bold mb-4 text-center">تعديل بياناتي</h1>
+        <input type="text" id="studentUniqueId" placeholder="أدخل الكود المميز الخاص بك" class="w-full p-3 border rounded mb-4 text-center text-xl uppercase">
+        <button onclick="findSubmission()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">بحث واسترجاع البيانات</button>
+    </div>
+
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md hidden" id="editSection">
+        <h2 class="text-xl font-bold mb-4 text-red-600">تعديل الإجابات</h2>
+        <form id="editForm" onsubmit="updateSubmission(event)" class="space-y-4"></form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = { /* الكونفيج */ 
+            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4", authDomain: "hazoma-60ed2.firebaseapp.com", projectId: "hazoma-60ed2", storageBucket: "hazoma-60ed2.firebasestorage.app", messagingSenderId: "962438384604", appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        };
+        const db = getFirestore(initializeApp(firebaseConfig));
+        let currentSubId = null;
+        let formQuestions = [];
+
+        window.findSubmission = async function() {
+            let uId = document.getElementById('studentUniqueId').value.toUpperCase();
+            if(!uId) return;
+
+            const qSnap = await getDocs(query(collection(db, "submissions"), where("uniqueId", "==", uId)));
+            if(qSnap.empty) return alert("الكود غير صحيح أو غير مسجل.");
+
+            let subDoc = qSnap.docs[0];
+            currentSubId = subDoc.id;
+            let subData = subDoc.data();
+
+            // التحقق إذا كان الأدمن يسمح بالتعديل
+            const formDoc = await getDoc(doc(db, "forms", subData.formId));
+            if(!formDoc.data().allowEdit) return alert("عذراً، الإدارة أغلقت إمكانية التعديل لهذا الفورم.");
+
+            formQuestions = formDoc.data().questions;
+            
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('editSection').classList.remove('hidden');
+
+            let html = '';
+            formQuestions.forEach(q => {
+                let val = subData.answers[q.id] || '';
+                html += `<div class="p-3 border rounded bg-gray-50">
+                    <label class="block font-bold mb-2">${q.title}</label>`;
+                
+                if(q.type === 'select') {
+                    html += `<select id="edit_${q.id}" class="w-full p-2 border rounded">
+                        <option value="">اختر...</option>
+                        ${q.options.map(opt => `<option value="${opt}" ${val===opt?'selected':''}>${opt}</option>`).join('')}
+                    </select>`;
+                } else {
+                    html += `<input type="${q.type}" id="edit_${q.id}" value="${val}" class="w-full p-2 border rounded">`;
+                }
+                html += `</div>`;
+            });
+            html += `<button type="submit" class="w-full bg-green-600 text-white p-3 rounded font-bold">حفظ التعديلات</button>`;
+            document.getElementById('editForm').innerHTML = html;
+        }
+
+        window.updateSubmission = async function(e) {
+            e.preventDefault();
+            let newAnswers = {};
+            formQuestions.forEach(q => {
+                newAnswers[q.id] = document.getElementById('edit_'+q.id).value;
+            });
+
+            await updateDoc(doc(db, "submissions", currentSubId), {
+                answers: newAnswers
+            });
+            alert("تم تحديث بياناتك بنجاح!");
+            location.reload();
+        }
+    </script>
+</body>
+</html>
