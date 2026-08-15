@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>أدمن - إنشاء فورم جديد</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-10 font-sans">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-center text-blue-600">منشئ النماذج (الفورم)</h1>
+        
+        <input type="text" id="formTitle" placeholder="اسم الفورم (مثال: بيانات طلاب الصف الأول)" class="w-full p-3 border rounded mb-6 text-lg">
+        
+        <div id="questionsContainer" class="space-y-4 mb-6"></div>
+
+        <div class="bg-blue-50 p-4 rounded border border-blue-200 mb-6">
+            <h3 class="font-bold mb-3">إضافة حقل جديد</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <input type="text" id="qTitle" placeholder="عنوان السؤال" class="p-2 border rounded">
+                <select id="qType" class="p-2 border rounded" onchange="toggleOptionsUI()">
+                    <option value="text">نص عادي</option>
+                    <option value="number">رقم (مثل الرقم القومي)</option>
+                    <option value="tel">رقم هاتف</option>
+                    <option value="date">تاريخ</option>
+                    <option value="select">قائمة منسدلة (كومبو بوكس)</option>
+                </select>
+                
+                <!-- خيارات القائمة المنسدلة -->
+                <div id="optionsDiv" class="col-span-2 hidden bg-white p-3 border rounded">
+                    <label class="block mb-2 font-bold text-sm">أضف الخيارات (كل خيار منفصل):</label>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="newOptionText" class="p-2 border rounded flex-1">
+                        <button onclick="addOptionToList()" class="bg-green-500 text-white px-4 py-2 rounded">+</button>
+                    </div>
+                    <ul id="optionsList" class="list-disc pl-5 rtl:pr-5"></ul>
+                </div>
+
+                <!-- الشروط -->
+                <div class="col-span-2 flex gap-4 items-center">
+                    <label><input type="checkbox" id="qRequired"> إجباري</label>
+                    <label><input type="checkbox" id="qUnique"> يمنع التكرار (للرقم القومي مثلاً)</label>
+                </div>
+                
+                <div class="col-span-2 border-t pt-2 mt-2">
+                    <label class="text-sm font-bold text-gray-700">شرط الظهور (اختياري):</label>
+                    <select id="qConditionId" class="p-2 border rounded w-full mb-2">
+                        <option value="">يظهر دائماً (بدون شرط)</option>
+                    </select>
+                    <input type="text" id="qConditionValue" placeholder="يظهر إذا كانت إجابة السؤال السابق تساوي..." class="p-2 border rounded w-full">
+                </div>
+            </div>
+            <button onclick="addQuestion()" class="mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">إضافة السؤال للفورم</button>
+        </div>
+
+        <button onclick="saveForm()" class="w-full bg-green-600 text-white p-3 rounded font-bold text-lg">حفظ الفورم بالكامل</button>
+
+        <h2 class="text-2xl font-bold mt-10 mb-4 border-b pb-2">الفورمات المتاحة</h2>
+        <ul id="formsList" class="space-y-2"></ul>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+            authDomain: "hazoma-60ed2.firebaseapp.com",
+            projectId: "hazoma-60ed2",
+            storageBucket: "hazoma-60ed2.firebasestorage.app",
+            messagingSenderId: "962438384604",
+            appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let questions = [];
+        let tempOptions = [];
+
+        window.toggleOptionsUI = function() {
+            document.getElementById('optionsDiv').style.display = document.getElementById('qType').value === 'select' ? 'block' : 'none';
+        }
+
+        window.addOptionToList = function() {
+            let val = document.getElementById('newOptionText').value;
+            if(val) { tempOptions.push(val); document.getElementById('newOptionText').value = ''; renderTempOptions(); }
+        }
+
+        function renderTempOptions() {
+            document.getElementById('optionsList').innerHTML = tempOptions.map((opt, i) => `<li>${opt} <button onclick="tempOptions.splice(${i},1); renderTempOptions()" class="text-red-500 text-xs mr-2">حذف</button></li>`).join('');
+        }
+
+        window.addQuestion = function() {
+            let title = document.getElementById('qTitle').value;
+            if(!title) return alert("أدخل عنوان السؤال");
+            
+            let q = {
+                id: 'q_' + Date.now(),
+                title: title,
+                type: document.getElementById('qType').value,
+                required: document.getElementById('qRequired').checked,
+                unique: document.getElementById('qUnique').checked,
+                options: [...tempOptions],
+                conditionId: document.getElementById('qConditionId').value,
+                conditionValue: document.getElementById('qConditionValue').value
+            };
+
+            questions.push(q);
+            tempOptions = []; renderTempOptions();
+            document.getElementById('qTitle').value = '';
+            updateQuestionsUI();
+            updateConditionSelects();
+        }
+
+        function updateQuestionsUI() {
+            let html = '';
+            questions.forEach((q, index) => {
+                html += `
+                <div class="p-4 border rounded bg-gray-50 flex justify-between items-center">
+                    <div>
+                        <span class="font-bold">${index + 1}. ${q.title}</span> <span class="text-xs text-gray-500">(${q.type}) ${q.required ? '*إجباري' : ''}</span>
+                        ${q.conditionId ? `<br><span class="text-xs text-blue-500">مشروط بـ: ${q.conditionValue}</span>` : ''}
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="moveQ(${index}, -1)" class="bg-gray-300 px-2 rounded">↑</button>
+                        <button onclick="moveQ(${index}, 1)" class="bg-gray-300 px-2 rounded">↓</button>
+                        <button onclick="deleteQ(${index})" class="bg-red-500 text-white px-2 rounded">X</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('questionsContainer').innerHTML = html;
+        }
+
+        window.moveQ = function(index, dir) {
+            if(index + dir < 0 || index + dir >= questions.length) return;
+            let temp = questions[index];
+            questions[index] = questions[index + dir];
+            questions[index + dir] = temp;
+            updateQuestionsUI();
+        }
+
+        window.deleteQ = function(index) { questions.splice(index, 1); updateQuestionsUI(); updateConditionSelects(); }
+
+        function updateConditionSelects() {
+            let select = document.getElementById('qConditionId');
+            select.innerHTML = '<option value="">يظهر دائماً</option>';
+            questions.forEach(q => {
+                if(q.type === 'select') select.innerHTML += `<option value="${q.id}">${q.title}</option>`;
+            });
+        }
+
+        window.saveForm = async function() {
+            let title = document.getElementById('formTitle').value;
+            if(!title || questions.length === 0) return alert("أدخل اسم الفورم وقم بإضافة أسئلة");
+            
+            try {
+                await addDoc(collection(db, "forms"), {
+                    title: title,
+                    questions: questions,
+                    allowEdit: true,
+                    createdAt: serverTimestamp()
+                });
+                alert("تم حفظ الفورم بنجاح!");
+                location.reload();
+            } catch (e) { alert("خطأ: " + e.message); }
+        }
+
+        async function loadForms() {
+            const querySnapshot = await getDocs(collection(db, "forms"));
+            let html = '';
+            querySnapshot.forEach((doc) => {
+                html += `<li class="p-3 bg-white border rounded shadow flex justify-between">
+                    <span>${doc.data().title}</span>
+                    <a href="admin_manage.html?formId=${doc.id}" class="text-blue-600 hover:underline">إدارة الإجابات والتعديل</a>
+                </li>`;
+            });
+            document.getElementById('formsList').innerHTML = html;
+        }
+        loadForms();
+    </script>
+</body>
+</html>
