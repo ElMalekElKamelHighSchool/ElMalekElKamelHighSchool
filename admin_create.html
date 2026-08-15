@@ -2,180 +2,1577 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أدمن - إنشاء فورم جديد</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: Arial, Tahoma, sans-serif;
+        }
+
+        .option-item {
+            transition: 0.2s;
+        }
+
+        .option-item:hover {
+            background: #f8fafc;
+        }
+
+        .question-card {
+            transition: 0.2s;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        button {
+            transition: 0.2s;
+        }
+
+        .edit-mode {
+            border: 2px solid #f59e0b !important;
+            background: #fffbeb !important;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-10 font-sans">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h1 class="text-3xl font-bold mb-6 text-center text-blue-600">منشئ النماذج (الفورم)</h1>
-        
-        <input type="text" id="formTitle" placeholder="اسم الفورم (مثال: بيانات طلاب الصف الأول)" class="w-full p-3 border rounded mb-6 text-lg">
-        
+
+<body class="bg-gray-100 p-4 md:p-10 font-sans">
+
+    <div class="max-w-4xl mx-auto bg-white p-5 md:p-8 rounded-2xl shadow-md">
+
+        <!-- العنوان -->
+        <h1 class="text-2xl md:text-3xl font-bold mb-6 text-center text-blue-600">
+            منشئ النماذج (الفورم)
+        </h1>
+
+        <!-- اسم الفورم -->
+        <input
+            type="text"
+            id="formTitle"
+            placeholder="اسم الفورم (مثال: بيانات طلاب الصف الأول)"
+            class="w-full p-3 border rounded-lg mb-6 text-lg focus:ring-2 focus:ring-blue-400 outline-none"
+        >
+
+        <!-- الأسئلة المضافة -->
         <div id="questionsContainer" class="space-y-4 mb-6"></div>
 
-        <div class="bg-blue-50 p-4 rounded border border-blue-200 mb-6">
-            <h3 class="font-bold mb-3">إضافة حقل جديد</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <input type="text" id="qTitle" placeholder="عنوان السؤال" class="p-2 border rounded">
-                <select id="qType" class="p-2 border rounded" onchange="toggleOptionsUI()">
+
+        <!-- =============================== -->
+        <!-- إضافة / تعديل سؤال -->
+        <!-- =============================== -->
+
+        <div
+            id="questionEditor"
+            class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6"
+        >
+
+            <h3
+                id="editorTitle"
+                class="font-bold mb-4 text-lg text-blue-800"
+            >
+                إضافة حقل جديد
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- عنوان السؤال -->
+                <input
+                    type="text"
+                    id="qTitle"
+                    placeholder="عنوان السؤال"
+                    class="p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                >
+
+                <!-- نوع السؤال -->
+                <select
+                    id="qType"
+                    class="p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                    onchange="toggleOptionsUI()"
+                >
                     <option value="text">نص عادي</option>
                     <option value="number">رقم (مثل الرقم القومي)</option>
                     <option value="tel">رقم هاتف</option>
                     <option value="date">تاريخ</option>
                     <option value="select">قائمة منسدلة (كومبو بوكس)</option>
                 </select>
-                
+
+
+                <!-- =============================== -->
                 <!-- خيارات القائمة المنسدلة -->
-                <div id="optionsDiv" class="col-span-2 hidden bg-white p-3 border rounded">
-                    <label class="block mb-2 font-bold text-sm">أضف الخيارات (كل خيار منفصل):</label>
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" id="newOptionText" class="p-2 border rounded flex-1">
-                        <button onclick="addOptionToList()" class="bg-green-500 text-white px-4 py-2 rounded">+</button>
+                <!-- =============================== -->
+
+                <div
+                    id="optionsDiv"
+                    class="col-span-1 md:col-span-2 hidden bg-white p-4 border rounded-xl"
+                >
+
+                    <label class="block mb-3 font-bold text-sm text-gray-700">
+                        خيارات القائمة المنسدلة
+                    </label>
+
+                    <div class="flex gap-2 mb-3">
+
+                        <input
+                            type="text"
+                            id="newOptionText"
+                            placeholder="اكتب الاختيار الجديد"
+                            class="p-3 border rounded-lg flex-1 focus:ring-2 focus:ring-green-400 outline-none"
+                            onkeydown="handleOptionEnter(event)"
+                        >
+
+                        <button
+                            onclick="addOptionToList()"
+                            type="button"
+                            class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg font-bold"
+                        >
+                            +
+                        </button>
+
                     </div>
-                    <ul id="optionsList" class="list-disc pl-5 rtl:pr-5"></ul>
+
+                    <!-- قائمة الخيارات -->
+                    <div
+                        id="optionsList"
+                        class="space-y-2"
+                    ></div>
+
+                    <p class="text-xs text-gray-500 mt-3">
+                        يمكنك حذف أي اختيار أو تحريكه لأعلى وأسفل لترتيب القائمة.
+                    </p>
+
                 </div>
 
+
+                <!-- =============================== -->
                 <!-- الشروط -->
-                <div class="col-span-2 flex gap-4 items-center">
-                    <label><input type="checkbox" id="qRequired"> إجباري</label>
-                    <label><input type="checkbox" id="qUnique"> يمنع التكرار (للرقم القومي مثلاً)</label>
+                <!-- =============================== -->
+
+                <div class="col-span-1 md:col-span-2 flex flex-col md:flex-row gap-4">
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            id="qRequired"
+                            class="w-4 h-4"
+                        >
+                        إجباري
+                    </label>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            id="qUnique"
+                            class="w-4 h-4"
+                        >
+                        يمنع التكرار (للرقم القومي مثلاً)
+                    </label>
+
                 </div>
-                
-                <div class="col-span-2 border-t pt-2 mt-2">
-                    <label class="text-sm font-bold text-gray-700">شرط الظهور (اختياري):</label>
-                    <select id="qConditionId" class="p-2 border rounded w-full mb-2">
-                        <option value="">يظهر دائماً (بدون شرط)</option>
+
+
+                <!-- =============================== -->
+                <!-- شرط الظهور -->
+                <!-- =============================== -->
+
+                <div class="col-span-1 md:col-span-2 border-t pt-4 mt-1">
+
+                    <label class="text-sm font-bold text-gray-700 block mb-2">
+                        شرط الظهور (اختياري):
+                    </label>
+
+                    <select
+                        id="qConditionId"
+                        class="p-3 border rounded-lg w-full mb-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                    >
+                        <option value="">
+                            يظهر دائماً (بدون شرط)
+                        </option>
                     </select>
-                    <input type="text" id="qConditionValue" placeholder="يظهر إذا كانت إجابة السؤال السابق تساوي..." class="p-2 border rounded w-full">
+
+                    <input
+                        type="text"
+                        id="qConditionValue"
+                        placeholder="يظهر إذا كانت إجابة السؤال تساوي..."
+                        class="p-3 border rounded-lg w-full focus:ring-2 focus:ring-blue-400 outline-none"
+                    >
+
                 </div>
+
             </div>
-            <button onclick="addQuestion()" class="mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">إضافة السؤال للفورم</button>
+
+
+            <!-- أزرار الإضافة والتعديل -->
+            <div class="flex flex-col md:flex-row gap-2 mt-4">
+
+                <button
+                    id="questionActionButton"
+                    onclick="addQuestion()"
+                    type="button"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-bold"
+                >
+                    إضافة السؤال للفورم
+                </button>
+
+                <button
+                    id="cancelEditButton"
+                    onclick="cancelEdit()"
+                    type="button"
+                    class="hidden md:w-32 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg font-bold"
+                >
+                    إلغاء
+                </button>
+
+            </div>
+
         </div>
 
-        <button onclick="saveForm()" class="w-full bg-green-600 text-white p-3 rounded font-bold text-lg">حفظ الفورم بالكامل</button>
 
-        <h2 class="text-2xl font-bold mt-10 mb-4 border-b pb-2">الفورمات المتاحة</h2>
-        <ul id="formsList" class="space-y-2"></ul>
+        <!-- =============================== -->
+        <!-- حفظ الفورم -->
+        <!-- =============================== -->
+
+        <button
+            onclick="saveForm()"
+            type="button"
+            class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg shadow"
+        >
+            حفظ الفورم بالكامل
+        </button>
+
+
+        <!-- =============================== -->
+        <!-- الفورمات المتاحة -->
+        <!-- =============================== -->
+
+        <h2 class="text-2xl font-bold mt-10 mb-4 border-b pb-2">
+            الفورمات المتاحة
+        </h2>
+
+        <ul
+            id="formsList"
+            class="space-y-2"
+        ></ul>
+
     </div>
 
+
+    <!-- =============================== -->
+    <!-- Firebase -->
+    <!-- =============================== -->
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            getDocs,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
 
         const firebaseConfig = {
+
             apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+
             authDomain: "hazoma-60ed2.firebaseapp.com",
+
             projectId: "hazoma-60ed2",
+
             storageBucket: "hazoma-60ed2.firebasestorage.app",
+
             messagingSenderId: "962438384604",
+
             appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+
         };
+
+
         const app = initializeApp(firebaseConfig);
+
         const db = getFirestore(app);
 
+
+        // ==========================================
+        // المتغيرات
+        // ==========================================
+
         let questions = [];
+
         let tempOptions = [];
 
-        window.toggleOptionsUI = function() {
-            document.getElementById('optionsDiv').style.display = document.getElementById('qType').value === 'select' ? 'block' : 'none';
+        // رقم السؤال الذي نقوم بتعديله
+        let editingQuestionIndex = -1;
+
+
+        // ==========================================
+        // حماية النصوص من HTML
+        // ==========================================
+
+        function escapeHTML(value) {
+
+            if (value === undefined || value === null) {
+                return "";
+            }
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
+
+
+        // ==========================================
+        // إظهار / إخفاء خيارات Combo Box
+        // ==========================================
+
+        window.toggleOptionsUI = function() {
+
+            const type =
+                document.getElementById("qType").value;
+
+            const optionsDiv =
+                document.getElementById("optionsDiv");
+
+            if (type === "select") {
+
+                optionsDiv.classList.remove("hidden");
+
+            } else {
+
+                optionsDiv.classList.add("hidden");
+
+            }
+
+        };
+
+
+        // ==========================================
+        // إضافة اختيار
+        // ==========================================
 
         window.addOptionToList = function() {
-            let val = document.getElementById('newOptionText').value;
-            if(val) { tempOptions.push(val); document.getElementById('newOptionText').value = ''; renderTempOptions(); }
-        }
+
+            const input =
+                document.getElementById("newOptionText");
+
+            const value =
+                input.value.trim();
+
+
+            if (!value) {
+
+                alert("اكتب الاختيار أولاً");
+
+                input.focus();
+
+                return;
+
+            }
+
+
+            // منع التكرار
+            if (tempOptions.includes(value)) {
+
+                alert("هذا الاختيار موجود بالفعل");
+
+                input.focus();
+
+                return;
+
+            }
+
+
+            tempOptions.push(value);
+
+            input.value = "";
+
+            renderTempOptions();
+
+            input.focus();
+
+        };
+
+
+        // ==========================================
+        // إضافة الاختيار باستخدام Enter
+        // ==========================================
+
+        window.handleOptionEnter = function(event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                addOptionToList();
+
+            }
+
+        };
+
+
+        // ==========================================
+        // عرض الاختيارات
+        // ==========================================
 
         function renderTempOptions() {
-            document.getElementById('optionsList').innerHTML = tempOptions.map((opt, i) => `<li>${opt} <button onclick="tempOptions.splice(${i},1); renderTempOptions()" class="text-red-500 text-xs mr-2">حذف</button></li>`).join('');
+
+            const container =
+                document.getElementById("optionsList");
+
+
+            if (tempOptions.length === 0) {
+
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 py-3 border rounded-lg bg-gray-50">
+                        لم تتم إضافة أي اختيارات بعد
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                tempOptions.map((opt, index) => {
+
+                    return `
+
+                    <div
+                        class="option-item flex items-center gap-2 p-2 border rounded-lg bg-gray-50"
+                    >
+
+                        <span
+                            class="flex-1 font-medium"
+                        >
+                            ${index + 1}. ${escapeHTML(opt)}
+                        </span>
+
+
+                        <!-- لأعلى -->
+                        <button
+                            type="button"
+                            onclick="moveOption(${index}, -1)"
+                            class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded font-bold"
+                            title="تحريك لأعلى"
+                        >
+                            ↑
+                        </button>
+
+
+                        <!-- لأسفل -->
+                        <button
+                            type="button"
+                            onclick="moveOption(${index}, 1)"
+                            class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded font-bold"
+                            title="تحريك لأسفل"
+                        >
+                            ↓
+                        </button>
+
+
+                        <!-- حذف -->
+                        <button
+                            type="button"
+                            onclick="deleteOption(${index})"
+                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded font-bold"
+                            title="حذف"
+                        >
+                            حذف
+                        </button>
+
+                    </div>
+
+                    `;
+
+                }).join("");
+
         }
+
+
+        // ==========================================
+        // تحريك اختيار
+        // ==========================================
+
+        window.moveOption = function(index, direction) {
+
+            const newIndex =
+                index + direction;
+
+
+            if (
+                newIndex < 0 ||
+                newIndex >= tempOptions.length
+            ) {
+
+                return;
+
+            }
+
+
+            const temp =
+                tempOptions[index];
+
+            tempOptions[index] =
+                tempOptions[newIndex];
+
+            tempOptions[newIndex] =
+                temp;
+
+
+            renderTempOptions();
+
+        };
+
+
+        // ==========================================
+        // حذف اختيار
+        // ==========================================
+
+        window.deleteOption = function(index) {
+
+            if (
+                index < 0 ||
+                index >= tempOptions.length
+            ) {
+
+                return;
+
+            }
+
+
+            const optionName =
+                tempOptions[index];
+
+
+            if (
+                !confirm(
+                    `هل تريد حذف الاختيار "${optionName}"؟`
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            tempOptions.splice(index, 1);
+
+            renderTempOptions();
+
+        };
+
+
+        // ==========================================
+        // إضافة سؤال
+        // ==========================================
 
         window.addQuestion = function() {
-            let title = document.getElementById('qTitle').value;
-            if(!title) return alert("أدخل عنوان السؤال");
-            
-            let q = {
-                id: 'q_' + Date.now(),
+
+            const title =
+                document
+                    .getElementById("qTitle")
+                    .value
+                    .trim();
+
+
+            if (!title) {
+
+                alert("أدخل عنوان السؤال");
+
+                return;
+
+            }
+
+
+            const type =
+                document.getElementById("qType").value;
+
+
+            // لو Combo Box لازم يكون فيه اختيارات
+            if (
+                type === "select" &&
+                tempOptions.length === 0
+            ) {
+
+                alert("أضف اختيارًا واحدًا على الأقل للقائمة المنسدلة");
+
+                return;
+
+            }
+
+
+            const q = {
+
+                id:
+                    "q_" +
+                    Date.now() +
+                    "_" +
+                    Math.random()
+                        .toString(36)
+                        .substring(2, 7),
+
                 title: title,
-                type: document.getElementById('qType').value,
-                required: document.getElementById('qRequired').checked,
-                unique: document.getElementById('qUnique').checked,
-                options: [...tempOptions],
-                conditionId: document.getElementById('qConditionId').value,
-                conditionValue: document.getElementById('qConditionValue').value
+
+                type: type,
+
+                required:
+                    document
+                        .getElementById("qRequired")
+                        .checked,
+
+                unique:
+                    document
+                        .getElementById("qUnique")
+                        .checked,
+
+                options:
+                    [...tempOptions],
+
+                conditionId:
+                    document
+                        .getElementById("qConditionId")
+                        .value,
+
+                conditionValue:
+                    document
+                        .getElementById("qConditionValue")
+                        .value
+                        .trim()
+
             };
 
+
             questions.push(q);
-            tempOptions = []; renderTempOptions();
-            document.getElementById('qTitle').value = '';
+
+
+            resetQuestionEditor();
+
             updateQuestionsUI();
+
             updateConditionSelects();
+
+        };
+
+
+        // ==========================================
+        // بدء تعديل سؤال
+        // ==========================================
+
+        window.editQuestion = function(index) {
+
+            if (
+                index < 0 ||
+                index >= questions.length
+            ) {
+
+                return;
+
+            }
+
+
+            const q =
+                questions[index];
+
+
+            editingQuestionIndex =
+                index;
+
+
+            // تعبئة البيانات
+            document.getElementById("qTitle").value =
+                q.title || "";
+
+
+            document.getElementById("qType").value =
+                q.type || "text";
+
+
+            document.getElementById("qRequired").checked =
+                !!q.required;
+
+
+            document.getElementById("qUnique").checked =
+                !!q.unique;
+
+
+            document.getElementById("qConditionId").value =
+                q.conditionId || "";
+
+
+            document.getElementById("qConditionValue").value =
+                q.conditionValue || "";
+
+
+            tempOptions =
+                Array.isArray(q.options)
+                    ? [...q.options]
+                    : [];
+
+
+            renderTempOptions();
+
+            toggleOptionsUI();
+
+
+            // تغيير شكل المحرر
+            const editor =
+                document.getElementById("questionEditor");
+
+            editor.classList.add("edit-mode");
+
+
+            document.getElementById("editorTitle").textContent =
+                `تعديل السؤال رقم ${index + 1}`;
+
+
+            const button =
+                document.getElementById("questionActionButton");
+
+
+            button.textContent =
+                "💾 حفظ تعديل السؤال";
+
+
+            button.classList.remove("bg-blue-600");
+
+            button.classList.add("bg-amber-500");
+
+            button.classList.remove("hover:bg-blue-700");
+
+            button.classList.add("hover:bg-amber-600");
+
+
+            document
+                .getElementById("cancelEditButton")
+                .classList.remove("hidden");
+
+
+            // تحديث قائمة الشروط
+            updateConditionSelects();
+
+
+            // إعادة اختيار الشرط بعد تحديث القائمة
+            document.getElementById("qConditionId").value =
+                q.conditionId || "";
+
+
+            // النزول للمحرر
+            document
+                .getElementById("questionEditor")
+                .scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+        };
+
+
+        // ==========================================
+        // حفظ تعديل السؤال
+        // ==========================================
+
+        function saveQuestionEdit() {
+
+            if (
+                editingQuestionIndex < 0 ||
+                editingQuestionIndex >= questions.length
+            ) {
+
+                return;
+
+            }
+
+
+            const title =
+                document
+                    .getElementById("qTitle")
+                    .value
+                    .trim();
+
+
+            if (!title) {
+
+                alert("أدخل عنوان السؤال");
+
+                return;
+
+            }
+
+
+            const type =
+                document.getElementById("qType").value;
+
+
+            if (
+                type === "select" &&
+                tempOptions.length === 0
+            ) {
+
+                alert("أضف اختيارًا واحدًا على الأقل للقائمة المنسدلة");
+
+                return;
+
+            }
+
+
+            const oldQuestion =
+                questions[editingQuestionIndex];
+
+
+            const oldId =
+                oldQuestion.id;
+
+
+            const newConditionId =
+                document
+                    .getElementById("qConditionId")
+                    .value;
+
+
+            /*
+                نحافظ على ID السؤال نفسه
+                حتى لا تتأثر الشروط المرتبطة به.
+            */
+            questions[editingQuestionIndex] = {
+
+                id: oldId,
+
+                title: title,
+
+                type: type,
+
+                required:
+                    document
+                        .getElementById("qRequired")
+                        .checked,
+
+                unique:
+                    document
+                        .getElementById("qUnique")
+                        .checked,
+
+                options:
+                    [...tempOptions],
+
+                conditionId:
+                    newConditionId,
+
+                conditionValue:
+                    document
+                        .getElementById("qConditionValue")
+                        .value
+                        .trim()
+
+            };
+
+
+            resetQuestionEditor();
+
+            updateQuestionsUI();
+
+            updateConditionSelects();
+
+
+            alert("تم تعديل السؤال بنجاح");
+
         }
+
+
+        // ==========================================
+        // تعديل زر الإضافة حسب الوضع
+        // ==========================================
+
+        const originalAddQuestion =
+            window.addQuestion;
+
+
+        /*
+            نستبدل الوظيفة بحيث:
+            - لو إضافة → إضافة
+            - لو تعديل → حفظ تعديل
+        */
+
+        window.addQuestion = function() {
+
+            if (editingQuestionIndex >= 0) {
+
+                saveQuestionEdit();
+
+                return;
+
+            }
+
+
+            originalAddQuestion();
+
+        };
+
+
+        // ==========================================
+        // إلغاء التعديل
+        // ==========================================
+
+        window.cancelEdit = function() {
+
+            resetQuestionEditor();
+
+        };
+
+
+        // ==========================================
+        // إعادة محرر السؤال للوضع الطبيعي
+        // ==========================================
+
+        function resetQuestionEditor() {
+
+            editingQuestionIndex = -1;
+
+            tempOptions = [];
+
+
+            document.getElementById("qTitle").value = "";
+
+            document.getElementById("qType").value = "text";
+
+            document.getElementById("qRequired").checked = false;
+
+            document.getElementById("qUnique").checked = false;
+
+            document.getElementById("qConditionValue").value = "";
+
+            document.getElementById("qConditionId").value = "";
+
+
+            renderTempOptions();
+
+            toggleOptionsUI();
+
+
+            const editor =
+                document.getElementById("questionEditor");
+
+            editor.classList.remove("edit-mode");
+
+
+            document.getElementById("editorTitle").textContent =
+                "إضافة حقل جديد";
+
+
+            const button =
+                document.getElementById("questionActionButton");
+
+
+            button.textContent =
+                "إضافة السؤال للفورم";
+
+
+            button.classList.remove("bg-amber-500");
+
+            button.classList.add("bg-blue-600");
+
+            button.classList.remove("hover:bg-amber-600");
+
+            button.classList.add("hover:bg-blue-700");
+
+
+            document
+                .getElementById("cancelEditButton")
+                .classList.add("hidden");
+
+        }
+
+
+        // ==========================================
+        // عرض الأسئلة
+        // ==========================================
 
         function updateQuestionsUI() {
-            let html = '';
+
+            let html = "";
+
+
+            if (questions.length === 0) {
+
+                html = `
+                    <div class="text-center text-gray-400 py-8 border rounded-xl">
+                        لم تتم إضافة أي أسئلة حتى الآن
+                    </div>
+                `;
+
+            }
+
+
             questions.forEach((q, index) => {
+
+                let conditionText = "";
+
+
+                if (q.conditionId) {
+
+                    const conditionQuestion =
+                        questions.find(
+                            item =>
+                                item.id === q.conditionId
+                        );
+
+
+                    if (conditionQuestion) {
+
+                        conditionText =
+                            `
+                            <br>
+                            <span class="text-xs text-blue-500">
+                                مشروط بـ:
+                                ${escapeHTML(conditionQuestion.title)}
+                                =
+                                ${escapeHTML(q.conditionValue || "")}
+                            </span>
+                            `;
+
+                    } else {
+
+                        conditionText =
+                            `
+                            <br>
+                            <span class="text-xs text-red-500">
+                                الشرط المرتبط بهذا السؤال لم يعد موجودًا
+                            </span>
+                            `;
+
+                    }
+
+                }
+
+
+                const typeNames = {
+
+                    text: "نص عادي",
+
+                    number: "رقم",
+
+                    tel: "رقم هاتف",
+
+                    date: "تاريخ",
+
+                    select: "قائمة منسدلة"
+
+                };
+
+
                 html += `
-                <div class="p-4 border rounded bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <span class="font-bold">${index + 1}. ${q.title}</span> <span class="text-xs text-gray-500">(${q.type}) ${q.required ? '*إجباري' : ''}</span>
-                        ${q.conditionId ? `<br><span class="text-xs text-blue-500">مشروط بـ: ${q.conditionValue}</span>` : ''}
+
+                <div
+                    class="question-card p-4 border rounded-xl bg-gray-50 flex flex-col md:flex-row justify-between gap-4"
+                >
+
+                    <div class="flex-1">
+
+                        <div class="flex items-start gap-2">
+
+                            <span
+                                class="bg-blue-600 text-white rounded-full min-w-8 h-8 flex items-center justify-center font-bold"
+                            >
+                                ${index + 1}
+                            </span>
+
+                            <div>
+
+                                <span class="font-bold text-lg">
+                                    ${escapeHTML(q.title)}
+                                </span>
+
+                                <div class="text-xs text-gray-500 mt-1">
+
+                                    (${typeNames[q.type] || q.type})
+
+                                    ${q.required
+                                        ? `<span class="text-red-500 font-bold"> * إجباري</span>`
+                                        : ""
+                                    }
+
+                                    ${q.unique
+                                        ? `<span class="text-purple-600 font-bold"> • يمنع التكرار</span>`
+                                        : ""
+                                    }
+
+                                </div>
+
+                                ${
+                                    q.type === "select"
+                                    ?
+                                    `
+                                    <div class="mt-2 text-xs text-gray-600">
+                                        الاختيارات:
+                                        ${q.options
+                                            .map(
+                                                (option, i) =>
+                                                    `<span class="inline-block bg-white border rounded px-2 py-1 mr-1 mb-1">
+                                                        ${i + 1}. ${escapeHTML(option)}
+                                                    </span>`
+                                            )
+                                            .join("")
+                                        }
+                                    </div>
+                                    `
+                                    :
+                                    ""
+                                }
+
+                                ${conditionText}
+
+                            </div>
+
+                        </div>
+
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="moveQ(${index}, -1)" class="bg-gray-300 px-2 rounded">↑</button>
-                        <button onclick="moveQ(${index}, 1)" class="bg-gray-300 px-2 rounded">↓</button>
-                        <button onclick="deleteQ(${index})" class="bg-red-500 text-white px-2 rounded">X</button>
+
+
+                    <!-- أزرار التحكم -->
+
+                    <div class="flex items-center gap-2 flex-wrap">
+
+                        <!-- لأعلى -->
+
+                        <button
+                            type="button"
+                            onclick="moveQ(${index}, -1)"
+                            class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-lg font-bold"
+                            title="تحريك السؤال لأعلى"
+                            ${index === 0 ? "disabled style='opacity:.4;cursor:not-allowed'" : ""}
+                        >
+                            ↑
+                        </button>
+
+
+                        <!-- لأسفل -->
+
+                        <button
+                            type="button"
+                            onclick="moveQ(${index}, 1)"
+                            class="bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-lg font-bold"
+                            title="تحريك السؤال لأسفل"
+                            ${index === questions.length - 1 ? "disabled style='opacity:.4;cursor:not-allowed'" : ""}
+                        >
+                            ↓
+                        </button>
+
+
+                        <!-- تعديل -->
+
+                        <button
+                            type="button"
+                            onclick="editQuestion(${index})"
+                            class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-bold"
+                        >
+                            ✏️ تعديل
+                        </button>
+
+
+                        <!-- حذف -->
+
+                        <button
+                            type="button"
+                            onclick="deleteQ(${index})"
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-bold"
+                        >
+                            🗑 حذف
+                        </button>
+
                     </div>
-                </div>`;
+
+                </div>
+
+                `;
+
             });
-            document.getElementById('questionsContainer').innerHTML = html;
+
+
+            document.getElementById("questionsContainer").innerHTML =
+                html;
+
         }
 
-        window.moveQ = function(index, dir) {
-            if(index + dir < 0 || index + dir >= questions.length) return;
-            let temp = questions[index];
-            questions[index] = questions[index + dir];
-            questions[index + dir] = temp;
+
+        // ==========================================
+        // تحريك السؤال
+        // ==========================================
+
+        window.moveQ = function(index, direction) {
+
+            const newIndex =
+                index + direction;
+
+
+            if (
+                newIndex < 0 ||
+                newIndex >= questions.length
+            ) {
+
+                return;
+
+            }
+
+
+            const temp =
+                questions[index];
+
+            questions[index] =
+                questions[newIndex];
+
+            questions[newIndex] =
+                temp;
+
+
             updateQuestionsUI();
-        }
 
-        window.deleteQ = function(index) { questions.splice(index, 1); updateQuestionsUI(); updateConditionSelects(); }
+            updateConditionSelects();
+
+        };
+
+
+        // ==========================================
+        // حذف السؤال
+        // ==========================================
+
+        window.deleteQ = function(index) {
+
+            if (
+                index < 0 ||
+                index >= questions.length
+            ) {
+
+                return;
+
+            }
+
+
+            const question =
+                questions[index];
+
+
+            if (
+                !confirm(
+                    `هل تريد حذف السؤال:\n\n"${question.title}"؟`
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const deletedId =
+                question.id;
+
+
+            // حذف السؤال
+            questions.splice(index, 1);
+
+
+            /*
+                تنظيف أي شروط كانت تعتمد
+                على السؤال المحذوف
+            */
+
+            questions.forEach(q => {
+
+                if (q.conditionId === deletedId) {
+
+                    q.conditionId = "";
+
+                    q.conditionValue = "";
+
+                }
+
+            });
+
+
+            // لو كنا نعدل نفس السؤال
+            if (editingQuestionIndex === index) {
+
+                resetQuestionEditor();
+
+            } else if (
+                editingQuestionIndex > index
+            ) {
+
+                editingQuestionIndex--;
+
+            }
+
+
+            updateQuestionsUI();
+
+            updateConditionSelects();
+
+        };
+
+
+        // ==========================================
+        // تحديث قائمة شروط الظهور
+        // ==========================================
 
         function updateConditionSelects() {
-            let select = document.getElementById('qConditionId');
-            select.innerHTML = '<option value="">يظهر دائماً</option>';
-            questions.forEach(q => {
-                if(q.type === 'select') select.innerHTML += `<option value="${q.id}">${q.title}</option>`;
+
+            const select =
+                document.getElementById("qConditionId");
+
+
+            const currentValue =
+                select.value;
+
+
+            select.innerHTML =
+                `
+                <option value="">
+                    يظهر دائماً (بدون شرط)
+                </option>
+                `;
+
+
+            questions.forEach((q, index) => {
+
+                /*
+                    لا نسمح للسؤال بأن يكون مشروطًا بنفسه
+                */
+
+                if (
+                    q.type === "select" &&
+                    index !== editingQuestionIndex
+                ) {
+
+                    select.innerHTML +=
+                        `
+                        <option value="${escapeHTML(q.id)}">
+                            ${escapeHTML(q.title)}
+                        </option>
+                        `;
+
+                }
+
             });
-        }
+
+
+            /*
+                نحاول إعادة القيمة القديمة
+                لو ما زالت موجودة
+            */
+
+            const exists =
+                Array.from(select.options)
+                    .some(
+                        option =>
+                            option.value === currentValue
+                    );
+
+
+            if (exists) {
+
+                select.value =
+                    currentValue;
+
+            } else {
+
+                select.value = "";
+
+            }
+
+        };
+
+
+        // ==========================================
+        // حفظ الفورم بالكامل
+        // ==========================================
 
         window.saveForm = async function() {
-            let title = document.getElementById('formTitle').value;
-            if(!title || questions.length === 0) return alert("أدخل اسم الفورم وقم بإضافة أسئلة");
-            
+
+            const title =
+                document
+                    .getElementById("formTitle")
+                    .value
+                    .trim();
+
+
+            if (
+                !title ||
+                questions.length === 0
+            ) {
+
+                alert(
+                    "أدخل اسم الفورم وقم بإضافة أسئلة"
+                );
+
+                return;
+
+            }
+
+
+            // التأكد من أن القوائم لها اختيارات
+            const invalidSelect =
+                questions.find(
+                    q =>
+                        q.type === "select" &&
+                        (!q.options ||
+                         q.options.length === 0)
+                );
+
+
+            if (invalidSelect) {
+
+                alert(
+                    `السؤال "${invalidSelect.title}" من نوع قائمة منسدلة ولكنه لا يحتوي على اختيارات.`
+                );
+
+                return;
+
+            }
+
+
             try {
-                await addDoc(collection(db, "forms"), {
-                    title: title,
-                    questions: questions,
-                    allowEdit: true,
-                    createdAt: serverTimestamp()
-                });
-                alert("تم حفظ الفورم بنجاح!");
+
+                await addDoc(
+                    collection(db, "forms"),
+                    {
+
+                        title: title,
+
+                        questions: questions,
+
+                        allowEdit: true,
+
+                        createdAt:
+                            serverTimestamp()
+
+                    }
+                );
+
+
+                alert(
+                    "تم حفظ الفورم بنجاح!"
+                );
+
+
                 location.reload();
-            } catch (e) { alert("خطأ: " + e.message); }
-        }
+
+
+            } catch (e) {
+
+                console.error(e);
+
+                alert(
+                    "خطأ: " +
+                    e.message
+                );
+
+            }
+
+        };
+
+
+        // ==========================================
+        // تحميل الفورمات الموجودة
+        // ==========================================
 
         async function loadForms() {
-            const querySnapshot = await getDocs(collection(db, "forms"));
-            let html = '';
-            querySnapshot.forEach((doc) => {
-                html += `<li class="p-3 bg-white border rounded shadow flex justify-between">
-                    <span>${doc.data().title}</span>
-                    <a href="admin_manage.html?formId=${doc.id}" class="text-blue-600 hover:underline">إدارة الإجابات والتعديل</a>
-                </li>`;
-            });
-            document.getElementById('formsList').innerHTML = html;
+
+            try {
+
+                const querySnapshot =
+                    await getDocs(
+                        collection(db, "forms")
+                    );
+
+
+                let html = "";
+
+
+                if (querySnapshot.empty) {
+
+                    html = `
+                        <li class="p-5 bg-gray-50 border rounded-xl text-center text-gray-500">
+                            لا توجد فورمات محفوظة حتى الآن
+                        </li>
+                    `;
+
+                }
+
+
+                querySnapshot.forEach((doc) => {
+
+                    const data =
+                        doc.data();
+
+
+                    html += `
+
+                    <li
+                        class="p-4 bg-white border rounded-xl shadow-sm flex flex-col md:flex-row justify-between gap-3"
+                    >
+
+                        <span class="font-bold text-gray-800">
+                            ${escapeHTML(data.title)}
+                        </span>
+
+
+                        <a
+                            href="admin_manage.html?formId=${encodeURIComponent(doc.id)}"
+                            class="text-blue-600 hover:text-blue-800 hover:underline font-bold"
+                        >
+                            إدارة الإجابات والتعديل
+                        </a>
+
+                    </li>
+
+                    `;
+
+                });
+
+
+                document.getElementById("formsList").innerHTML =
+                    html;
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                document.getElementById("formsList").innerHTML =
+                    `
+                    <li class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+                        تعذر تحميل الفورمات: ${escapeHTML(error.message)}
+                    </li>
+                    `;
+
+            }
+
         }
+
+
+        // ==========================================
+        // تشغيل أولي
+        // ==========================================
+
+        renderTempOptions();
+
+        updateQuestionsUI();
+
+        updateConditionSelects();
+
         loadForms();
+
     </script>
+
 </body>
 </html>
