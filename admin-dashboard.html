@@ -2,27 +2,74 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة الإدارة | المستشار</title>
+    <title>لوحة تحكم المستشار | النظام الشامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-900 text-white font-['Cairo']">
-    <nav class="bg-black p-4 flex justify-between border-b border-yellow-500">
-        <h1 class="text-xl font-black text-yellow-500 italic">لوحة تحكم المستشار (ADMIN)</h1>
-        <button id="logoutBtn" class="bg-red-600 px-4 py-1 rounded-lg">تسجيل الخروج</button>
+<body class="bg-slate-900 text-white font-['Cairo'] min-h-screen flex flex-col">
+    <!-- النافبار -->
+    <nav class="bg-black/80 backdrop-blur-md p-5 flex justify-between items-center border-b border-yellow-500 shadow-lg sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-yellow-500 rounded-full animate-ping"></div>
+            <h1 class="text-xl font-black text-yellow-500 tracking-wider">لوحة تحكم المستشار (ADMIN HUB)</h1>
+        </div>
+        <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2 rounded-xl transition shadow-md">تسجيل الخروج</button>
     </nav>
-    <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <a href="admin-results.html" class="bg-blue-800 p-10 rounded-3xl text-center hover:scale-105 transition shadow-2xl">رفع النتائج</a>
-        <a href="teacher-portal.html" class="bg-green-800 p-10 rounded-3xl text-center hover:scale-105 transition shadow-2xl">إدارة المدرسين</a>
-        <div class="bg-gray-800 p-10 rounded-3xl text-center opacity-50">إعدادات المنصة</div>
-    </div>
 
+    <!-- المحتوى الرئيسي -->
+    <main class="flex-1 p-8 max-w-7xl mx-auto w-full">
+        <div class="mb-10 text-center">
+            <h2 class="text-3xl font-black text-yellow-400 mb-2">أهلاً بك يا سيادة المستشار</h2>
+            <p class="text-slate-400">إدارة النماذج، تجميع بيانات الطلاب، والمتابعة اللحظية من مكان واحد بتصميم فخم ومحترف.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- كارد 1: إنشاء وتصميم الفورم -->
+            <a href="admin_create.html" class="bg-slate-800/90 border border-slate-700 hover:border-yellow-500 p-8 rounded-3xl text-center hover:scale-105 transition-all duration-300 shadow-2xl group flex flex-col items-center justify-center">
+                <div class="w-16 h-16 bg-yellow-500/10 group-hover:bg-yellow-500/20 rounded-2xl flex items-center justify-center mb-4 text-yellow-500 text-2xl font-bold">📝</div>
+                <h3 class="text-xl font-bold text-white mb-2">إنشاء وتصميم النماذج</h3>
+                <p class="text-slate-400 text-sm">إضافة أسئلة جديدة، تحديد الشروط التشعبية، وترتيب الحقول بدقة.</p>
+            </a>
+
+            <!-- كارد 2: إدارة الإجابات والتصدير -->
+            <a href="admin_manage.html" class="bg-slate-800/90 border border-slate-700 hover:border-yellow-500 p-8 rounded-3xl text-center hover:scale-105 transition-all duration-300 shadow-2xl group flex flex-col items-center justify-center">
+                <div class="w-16 h-16 bg-blue-500/10 group-hover:bg-blue-500/20 rounded-2xl flex items-center justify-center mb-4 text-blue-400 text-2xl font-bold">📊</div>
+                <h3 class="text-xl font-bold text-white mb-2">إدارة إجابات الطلاب</h3>
+                <p class="text-slate-400 text-sm">مراجعة السجلات، التحكم بصلاحيات التعديل، والتصدير لإكسيل.</p>
+            </a>
+
+            <!-- كارد 3: إدارة المدرسين -->
+            <a href="teacher-portal.html" class="bg-slate-800/90 border border-slate-700 hover:border-yellow-500 p-8 rounded-3xl text-center hover:scale-105 transition-all duration-300 shadow-2xl group flex flex-col items-center justify-center">
+                <div class="w-16 h-16 bg-green-500/10 group-hover:bg-green-500/20 rounded-2xl flex items-center justify-center mb-4 text-green-400 text-2xl font-bold">👥</div>
+                <h3 class="text-xl font-bold text-white mb-2">إدارة المدرسين</h3>
+                <p class="text-slate-400 text-sm">صلاحيات الطاقم التعليمي ومتابعة العمل داخل المنصة.</p>
+            </a>
+
+            <!-- كارد 4: رفع النتائج -->
+            <a href="admin-results.html" class="bg-slate-800/90 border border-slate-700 hover:border-yellow-500 p-8 rounded-3xl text-center hover:scale-105 transition-all duration-300 shadow-2xl group flex flex-col items-center justify-center">
+                <div class="w-16 h-16 bg-purple-500/10 group-hover:bg-purple-500/20 rounded-2xl flex items-center justify-center mb-4 text-purple-400 text-2xl font-bold">📈</div>
+                <h3 class="text-xl font-bold text-white mb-2">رفع النتائج</h3>
+                <p class="text-slate-400 text-sm">رفع نتائج الامتحانات ودرجات الطلاب الخاصة بالمدرسة.</p>
+            </a>
+
+            <!-- كارد 5: إعدادات المنصة -->
+            <div class="bg-slate-800/50 border border-slate-700/50 p-8 rounded-3xl text-center opacity-60 flex flex-col items-center justify-center cursor-not-allowed">
+                <div class="w-16 h-16 bg-slate-700/50 rounded-2xl flex items-center justify-center mb-4 text-slate-400 text-2xl font-bold">⚙️</div>
+                <h3 class="text-xl font-bold text-slate-300 mb-2">إعدادات المنصة</h3>
+                <p class="text-slate-500 text-sm">قريباً - إعدادات عامة للنظام.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- سكريبت المصادقة -->
     <script type="module">
         import { auth } from './config.js';
         import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
         onAuthStateChanged(auth, (user) => {
-            if (!user || !user.email.endsWith('@admin.com')) { window.location.href = 'login.html'; }
+            if (!user) { 
+                window.location.href = 'login.html'; 
+            }
         });
 
         document.getElementById('logoutBtn').onclick = () => {
