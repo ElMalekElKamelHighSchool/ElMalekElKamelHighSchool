@@ -1,35 +1,3197 @@
-<!-- admin-results.html -->
-<div class="p-8 bg-white rounded-2xl shadow-xl border-t-4 border-blue-900">
-    <h2 class="text-2xl font-bold mb-6 text-blue-900">إدارة نتائج الطلاب - الملك الكامل</h2>
-    
-    <div class="grid md:grid-cols-2 gap-6 mb-8">
-        <div class="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center">
-            <p class="mb-4 text-gray-600">رفع ملف نتائج (Excel / CSV)</p>
-            <input type="file" id="excelFile" class="hidden">
-            <button onclick="document.getElementById('excelFile').click()" class="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800">اختر الملف</button>
-        </div>
-        
-        <div class="space-y-4">
-            <input type="text" id="sSeatNumber" placeholder="رقم الجلوس" class="w-full border p-2 rounded">
-            <input type="number" id="sGrade" placeholder="الدرجة" class="w-full border p-2 rounded">
-            <button id="saveResultBtn" class="w-full bg-green-600 text-white p-2 rounded font-bold">حفظ النتيجة يدوياً</button>
-        </div>
-    </div>
-</div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script type="module">
-    import { db, doc, setDoc } from './config.js';
-    
-    document.getElementById('saveResultBtn').onclick = async () => {
-        const seat = document.getElementById('sSeatNumber').value;
-        const score = document.getElementById('sGrade').value;
-        
-        await setDoc(doc(db, "results", seat), {
-            math: score, // مثال لمادة الرياضيات
-            physics: 95, // بيانات تجريبية
-            chemistry: 88,
-            timestamp: new Date()
-        });
-        alert("تم حفظ نتيجة الطالب رقم " + seat);
-    };
-</script>
+    <title>لوحة التحكم للنتائج - مدرسة الملك الكامل</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- XLSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- QRCode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            scroll-behavior: smooth;
+        }
+
+        /* =====================================================
+           PRINT
+        ===================================================== */
+
+        @media print {
+
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 0.6cm;
+            }
+
+            /* بطاقات الاستعلام القديمة */
+
+            .print-area {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            .ticket-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                padding: 5px;
+            }
+
+            .mini-ticket {
+                border: 2px solid #1e3a8a;
+                border-radius: 16px;
+                padding: 12px;
+                text-align: center;
+                page-break-inside: avoid;
+                height: 275px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                background-color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* جدول النتائج */
+
+            #resultsPrintArea {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            #resultsPrintTable {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                direction: rtl;
+                color: #000 !important;
+                background: #fff !important;
+                font-family: 'Cairo', sans-serif;
+            }
+
+            #resultsPrintTable thead {
+                display: table-header-group !important;
+            }
+
+            #resultsPrintTable tfoot {
+                display: table-footer-group !important;
+            }
+
+            #resultsPrintTable tr {
+                page-break-inside: avoid !important;
+            }
+
+            #resultsPrintTable th {
+                background: #e5e7eb !important;
+                color: #000 !important;
+                border: 1px solid #000 !important;
+                padding: 7px 5px !important;
+                font-size: 10px !important;
+                font-weight: 900 !important;
+                text-align: center !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            #resultsPrintTable td {
+                color: #000 !important;
+                border: 1px solid #555 !important;
+                padding: 6px 5px !important;
+                font-size: 9px !important;
+                text-align: center !important;
+            }
+
+            #resultsPrintTable td:first-child,
+            #resultsPrintTable th:first-child {
+                text-align: right !important;
+            }
+
+            #resultsPrintHeader {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 15px;
+                color: #000 !important;
+            }
+
+            .results-print-footer {
+                display: block !important;
+                text-align: center;
+                margin-top: 15px;
+                font-size: 9px;
+                color: #444 !important;
+            }
+        }
+
+        /* =====================================================
+           NORMAL
+        ===================================================== */
+
+        .print-area {
+            display: none;
+        }
+
+        #resultsPrintArea {
+            display: none;
+        }
+
+        .results-print-footer {
+            display: none;
+        }
+
+        .active-tab {
+            border-bottom: 4px solid #f59e0b;
+            color: #f59e0b;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-hover {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10B981;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom Scrollbar */
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+    </style>
+</head>
+
+<body class="min-h-screen pb-12">
+
+    <!-- =====================================================
+         Navigation Bar
+    ===================================================== -->
+
+    <nav class="no-print bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
+
+            <div class="flex items-center gap-4">
+
+                <img
+                    src="https://www.image2url.com/r2/default/images/1778151852690-93c3f74c-5bda-488c-bee6-558d7bb5e84f.jpg"
+                    class="h-12 w-12 rounded-2xl border-2 border-amber-500 shadow-lg object-cover"
+                >
+
+                <div>
+
+                    <h1 class="font-black text-xl text-white tracking-wide">
+                        لوحة التحكم الاحترافية
+                    </h1>
+
+                    <p class="text-xs text-amber-400 font-bold">
+                        إدارة نتائج مدرسة الملك الكامل الثانوية | المستشار حازم سالم 2026
+                    </p>
+
+                </div>
+
+            </div>
+
+            <a
+                href="index.html"
+                class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-5 py-2.5 rounded-2xl font-bold text-sm flex items-center gap-2 btn-hover"
+            >
+                <i class="fas fa-home"></i>
+                الرئيسية
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         Main Control Panel
+    ===================================================== -->
+
+    <div class="max-w-7xl mx-auto space-y-8 no-print px-4 sm:px-6 pt-8">
+
+        <!-- =================================================
+             Step 1 & 2
+        ================================================= -->
+
+        <div class="glass-card p-6 md:p-8 rounded-3xl shadow-2xl border-r-8 border-amber-500">
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-slate-800 pb-6">
+
+                <div>
+
+                    <h2 class="text-2xl font-black text-white flex items-center gap-3">
+
+                        <i class="fas fa-file-excel text-emerald-500"></i>
+
+                        استيراد وتخصيص شيت النتائج
+
+                    </h2>
+
+                    <p class="text-slate-400 text-sm mt-1">
+                        قم برفع ملف الإكسيل، ثم اختر الأعمدة ورتب ظهور المواد والدرجات بحرية
+                    </p>
+
+                </div>
+
+
+                <div class="flex gap-3 w-full md:w-auto flex-wrap">
+
+                    <!-- OLD PDF TICKETS BUTTON -->
+
+                    <button
+                        onclick="preparePDF()"
+                        class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-2xl font-bold btn-hover flex items-center justify-center gap-2 text-sm"
+                    >
+
+                        <i class="fas fa-id-card"></i>
+
+                        طباعة بطاقات PDF
+
+                    </button>
+
+
+                    <!-- NEW RESULTS PDF -->
+
+                    <button
+                        onclick="prepareResultsPDF()"
+                        class="flex-1 md:flex-none bg-violet-600 hover:bg-violet-500 text-white px-5 py-3 rounded-2xl font-bold btn-hover flex items-center justify-center gap-2 text-sm"
+                    >
+
+                        <i class="fas fa-file-pdf"></i>
+
+                        PDF النتائج
+
+                    </button>
+
+
+                    <!-- NEW EXCEL -->
+
+                    <button
+                        onclick="exportResultsExcel()"
+                        class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-2xl font-bold btn-hover flex items-center justify-center gap-2 text-sm"
+                    >
+
+                        <i class="fas fa-file-excel"></i>
+
+                        تصدير Excel
+
+                    </button>
+
+
+                    <!-- DELETE ALL -->
+
+                    <button
+                        onclick="deleteAllGradeData()"
+                        class="flex-1 md:flex-none bg-rose-500/10 hover:bg-rose-600 border border-rose-500/30 text-rose-400 hover:text-white px-5 py-3 rounded-2xl font-bold btn-hover flex items-center justify-center gap-2 text-sm"
+                    >
+
+                        <i class="fas fa-trash-alt"></i>
+
+                        مسح سجل الصف
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 Configuration Form
+            ================================================= -->
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+
+
+                <!-- Grade -->
+
+                <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+
+                    <label class="block text-xs font-black text-slate-300 mb-2">
+                        1. اختيار الصف الدراسي:
+                    </label>
+
+                    <select
+                        id="gradeSelect"
+                        onchange="onGradeSelectChange()"
+                        class="w-full bg-slate-800 border border-slate-700 text-white p-3 rounded-xl font-bold text-sm outline-none focus:border-amber-500 transition"
+                    >
+
+                        <option value="1sec">
+                            الصف الأول الثانوي
+                        </option>
+
+                        <option value="2sec">
+                            الصف الثاني الثانوي
+                        </option>
+
+                        <option value="3sec">
+                            الصف الثالث الثانوي
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Excel -->
+
+                <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+
+                    <label class="block text-xs font-black text-slate-300 mb-2">
+                        2. اختر ملف الإكسيل (XLSX/XLS):
+                    </label>
+
+                    <input
+                        type="file"
+                        id="excelInput"
+                        accept=".xlsx, .xls"
+                        onchange="handleExcelSelect(event)"
+                        class="block w-full text-xs font-bold text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer"
+                    >
+
+                </div>
+
+
+                <!-- Secret Code Policy -->
+
+                <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+
+                    <label class="block text-xs font-black text-slate-300 mb-2">
+                        3. سياسة الكود السري:
+                    </label>
+
+                    <div class="flex flex-col gap-2 pt-1">
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+
+                            <input
+                                type="radio"
+                                name="idPolicy"
+                                value="seat"
+                                checked
+                                class="w-4 h-4 accent-amber-500"
+                            >
+
+                            <span class="text-xs font-bold text-slate-300">
+                                طابق الكود السري برقم الجلوس
+                            </span>
+
+                        </label>
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+
+                            <input
+                                type="radio"
+                                name="idPolicy"
+                                value="new"
+                                class="w-4 h-4 accent-amber-500"
+                            >
+
+                            <span class="text-xs font-bold text-slate-300">
+                                توليد كود سري عشوائي جديد
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Payment -->
+
+                <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+
+                    <label class="block text-xs font-black text-slate-300 mb-2">
+                        4. إعدادات الدفع المالي (فوري):
+                    </label>
+
+                    <div class="space-y-2">
+
+                        <input
+                            type="number"
+                            id="fawryAmount"
+                            placeholder="قيمة الرسوم (مثال: 28.92)"
+                            class="w-full bg-slate-800 border border-slate-700 text-white p-2.5 rounded-xl font-bold text-xs outline-none focus:border-emerald-500 transition"
+                        >
+
+                        <label class="flex items-center justify-between cursor-pointer pt-1">
+
+                            <span class="text-xs font-bold text-slate-300">
+                                حجب النتيجة لغير المدفوع:
+                            </span>
+
+                            <div class="relative inline-block w-9 align-middle select-none">
+
+                                <input
+                                    type="checkbox"
+                                    id="uploadPaymentToggle"
+                                    class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-2 appearance-none cursor-pointer transition-all duration-300 z-10 top-0 left-0 border-gray-300"
+                                />
+
+                                <label
+                                    for="uploadPaymentToggle"
+                                    class="toggle-label block overflow-hidden h-4 rounded-full bg-slate-700 cursor-pointer"
+                                ></label>
+
+                            </div>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 Dynamic Mapping
+            ================================================= -->
+
+            <div
+                id="mappingSection"
+                class="hidden bg-slate-900/90 border-2 border-amber-500/40 p-6 rounded-2xl mb-6 space-y-6 animate-fade-in"
+            >
+
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+
+                    <h3 class="font-black text-lg text-amber-400 flex items-center gap-2">
+
+                        <i class="fas fa-sliders-h"></i>
+
+                        تخصيص أعمدة الشيت وترتيب عرض المواد
+
+                    </h3>
+
+                    <span
+                        id="excelRowCount"
+                        class="text-xs font-bold bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full"
+                    ></span>
+
+                </div>
+
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+                    <!-- Essential -->
+
+                    <div class="space-y-4">
+
+                        <h4 class="text-xs font-black uppercase text-slate-400 tracking-wider">
+                            الأعمدة الأساسية للطالب:
+                        </h4>
+
+
+                        <div>
+
+                            <label class="block text-xs font-bold text-slate-300 mb-1">
+                                عمود رقم الجلوس:
+                            </label>
+
+                            <select
+                                id="seatColSelect"
+                                class="w-full bg-slate-800 border border-slate-700 text-amber-300 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
+                            ></select>
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-bold text-slate-300 mb-1">
+                                عمود اسم الطالب:
+                            </label>
+
+                            <select
+                                id="nameColSelect"
+                                class="w-full bg-slate-800 border border-slate-700 text-amber-300 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-amber-500"
+                            ></select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Subjects -->
+
+                    <div class="space-y-3">
+
+                        <h4 class="text-xs font-black uppercase text-slate-400 tracking-wider">
+                            أعمدة المواد والدرجات (حدد ورتّب بالأسهم):
+                        </h4>
+
+                        <div
+                            id="subjectColumnsList"
+                            class="max-h-60 overflow-y-auto space-y-2 pr-1"
+                        >
+                            <!-- Dynamic -->
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Upload -->
+
+            <button
+                onclick="processExcelUpload()"
+                id="upBtn"
+                class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 py-4 rounded-2xl font-black text-lg btn-hover shadow-xl flex items-center justify-center gap-3"
+            >
+
+                <i class="fas fa-cloud-upload-alt text-xl"></i>
+
+                مزامنة البيانات وتحديث السحابة
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             Grade Control & Student Table
+        ================================================= -->
+
+        <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl space-y-6">
+
+            <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 pb-6 border-b border-slate-800">
+
+
+                <!-- Grade View -->
+
+                <div class="flex bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
+
+                    <button
+                        onclick="changeGradeView('1sec', this)"
+                        class="tab-btn active-tab px-6 py-2.5 font-black text-sm rounded-xl transition-all"
+                    >
+                        الصف الأول
+                    </button>
+
+                    <button
+                        onclick="changeGradeView('2sec', this)"
+                        class="tab-btn px-6 py-2.5 font-black text-sm rounded-xl transition-all"
+                    >
+                        الصف الثاني
+                    </button>
+
+                    <button
+                        onclick="changeGradeView('3sec', this)"
+                        class="tab-btn px-6 py-2.5 font-black text-sm rounded-xl transition-all"
+                    >
+                        الصف الثالث
+                    </button>
+
+                </div>
+
+
+                <!-- Controls -->
+
+                <div class="flex flex-wrap items-center gap-4 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+
+
+                    <!-- Publish -->
+
+                    <div class="flex items-center gap-3 px-2">
+
+                        <span class="text-xs font-black text-slate-200">
+                            حالة النتيجة العامة:
+                        </span>
+
+                        <label class="flex items-center cursor-pointer gap-2">
+
+                            <div class="relative inline-block w-10 align-middle select-none">
+
+                                <input
+                                    type="checkbox"
+                                    id="globalPublishToggle"
+                                    onchange="toggleGradePublishStatus(this.checked)"
+                                    class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer transition-all duration-300 z-10 top-0 left-0 border-gray-300"
+                                />
+
+                                <label
+                                    for="globalPublishToggle"
+                                    class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-700 cursor-pointer"
+                                ></label>
+
+                            </div>
+
+                            <span
+                                id="publishStatusText"
+                                class="text-xs font-black text-rose-400"
+                            >
+                                محجوبة
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="h-6 w-px bg-slate-800 hidden md:block"></div>
+
+
+                    <!-- Payment -->
+
+                    <div class="flex items-center gap-3 px-2">
+
+                        <span class="text-xs font-black text-slate-200">
+                            إلزامية الدفع للصف:
+                        </span>
+
+                        <div class="relative inline-block w-10 align-middle select-none">
+
+                            <input
+                                type="checkbox"
+                                id="globalGradePaymentToggle"
+                                onchange="toggleGradePaymentRequirement(this.checked)"
+                                class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer transition-all duration-300 z-10 top-0 left-0 border-gray-300"
+                            />
+
+                            <label
+                                for="globalGradePaymentToggle"
+                                class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-700 cursor-pointer"
+                            ></label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Search -->
+
+                <div class="relative w-full lg:w-72">
+
+                    <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        onkeyup="filterTable()"
+                        placeholder="ابحث بالاسم أو الكود أو رقم الجلوس..."
+                        class="w-full bg-slate-900 border border-slate-800 pr-11 pl-4 py-3 rounded-2xl text-xs font-bold text-white outline-none focus:border-amber-500 transition shadow-inner"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- Table -->
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-800">
+
+                <table
+                    class="w-full text-right border-collapse"
+                    id="studentsTable"
+                >
+
+                    <thead class="bg-slate-900 text-slate-300">
+
+                        <tr>
+
+                            <th class="p-4 text-xs font-black">
+                                اسم الطالب
+                            </th>
+
+                            <th class="p-4 text-center text-xs font-black">
+                                رقم الجلوس
+                            </th>
+
+                            <th class="p-4 text-center text-xs font-black">
+                                الكود السري
+                            </th>
+
+                            <th class="p-4 text-center text-xs font-black">
+                                حالة الدفع
+                            </th>
+
+                            <th class="p-4 text-center text-xs font-black">
+                                الإجراءات
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody
+                        id="tableBody"
+                        class="divide-y divide-slate-800/60 bg-slate-900/30"
+                    >
+
+                        <!-- Rows -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Single Student Ticket
+        ================================================= -->
+
+        <div
+            id="ticketSection"
+            class="glass-card p-8 rounded-3xl border-t-8 border-emerald-500 hidden text-center space-y-6"
+        >
+
+            <h3 class="font-black text-xl text-emerald-400">
+                معاينة بطاقة الطالب الاستعلامية
+            </h3>
+
+            <div class="flex flex-col items-center">
+
+                <div
+                    id="captureArea"
+                    class="bg-white text-slate-900 border-[10px] border-blue-900 p-6 rounded-[45px] text-center w-80 shadow-2xl relative"
+                >
+
+                    <div
+                        class="text-[11px] font-black text-blue-900 mb-1 border-b-2 border-blue-100 pb-2 uppercase"
+                    >
+                        مدرسة الملك الكامل الثانوية العسكرية
+                    </div>
+
+                    <p
+                        id="tGradeName"
+                        class="text-[10px] text-amber-600 font-black mb-1"
+                    ></p>
+
+                    <h2 class="font-black text-blue-950 text-2xl tracking-tight">
+                        بطاقة الاستعلام
+                    </h2>
+
+                    <p
+                        id="tName"
+                        class="text-lg font-black my-3 text-slate-800 leading-snug min-h-[50px] flex items-center justify-center"
+                    ></p>
+
+
+                    <div
+                        class="bg-blue-50 p-3 rounded-2xl my-3 border border-blue-200"
+                    >
+
+                        <span
+                            class="block text-[9px] font-black text-blue-600 uppercase tracking-widest"
+                        >
+                            Secret Code / الكود السري
+                        </span>
+
+                        <span
+                            id="tNewID"
+                            class="text-3xl font-black text-blue-900 font-mono tracking-wider"
+                        ></span>
+
+                    </div>
+
+
+                    <div
+                        id="qrcode"
+                        class="flex justify-center bg-white p-3 rounded-2xl border border-slate-200 shadow-sm inline-block my-2"
+                    ></div>
+
+                    <p class="text-[9px] text-slate-400 font-bold italic mt-2">
+                        امسح الكود أو اضغط عليه للوصول المباشر للنتيجة
+                    </p>
+
+                </div>
+
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-sm mt-6">
+
+                    <button
+                        onclick="copyImageToClipboard()"
+                        class="bg-slate-800 hover:bg-slate-700 text-white p-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 btn-hover border border-slate-700"
+                    >
+
+                        <i class="fas fa-copy text-amber-400"></i>
+
+                        نسخ الصورة
+
+                    </button>
+
+
+                    <button
+                        onclick="sendViaWhatsApp()"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 btn-hover shadow-lg"
+                    >
+
+                        <i class="fab fa-whatsapp text-lg"></i>
+
+                        إرسال واتساب
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         OLD PRINT PDF TICKETS
+    ===================================================== -->
+
+    <div
+        id="pdfView"
+        class="print-area w-full"
+    >
+
+        <div class="text-center mb-8">
+
+            <h1 class="text-2xl font-black text-blue-900">
+                كشوف بطاقات الاستعلام - مدرسة الملك الكامل الثانوية
+            </h1>
+
+            <h2 class="text-md font-bold text-slate-700 mt-1">
+                تقرير الصف:
+                <span id="pdfGradeTitle"></span>
+            </h2>
+
+        </div>
+
+        <div
+            id="pdfGrid"
+            class="ticket-grid"
+        ></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NEW RESULTS PRINT VIEW
+    ===================================================== -->
+
+    <div id="resultsPrintArea">
+
+        <div id="resultsPrintHeader">
+
+            <h1 style="font-size:20px;font-weight:900;margin:0 0 5px;">
+                مدرسة الملك الكامل الثانوية العسكرية
+            </h1>
+
+            <h2
+                id="resultsPrintGrade"
+                style="font-size:16px;font-weight:800;margin:0 0 5px;"
+            ></h2>
+
+            <p
+                id="resultsPrintDate"
+                style="font-size:10px;margin:0;"
+            ></p>
+
+        </div>
+
+
+        <table id="resultsPrintTable">
+
+            <thead id="resultsPrintHead"></thead>
+
+            <tbody id="resultsPrintBody"></tbody>
+
+        </table>
+
+
+        <div class="results-print-footer">
+            المستشار حازم سالم 2026
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ===================================================== -->
+
+    <script>
+
+        // =====================================================
+        // Firebase
+        // =====================================================
+
+        const firebaseConfig = {
+
+            apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+
+            authDomain: "hazoma-60ed2.firebaseapp.com",
+
+            projectId: "hazoma-60ed2",
+
+            storageBucket: "hazoma-60ed2.firebasestorage.app",
+
+            messagingSenderId: "962438384604",
+
+            appId: "1:962438384604:web:52db16e5723a8f6d3bdd19"
+
+        };
+
+
+        if (!firebase.apps.length) {
+
+            firebase.initializeApp(firebaseConfig);
+
+        }
+
+
+        const db = firebase.firestore();
+
+
+        // =====================================================
+        // Global Variables
+        // =====================================================
+
+        let currentView = '1sec';
+
+        let currentStudentData = null;
+
+        let parsedExcelData = [];
+
+        let excelHeaders = [];
+
+        let subjectColumnsOrder = [];
+
+        let currentStudents = [];
+
+
+        // =====================================================
+        // Base Result URL
+        // =====================================================
+
+        const RESULT_PAGE_URL =
+            "https://elmalekelkamelhighschool.github.io/ElMalekElKamelHighSchool/student-result.html";
+
+
+        // =====================================================
+        // Grade Names
+        // =====================================================
+
+        const gradeMap = {
+
+            '1sec': 'الأول الثانوي',
+
+            '2sec': 'الثاني الثانوي',
+
+            '3sec': 'الثالث الثانوي'
+
+        };
+
+
+        // =====================================================
+        // Safe HTML
+        // =====================================================
+
+        function escapeHTML(value) {
+
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+        // =====================================================
+        // Smart Result Link
+        //
+        // id   = secret code
+        // seat = seat number fallback
+        // g    = grade
+        // =====================================================
+
+        function buildSmartLink(secretID, seatID, grade) {
+
+            const params = new URLSearchParams();
+
+            params.set("id", String(secretID));
+
+            params.set("g", String(grade));
+
+            params.set("seat", String(seatID));
+
+            params.set("fallback", String(seatID));
+
+            return RESULT_PAGE_URL + "?" + params.toString();
+
+        }
+
+
+        // =====================================================
+        // Batch Commit Handler
+        // =====================================================
+
+        async function runChunkedBatches(operations) {
+
+            const CHUNK_SIZE = 400;
+
+            for (
+                let i = 0;
+                i < operations.length;
+                i += CHUNK_SIZE
+            ) {
+
+                const batch = db.batch();
+
+                const chunk =
+                    operations.slice(i, i + CHUNK_SIZE);
+
+                chunk.forEach(op => op(batch));
+
+                await batch.commit();
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Excel Processing
+        // =====================================================
+
+        function handleExcelSelect(e) {
+
+            const file = e.target.files[0];
+
+            if (!file) return;
+
+
+            const reader = new FileReader();
+
+
+            reader.onload = function(evt) {
+
+                try {
+
+                    const data =
+                        new Uint8Array(evt.target.result);
+
+                    const workbook =
+                        XLSX.read(data, {
+                            type: 'array'
+                        });
+
+                    const sheetName =
+                        workbook.SheetNames[0];
+
+                    const sheet =
+                        workbook.Sheets[sheetName];
+
+
+                    parsedExcelData =
+                        XLSX.utils.sheet_to_json(
+                            sheet,
+                            {
+                                raw: false,
+                                defval: ""
+                            }
+                        );
+
+
+                    if (parsedExcelData.length === 0) {
+
+                        alert("⚠️ ملف الإكسيل فارغ!");
+
+                        return;
+
+                    }
+
+
+                    excelHeaders =
+                        Object.keys(parsedExcelData[0]);
+
+
+                    renderMappingUI();
+
+                }
+
+                catch (err) {
+
+                    alert(
+                        "❌ فشل قرآءة ملف الإكسيل: " +
+                        err.message
+                    );
+
+                }
+
+            };
+
+
+            reader.readAsArrayBuffer(file);
+
+        }
+
+
+        // =====================================================
+        // Mapping UI
+        // =====================================================
+
+        function renderMappingUI() {
+
+            const seatSelect =
+                document.getElementById('seatColSelect');
+
+            const nameSelect =
+                document.getElementById('nameColSelect');
+
+            const subjectList =
+                document.getElementById('subjectColumnsList');
+
+
+            seatSelect.innerHTML = '';
+
+            nameSelect.innerHTML = '';
+
+            subjectList.innerHTML = '';
+
+
+            document.getElementById('excelRowCount').innerText =
+                `عدد الطلاب بالملف: ${parsedExcelData.length}`;
+
+
+            let autoSeat =
+                excelHeaders.find(h =>
+                    h.includes("جلوس") ||
+                    h.includes("رقم")
+                ) ||
+                excelHeaders[0];
+
+
+            let autoName =
+                excelHeaders.find(h =>
+                    h.includes("اسم") ||
+                    h.includes("طالب")
+                ) ||
+                excelHeaders[1] ||
+                excelHeaders[0];
+
+
+            excelHeaders.forEach(h => {
+
+                seatSelect.innerHTML +=
+                    `<option value="${escapeHTML(h)}"
+                    ${h === autoSeat ? 'selected' : ''}>
+                    ${escapeHTML(h)}
+                    </option>`;
+
+
+                nameSelect.innerHTML +=
+                    `<option value="${escapeHTML(h)}"
+                    ${h === autoName ? 'selected' : ''}>
+                    ${escapeHTML(h)}
+                    </option>`;
+
+            });
+
+
+            subjectColumnsOrder =
+                excelHeaders.filter(
+                    h =>
+                        h !== autoSeat &&
+                        h !== autoName
+                );
+
+
+            renderSubjectList();
+
+
+            document
+                .getElementById('mappingSection')
+                .classList.remove('hidden');
+
+        }
+
+
+        // =====================================================
+        // Subject List
+        // =====================================================
+
+        function renderSubjectList() {
+
+            const subjectList =
+                document.getElementById('subjectColumnsList');
+
+
+            subjectList.innerHTML = '';
+
+
+            subjectColumnsOrder.forEach(
+                (col, idx) => {
+
+                    subjectList.innerHTML += `
+
+                        <div
+                            class="flex items-center justify-between bg-slate-800 p-2 rounded-xl border border-slate-700 text-xs"
+                        >
+
+                            <label
+                                class="flex items-center gap-2 cursor-pointer font-bold text-slate-200"
+                            >
+
+                                <input
+                                    type="checkbox"
+                                    checked
+                                    value="${escapeHTML(col)}"
+                                    class="subject-chk accent-amber-500 w-4 h-4"
+                                >
+
+                                <span>
+                                    ${escapeHTML(col)}
+                                </span>
+
+                            </label>
+
+
+                            <div class="flex items-center gap-1">
+
+                                <button
+                                    type="button"
+                                    onclick="moveColumn(${idx}, -1)"
+                                    class="p-1 px-2 text-slate-400 hover:text-amber-400 bg-slate-900 rounded"
+                                >
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    onclick="moveColumn(${idx}, 1)"
+                                    class="p-1 px-2 text-slate-400 hover:text-amber-400 bg-slate-900 rounded"
+                                >
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            );
+
+        }
+
+
+        // =====================================================
+        // Move Column
+        // =====================================================
+
+        function moveColumn(index, direction) {
+
+            const newIndex =
+                index + direction;
+
+
+            if (
+                newIndex < 0 ||
+                newIndex >= subjectColumnsOrder.length
+            ) {
+                return;
+            }
+
+
+            const temp =
+                subjectColumnsOrder[index];
+
+
+            subjectColumnsOrder[index] =
+                subjectColumnsOrder[newIndex];
+
+
+            subjectColumnsOrder[newIndex] =
+                temp;
+
+
+            renderSubjectList();
+
+        }
+
+
+        // =====================================================
+        // Upload Excel
+        // =====================================================
+
+        async function processExcelUpload() {
+
+            if (parsedExcelData.length === 0) {
+
+                return alert(
+                    "⚠️ فضلاً اختر ملف إكسيل يحتوي على بيانات أولاً"
+                );
+
+            }
+
+
+            const grade =
+                document.getElementById('gradeSelect').value;
+
+
+            const policy =
+                document.querySelector(
+                    'input[name="idPolicy"]:checked'
+                ).value;
+
+
+            const amount =
+                document.getElementById('fawryAmount').value || 0;
+
+
+            const paymentRequired =
+                document.getElementById('uploadPaymentToggle').checked;
+
+
+            const seatCol =
+                document.getElementById('seatColSelect').value;
+
+
+            const nameCol =
+                document.getElementById('nameColSelect').value;
+
+
+            const checkedBoxes =
+                Array.from(
+                    document.querySelectorAll('.subject-chk:checked')
+                ).map(cb => cb.value);
+
+
+            const activeDisplayColumns =
+                subjectColumnsOrder.filter(
+                    c => checkedBoxes.includes(c)
+                );
+
+
+            const btn =
+                document.getElementById('upBtn');
+
+
+            btn.disabled = true;
+
+            btn.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> جاري المزامنة مع السحابة...';
+
+
+            try {
+
+                const operations = [];
+
+
+                // =================================================
+                // Save Grade Settings
+                // =================================================
+
+                const settingsRef =
+                    db.collection(
+                        `config_${grade}`
+                    ).doc('settings');
+
+
+                operations.push(
+                    (b) =>
+                        b.set(
+                            settingsRef,
+                            {
+                                displayColumns:
+                                    activeDisplayColumns,
+
+                                seatColName:
+                                    seatCol,
+
+                                nameColName:
+                                    nameCol,
+
+                                paymentRequired:
+                                    paymentRequired,
+
+                                isPublished:
+                                    true,
+
+                                updatedAt:
+                                    firebase.firestore.FieldValue.serverTimestamp()
+                            },
+                            {
+                                merge: true
+                            }
+                        )
+                );
+
+
+                // =================================================
+                // Build Students
+                // =================================================
+
+                for (let row of parsedExcelData) {
+
+                    const seatID =
+                        String(
+                            row[seatCol] || ""
+                        ).trim();
+
+
+                    const name =
+                        String(
+                            row[nameCol] || ""
+                        ).trim();
+
+
+                    if (!seatID || !name) {
+                        continue;
+                    }
+
+
+                    let secretID =
+                        policy === 'seat'
+                            ? seatID
+                            : Math.floor(
+                                1000000 +
+                                Math.random() * 9000000
+                            ).toString();
+
+
+                    const scores = {};
+
+
+                    activeDisplayColumns.forEach(col => {
+
+                        scores[col] =
+                            row[col] !== undefined
+                                ? String(row[col])
+                                : "-";
+
+                    });
+
+
+                    const studentRecord = {
+
+                        name,
+
+                        seatID,
+
+                        secretID,
+
+                        grade,
+
+                        scores,
+
+                        isPaid: false,
+
+                        paymentRequired,
+
+                        amount
+
+                    };
+
+
+                    const resRef =
+                        db.collection(
+                            `results_${grade}`
+                        ).doc(secretID);
+
+
+                    const mapRef =
+                        db.collection(
+                            `mapping_${grade}`
+                        ).doc(seatID);
+
+
+                    operations.push(
+                        (b) =>
+                            b.set(
+                                resRef,
+                                studentRecord
+                            )
+                    );
+
+
+                    operations.push(
+                        (b) =>
+                            b.set(
+                                mapRef,
+                                studentRecord
+                            )
+                    );
+
+                }
+
+
+                await runChunkedBatches(
+                    operations
+                );
+
+
+                alert(
+                    "✅ تم رفع وتخصيص البيانات بنجاح تام!"
+                );
+
+
+                document
+                    .getElementById('mappingSection')
+                    .classList.add('hidden');
+
+
+                document
+                    .getElementById('excelInput')
+                    .value = "";
+
+
+                parsedExcelData = [];
+
+
+                loadStudents();
+
+            }
+
+            catch (err) {
+
+                alert(
+                    "❌ حدث خطأ أثناء المزامنة: " +
+                    err.message
+                );
+
+            }
+
+            finally {
+
+                btn.disabled = false;
+
+                btn.innerHTML =
+                    '<i class="fas fa-cloud-upload-alt text-xl"></i> مزامنة البيانات وتحديث السحابة';
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Load Students
+        // =====================================================
+
+        async function loadStudents() {
+
+            const tbody =
+                document.getElementById('tableBody');
+
+
+            tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center py-12 font-bold text-amber-400"><i class="fas fa-spinner fa-spin ml-2"></i> جاري استدعاء البيانات...</td></tr>';
+
+
+            try {
+
+                // =================================================
+                // Settings
+                // =================================================
+
+                const configDoc =
+                    await db
+                        .collection(`config_${currentView}`)
+                        .doc('settings')
+                        .get();
+
+
+                if (configDoc.exists) {
+
+                    const cfg =
+                        configDoc.data();
+
+
+                    const isPub =
+                        cfg.isPublished !== false;
+
+
+                    document
+                        .getElementById('globalPublishToggle')
+                        .checked = isPub;
+
+
+                    updatePublishLabel(isPub);
+
+                }
+
+                else {
+
+                    document
+                        .getElementById('globalPublishToggle')
+                        .checked = false;
+
+
+                    updatePublishLabel(false);
+
+                }
+
+
+                // =================================================
+                // Student Data
+                // =================================================
+
+                const snapshot =
+                    await db
+                        .collection(`mapping_${currentView}`)
+                        .orderBy('seatID')
+                        .get();
+
+
+                tbody.innerHTML = '';
+
+                currentStudents = [];
+
+
+                if (snapshot.empty) {
+
+                    tbody.innerHTML =
+                        '<tr><td colspan="5" class="text-center py-12 text-slate-500 font-bold italic">لا توجد نتائج مسجلة لهذا الصف</td></tr>';
+
+                    return;
+
+                }
+
+
+                let anyPaymentRequired = false;
+
+
+                snapshot.forEach(doc => {
+
+                    const d = doc.data();
+
+
+                    currentStudents.push(d);
+
+
+                    if (d.paymentRequired) {
+                        anyPaymentRequired = true;
+                    }
+
+
+                    let paymentBadge =
+                        d.paymentRequired
+
+                            ? (
+                                d.isPaid
+
+                                    ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-black">
+                                        <i class="fas fa-check-circle ml-1"></i>
+                                        مدفوع
+                                      </span>`
+
+                                    : `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-black">
+                                        <i class="fas fa-times-circle ml-1"></i>
+                                        غير مدفوع
+                                      </span>`
+                              )
+
+                            : `<span class="bg-slate-800 text-slate-400 px-3 py-1 rounded-full text-xs font-black">
+                                <i class="fas fa-unlock ml-1"></i>
+                                مجاني
+                              </span>`;
+
+
+                    let togglePayBtn =
+                        d.paymentRequired
+
+                            ? `<button
+                                onclick="toggleStudentPayment('${escapeHTML(d.seatID)}', '${escapeHTML(d.secretID)}', ${d.isPaid})"
+                                class="p-2 ${d.isPaid ? 'text-slate-500 hover:text-rose-400' : 'text-emerald-400 hover:text-emerald-300'} transition"
+                                title="${d.isPaid ? 'إلغاء الدفع' : 'تأكيد الدفع يدوياً'}"
+                              >
+                                <i class="fas ${d.isPaid ? 'fa-undo' : 'fa-hand-holding-usd'}"></i>
+                              </button>`
+
+                            : ``;
+
+
+                    tbody.innerHTML += `
+
+                        <tr
+                            class="hover:bg-slate-800/40 transition border-b border-slate-800/40"
+                        >
+
+                            <td class="p-4 font-bold text-slate-200 text-sm">
+                                ${escapeHTML(d.name)}
+                            </td>
+
+                            <td class="p-4 text-center font-bold text-slate-400 text-sm">
+                                ${escapeHTML(d.seatID)}
+                            </td>
+
+                            <td class="p-4 text-center font-black text-amber-400 font-mono text-sm tracking-wider">
+                                ${escapeHTML(d.secretID)}
+                            </td>
+
+                            <td class="p-4 text-center">
+                                ${paymentBadge}
+                            </td>
+
+                            <td class="p-4 text-center">
+
+                                <div class="flex items-center justify-center gap-2">
+
+                                    ${togglePayBtn}
+
+
+                                    <button
+                                        onclick="renderTicket('${escapeHTML(d.seatID)}', '${escapeHTML(d.name)}', '${escapeHTML(d.secretID)}', '${escapeHTML(currentView)}')"
+                                        class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl text-xs font-black transition shadow"
+                                    >
+                                        بطاقة
+                                    </button>
+
+
+                                    <button
+                                        onclick="deleteStudent('${escapeHTML(d.seatID)}', '${escapeHTML(d.secretID)}')"
+                                        class="p-2 text-rose-400 hover:text-rose-300 transition"
+                                    >
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                });
+
+
+                document
+                    .getElementById('globalGradePaymentToggle')
+                    .checked = anyPaymentRequired;
+
+
+            }
+
+            catch (e) {
+
+                tbody.innerHTML =
+                    `<tr>
+                        <td colspan="5" class="text-center py-12 text-rose-400 font-bold">
+                            فشل الاتصال بالسحابة: ${escapeHTML(e.message)}
+                        </td>
+                    </tr>`;
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Publish Status
+        // =====================================================
+
+        async function toggleGradePublishStatus(isPublished) {
+
+            updatePublishLabel(isPublished);
+
+
+            try {
+
+                await db
+                    .collection(`config_${currentView}`)
+                    .doc('settings')
+                    .set(
+                        {
+                            isPublished: isPublished
+                        },
+                        {
+                            merge: true
+                        }
+                    );
+
+            }
+
+            catch (e) {
+
+                alert(
+                    "❌ حدث خطأ أثناء تغيير حالة نشر النتيجة"
+                );
+
+            }
+
+        }
+
+
+        function updatePublishLabel(isPublished) {
+
+            const label =
+                document.getElementById(
+                    'publishStatusText'
+                );
+
+
+            if (isPublished) {
+
+                label.innerText =
+                    "منشورة ومعروضة";
+
+                label.className =
+                    "text-xs font-black text-emerald-400";
+
+            }
+
+            else {
+
+                label.innerText =
+                    "محجوبة عن الطلاب";
+
+                label.className =
+                    "text-xs font-black text-rose-400";
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Payment Toggle
+        // =====================================================
+
+        async function toggleStudentPayment(
+            seatID,
+            secretID,
+            currentStatus
+        ) {
+
+            const newStatus =
+                !currentStatus;
+
+
+            const batch =
+                db.batch();
+
+
+            batch.update(
+                db
+                    .collection(`mapping_${currentView}`)
+                    .doc(seatID),
+                {
+                    isPaid: newStatus
+                }
+            );
+
+
+            batch.update(
+                db
+                    .collection(`results_${currentView}`)
+                    .doc(secretID),
+                {
+                    isPaid: newStatus
+                }
+            );
+
+
+            try {
+
+                await batch.commit();
+
+                loadStudents();
+
+            }
+
+            catch(e) {
+
+                alert(
+                    "❌ فشل تحديث حالة الدفع للطالب"
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Grade Payment Requirement
+        // =====================================================
+
+        async function toggleGradePaymentRequirement(
+            isPaymentRequired
+        ) {
+
+            if (
+                !confirm(
+                    `هل أنت متأكد من جعل نتيجة هذا الصف ${
+                        isPaymentRequired
+                            ? 'مدفوعة الإلزام'
+                            : 'مجانية بالكامل'
+                    }؟`
+                )
+            ) {
+
+                document
+                    .getElementById(
+                        'globalGradePaymentToggle'
+                    )
+                    .checked =
+                    !isPaymentRequired;
+
+                return;
+
+            }
+
+
+            try {
+
+                const mapSnap =
+                    await db
+                        .collection(`mapping_${currentView}`)
+                        .get();
+
+
+                const resSnap =
+                    await db
+                        .collection(`results_${currentView}`)
+                        .get();
+
+
+                const ops = [];
+
+
+                mapSnap.forEach(
+                    doc =>
+                        ops.push(
+                            b =>
+                                b.update(
+                                    doc.ref,
+                                    {
+                                        paymentRequired:
+                                            isPaymentRequired
+                                    }
+                                )
+                        )
+                );
+
+
+                resSnap.forEach(
+                    doc =>
+                        ops.push(
+                            b =>
+                                b.update(
+                                    doc.ref,
+                                    {
+                                        paymentRequired:
+                                            isPaymentRequired
+                                    }
+                                )
+                        )
+                );
+
+
+                ops.push(
+                    b =>
+                        b.set(
+                            db
+                                .collection(`config_${currentView}`)
+                                .doc('settings'),
+                            {
+                                paymentRequired:
+                                    isPaymentRequired
+                            },
+                            {
+                                merge: true
+                            }
+                        )
+                );
+
+
+                await runChunkedBatches(ops);
+
+
+                loadStudents();
+
+            }
+
+            catch(e) {
+
+                alert(
+                    "❌ حدث خطأ أثناء تعديل إعدادات الدفع للصف"
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Delete Student
+        // =====================================================
+
+        async function deleteStudent(
+            seat,
+            secret
+        ) {
+
+            if (
+                !confirm(
+                    "⚠️ هل أنت متأكد من حذف هذا الطالب نهائياً؟"
+                )
+            ) {
+                return;
+            }
+
+
+            try {
+
+                const batch =
+                    db.batch();
+
+
+                batch.delete(
+                    db
+                        .collection(`mapping_${currentView}`)
+                        .doc(seat)
+                );
+
+
+                batch.delete(
+                    db
+                        .collection(`results_${currentView}`)
+                        .doc(secret)
+                );
+
+
+                await batch.commit();
+
+
+                loadStudents();
+
+            }
+
+            catch (e) {
+
+                alert(
+                    "❌ فشل الحذف: " +
+                    e.message
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Delete All
+        // =====================================================
+
+        async function deleteAllGradeData() {
+
+            if (
+                !confirm(
+                    "⛔ تحذير هام: سيتم مسح جميع سجلات هذا الصف بالكامل! هل أنت متأكد؟"
+                )
+            ) {
+                return;
+            }
+
+
+            try {
+
+                const mapSnap =
+                    await db
+                        .collection(`mapping_${currentView}`)
+                        .get();
+
+
+                const resSnap =
+                    await db
+                        .collection(`results_${currentView}`)
+                        .get();
+
+
+                const ops = [];
+
+
+                mapSnap.forEach(
+                    doc =>
+                        ops.push(
+                            b => b.delete(doc.ref)
+                        )
+                );
+
+
+                resSnap.forEach(
+                    doc =>
+                        ops.push(
+                            b => b.delete(doc.ref)
+                        )
+                );
+
+
+                ops.push(
+                    b =>
+                        b.delete(
+                            db
+                                .collection(`config_${currentView}`)
+                                .doc('settings')
+                        )
+                );
+
+
+                await runChunkedBatches(ops);
+
+
+                alert(
+                    "✅ تم إفراغ سجل الصف بنجاح تام"
+                );
+
+
+                loadStudents();
+
+            }
+
+            catch (e) {
+
+                alert(
+                    "❌ حدث خطأ أثناء المسح الشامل: " +
+                    e.message
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Change Grade
+        // =====================================================
+
+        function changeGradeView(
+            grade,
+            el
+        ) {
+
+            currentView = grade;
+
+
+            document
+                .querySelectorAll('.tab-btn')
+                .forEach(
+                    b =>
+                        b.classList.remove(
+                            'active-tab'
+                        )
+                );
+
+
+            el.classList.add('active-tab');
+
+
+            document
+                .getElementById('ticketSection')
+                .classList.add('hidden');
+
+
+            document
+                .getElementById('searchInput')
+                .value = "";
+
+
+            loadStudents();
+
+        }
+
+
+        // =====================================================
+        // Grade Select
+        // =====================================================
+
+        function onGradeSelectChange() {
+
+            const grade =
+                document.getElementById(
+                    'gradeSelect'
+                ).value;
+
+
+            const buttons =
+                document.querySelectorAll(
+                    '.tab-btn'
+                );
+
+
+            const gradeIndex = {
+                '1sec': 0,
+                '2sec': 1,
+                '3sec': 2
+            };
+
+
+            if (
+                gradeIndex[grade] !== undefined
+            ) {
+
+                buttons.forEach(
+                    b =>
+                        b.classList.remove(
+                            'active-tab'
+                        )
+                );
+
+
+                if (buttons[gradeIndex[grade]]) {
+
+                    buttons[gradeIndex[grade]]
+                        .classList.add(
+                            'active-tab'
+                        );
+
+                }
+
+
+                currentView = grade;
+
+                loadStudents();
+
+            }
+
+        }
+
+
+        // =====================================================
+        // OLD PDF CARDS
+        // =====================================================
+
+        async function preparePDF() {
+
+            const snapshot =
+                await db
+                    .collection(`mapping_${currentView}`)
+                    .orderBy('seatID')
+                    .get();
+
+
+            if (snapshot.empty) {
+
+                return alert(
+                    "السجل فارغ، لا توجد بطاقات للطباعة"
+                );
+
+            }
+
+
+            const grid =
+                document.getElementById(
+                    'pdfGrid'
+                );
+
+
+            grid.innerHTML = '';
+
+
+            document
+                .getElementById(
+                    'pdfGradeTitle'
+                )
+                .innerText =
+                gradeMap[currentView];
+
+
+            snapshot.forEach(doc => {
+
+                const d =
+                    doc.data();
+
+
+                const smartLink =
+                    buildSmartLink(
+                        d.secretID,
+                        d.seatID,
+                        currentView
+                    );
+
+
+                const card =
+                    document.createElement('div');
+
+
+                card.className =
+                    'mini-ticket';
+
+
+                card.innerHTML = `
+
+                    <div
+                        style="font-size:10px;font-weight:900;color:#1e3a8a"
+                    >
+                        مدرسة الملك الكامل الثانوية العسكرية
+                    </div>
+
+
+                    <div
+                        style="font-size:13px;font-weight:900;color:#1e293b;margin:4px 0"
+                    >
+                        ${escapeHTML(d.name)}
+                    </div>
+
+
+                    <div
+                        style="background:#fef3c7;border:2px solid #1e3a8a;padding:4px;border-radius:10px;width:90%;margin:4px 0"
+                    >
+
+                        <div
+                            style="font-size:8px;font-weight:900;color:#92400e"
+                        >
+                            كود الاستعلام الشخصي
+                        </div>
+
+                        <div
+                            style="font-size:20px;font-weight:900;color:#1e3a8a;font-family:monospace"
+                        >
+                            ${escapeHTML(d.secretID)}
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="pdf-qr-${encodeURIComponent(d.secretID)}"
+                        style="margin:4px auto"
+                    ></div>
+
+
+                    <div
+                        style="font-size:9px;color:#475569;font-weight:bold"
+                    >
+                        رقم الجلوس:
+                        ${escapeHTML(d.seatID)}
+                    </div>
+
+
+                    <div
+                        style="font-size:7px;color:#94a3b8"
+                    >
+                        Al-Mostshar Hazem Salem 2026
+                    </div>
+
+                `;
+
+
+                grid.appendChild(card);
+
+
+                new QRCode(
+                    document.getElementById(
+                        `pdf-qr-${encodeURIComponent(d.secretID)}`
+                    ),
+                    {
+                        text: smartLink,
+                        width: 80,
+                        height: 80,
+                        colorDark: "#1e3a8a"
+                    }
+                );
+
+            });
+
+
+            setTimeout(
+                () => {
+                    window.print();
+                },
+                1500
+            );
+
+        }
+
+
+        // =====================================================
+        // Ticket
+        // =====================================================
+
+        function renderTicket(
+            seatID,
+            name,
+            secretID,
+            grade
+        ) {
+
+            currentStudentData = {
+
+                seatID,
+                name,
+                secretID,
+                grade
+
+            };
+
+
+            document
+                .getElementById('ticketSection')
+                .classList.remove('hidden');
+
+
+            document
+                .getElementById('tName')
+                .innerText =
+                name;
+
+
+            document
+                .getElementById('tGradeName')
+                .innerText =
+                gradeMap[grade];
+
+
+            document
+                .getElementById('tNewID')
+                .innerText =
+                secretID;
+
+
+            // =================================================
+            // QR الجديد
+            // =================================================
+
+            const smartLink =
+                buildSmartLink(
+                    secretID,
+                    seatID,
+                    grade
+                );
+
+
+            const qrContainer =
+                document.getElementById(
+                    'qrcode'
+                );
+
+
+            qrContainer.innerHTML = "";
+
+
+            new QRCode(
+                qrContainer,
+                {
+                    text: smartLink,
+                    width: 130,
+                    height: 130,
+                    colorDark: "#1e3a8a"
+                }
+            );
+
+
+            document
+                .getElementById('ticketSection')
+                .scrollIntoView({
+                    behavior: 'smooth'
+                });
+
+        }
+
+
+        // =====================================================
+        // Copy Ticket Image
+        // =====================================================
+
+        async function copyImageToClipboard() {
+
+            const canvas =
+                await html2canvas(
+                    document.querySelector(
+                        "#captureArea"
+                    ),
+                    {
+                        scale: 3,
+                        useCORS: true
+                    }
+                );
+
+
+            canvas.toBlob(
+                blob => {
+
+                    navigator.clipboard.write(
+                        [
+                            new ClipboardItem(
+                                {
+                                    "image/png":
+                                        blob
+                                }
+                            )
+                        ]
+                    );
+
+
+                    alert(
+                        "✅ تم نسخ البطاقة كصورة عالية الجودة!"
+                    );
+
+                }
+            );
+
+        }
+
+
+        // =====================================================
+        // WhatsApp
+        // =====================================================
+
+        function sendViaWhatsApp() {
+
+            if (!currentStudentData) {
+                return;
+            }
+
+
+            const {
+                name,
+                secretID,
+                seatID,
+                grade
+            } = currentStudentData;
+
+
+            const smartLink =
+                buildSmartLink(
+                    secretID,
+                    seatID,
+                    grade
+                );
+
+
+            const msg =
+                `🎓 *مدرسة الملك الكامل العسكرية*%0a` +
+                `👤 الطالب: *${name}*%0a` +
+                `🔑 كود الاستعلام: *${secretID}*%0a` +
+                `🔢 رقم الجلوس: *${seatID}*%0a` +
+                `🔗 الرابط المباشر للنتيجة:%0a` +
+                `${smartLink}`;
+
+
+            window.open(
+                `https://wa.me/?text=${msg}`,
+                '_blank'
+            );
+
+        }
+
+
+        // =====================================================
+        // Search / Filter
+        // =====================================================
+
+        function filterTable() {
+
+            const input =
+                document
+                    .getElementById(
+                        "searchInput"
+                    )
+                    .value
+                    .toUpperCase();
+
+
+            const trs =
+                document
+                    .getElementById(
+                        "tableBody"
+                    )
+                    .getElementsByTagName(
+                        "tr"
+                    );
+
+
+            for (let tr of trs) {
+
+                tr.style.display =
+                    tr.innerText
+                        .toUpperCase()
+                        .includes(input)
+                        ? ""
+                        : "none";
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Get Visible Students
+        //
+        // يحترم البحث الحالي
+        // =====================================================
+
+        function getFilteredStudents() {
+
+            const search =
+                document
+                    .getElementById(
+                        "searchInput"
+                    )
+                    .value
+                    .trim()
+                    .toUpperCase();
+
+
+            if (!search) {
+
+                return [...currentStudents];
+
+            }
+
+
+            return currentStudents.filter(
+                d => {
+
+                    const text =
+                        [
+                            d.name,
+                            d.seatID,
+                            d.secretID
+                        ]
+                        .join(" ")
+                        .toUpperCase();
+
+
+                    return text.includes(search);
+
+                }
+            );
+
+        }
+
+
+        // =====================================================
+        // Get Selected Display Columns
+        //
+        // نفس ترتيب الأعمدة الذي اختاره المستخدم
+        // =====================================================
+
+        async function getCurrentDisplayColumns() {
+
+            try {
+
+                const configDoc =
+                    await db
+                        .collection(`config_${currentView}`)
+                        .doc('settings')
+                        .get();
+
+
+                if (
+                    configDoc.exists &&
+                    Array.isArray(
+                        configDoc.data().displayColumns
+                    )
+                ) {
+
+                    return configDoc.data()
+                        .displayColumns;
+
+                }
+
+            }
+
+            catch (e) {
+
+                console.log(
+                    "Could not load display columns",
+                    e
+                );
+
+            }
+
+
+            // fallback
+
+            return subjectColumnsOrder;
+
+        }
+
+
+        // =====================================================
+        // EXPORT EXCEL
+        // =====================================================
+
+        async function exportResultsExcel() {
+
+            try {
+
+                if (
+                    !currentStudents ||
+                    currentStudents.length === 0
+                ) {
+
+                    return alert(
+                        "⚠️ لا توجد بيانات نتائج لتصديرها"
+                    );
+
+                }
+
+
+                const columns =
+                    await getCurrentDisplayColumns();
+
+
+                const students =
+                    getFilteredStudents();
+
+
+                if (students.length === 0) {
+
+                    return alert(
+                        "⚠️ لا توجد نتائج مطابقة للبحث الحالي"
+                    );
+
+                }
+
+
+                const exportData =
+                    students.map(
+                        d => {
+
+                            const row = {};
+
+
+                            // =================================================
+                            // نفس ترتيب الأعمدة الأساسي
+                            // =================================================
+
+                            row["اسم الطالب"] =
+                                d.name;
+
+
+                            row["رقم الجلوس"] =
+                                d.seatID;
+
+
+                            row["الكود السري"] =
+                                d.secretID;
+
+
+                            // =================================================
+                            // المواد بنفس ترتيب الاختيار
+                            // =================================================
+
+                            columns.forEach(
+                                col => {
+
+                                    row[col] =
+                                        d.scores &&
+                                        d.scores[col] !== undefined
+                                            ? d.scores[col]
+                                            : "-";
+
+                                }
+                            );
+
+
+                            return row;
+
+                        }
+                    );
+
+
+                const worksheet =
+                    XLSX.utils.json_to_sheet(
+                        exportData
+                    );
+
+
+                worksheet["!cols"] =
+                    [
+                        {
+                            wch: 32
+                        },
+                        {
+                            wch: 15
+                        },
+                        {
+                            wch: 18
+                        },
+                        ...columns.map(
+                            () => ({
+                                wch: 15
+                            })
+                        )
+                    ];
+
+
+                const workbook =
+                    XLSX.utils.book_new();
+
+
+                XLSX.utils.book_append_sheet(
+                    workbook,
+                    worksheet,
+                    "النتائج"
+                );
+
+
+                const date =
+                    new Date()
+                        .toISOString()
+                        .slice(0, 10);
+
+
+                const fileName =
+                    `نتائج_${gradeMap[currentView]}_${date}.xlsx`;
+
+
+                XLSX.writeFile(
+                    workbook,
+                    fileName
+                );
+
+
+                alert(
+                    `✅ تم تصدير ${students.length} طالب إلى Excel بنجاح`
+                );
+
+            }
+
+            catch (e) {
+
+                alert(
+                    "❌ فشل تصدير Excel: " +
+                    e.message
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // PREPARE RESULTS PDF
+        // =====================================================
+
+        async function prepareResultsPDF() {
+
+            try {
+
+                if (
+                    !currentStudents ||
+                    currentStudents.length === 0
+                ) {
+
+                    return alert(
+                        "⚠️ لا توجد نتائج لتجهيز ملف PDF"
+                    );
+
+                }
+
+
+                const columns =
+                    await getCurrentDisplayColumns();
+
+
+                const students =
+                    getFilteredStudents();
+
+
+                if (students.length === 0) {
+
+                    return alert(
+                        "⚠️ لا توجد نتائج مطابقة للبحث الحالي"
+                    );
+
+                }
+
+
+                // =================================================
+                // Header
+                // =================================================
+
+                document
+                    .getElementById(
+                        "resultsPrintGrade"
+                    )
+                    .innerText =
+                    `نتائج ${gradeMap[currentView]}`;
+
+
+                const now =
+                    new Date();
+
+
+                document
+                    .getElementById(
+                        "resultsPrintDate"
+                    )
+                    .innerText =
+                    `تاريخ الطباعة: ${now.toLocaleDateString('ar-EG')} - عدد الطلاب: ${students.length}`;
+
+
+                // =================================================
+                // Table Header
+                // =================================================
+
+                const head =
+                    document
+                        .getElementById(
+                            "resultsPrintHead"
+                        );
+
+
+                head.innerHTML = "";
+
+
+                const headerRow =
+                    document.createElement("tr");
+
+
+                const headers = [
+                    "اسم الطالب",
+                    "رقم الجلوس",
+                    "الكود السري",
+                    ...columns
+                ];
+
+
+                headers.forEach(
+                    header => {
+
+                        const th =
+                            document.createElement("th");
+
+
+                        th.innerText =
+                            header;
+
+
+                        headerRow.appendChild(th);
+
+                    }
+                );
+
+
+                head.appendChild(headerRow);
+
+
+                // =================================================
+                // Table Body
+                // =================================================
+
+                const body =
+                    document
+                        .getElementById(
+                            "resultsPrintBody"
+                        );
+
+
+                body.innerHTML = "";
+
+
+                students.forEach(
+                    d => {
+
+                        const tr =
+                            document.createElement("tr");
+
+
+                        // Name
+
+                        const nameTd =
+                            document.createElement("td");
+
+                        nameTd.innerText =
+                            d.name || "-";
+
+                        tr.appendChild(nameTd);
+
+
+                        // Seat
+
+                        const seatTd =
+                            document.createElement("td");
+
+                        seatTd.innerText =
+                            d.seatID || "-";
+
+                        tr.appendChild(seatTd);
+
+
+                        // Secret
+
+                        const secretTd =
+                            document.createElement("td");
+
+                        secretTd.innerText =
+                            d.secretID || "-";
+
+                        tr.appendChild(secretTd);
+
+
+                        // Scores
+
+                        columns.forEach(
+                            col => {
+
+                                const td =
+                                    document.createElement("td");
+
+
+                                td.innerText =
+                                    d.scores &&
+                                    d.scores[col] !== undefined
+                                        ? d.scores[col]
+                                        : "-";
+
+
+                                tr.appendChild(td);
+
+                            }
+                        );
+
+
+                        body.appendChild(tr);
+
+                    }
+                );
+
+
+                // =================================================
+                // Print
+                // =================================================
+
+                document.body.classList.add(
+                    "printing-results"
+                );
+
+
+                setTimeout(
+                    () => {
+
+                        window.print();
+
+                        document.body.classList.remove(
+                            "printing-results"
+                        );
+
+                    },
+                    300
+                );
+
+            }
+
+            catch (e) {
+
+                alert(
+                    "❌ فشل تجهيز PDF النتائج: " +
+                    e.message
+                );
+
+            }
+
+        }
+
+
+        // =====================================================
+        // Print Cleanup
+        // =====================================================
+
+        window.addEventListener(
+            "afterprint",
+            function() {
+
+                document
+                    .getElementById(
+                        "resultsPrintArea"
+                    )
+                    .style.display = "none";
+
+                document
+                    .getElementById(
+                        "pdfView"
+                    )
+                    .style.display = "none";
+
+            }
+        );
+
+
+        // =====================================================
+        // Init
+        // =====================================================
+
+        window.onload =
+            loadStudents;
+
+    </script>
+
+</body>
+</html>
