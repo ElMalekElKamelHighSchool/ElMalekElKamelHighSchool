@@ -1,27 +1,27 @@
-/* =========================================================
+/* ============================================================
    مدرسة الملك الكامل الثانوية
    RESULT DATA ENGINE
+   File: result-data.js
 
-   هذا الملف مسؤول عن:
-   - Firebase
-   - Firestore
-   - حالة النتائج
-   - البحث
-   - رقم الجلوس
-   - الكود السري
-   - الدفع
-   - عرض الدرجات
-   - الطباعة
-   ========================================================= */
+   كل منطق البيانات موجود هنا:
+   Firebase
+   Firestore
+   البحث
+   النتيجة
+   الدفع
+   الكود السري
+   الطباعة
+   ============================================================ */
 
 
-/* =========================================================
+/* ============================================================
    FIREBASE CONFIG
-   ========================================================= */
+   ============================================================ */
 
-const firebaseConfig = {
+const RESULT_FIREBASE_CONFIG = {
 
-    apiKey: "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
+    apiKey:
+        "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
 
     authDomain:
         "hazoma-60ed2.firebaseapp.com",
@@ -41,33 +41,59 @@ const firebaseConfig = {
 };
 
 
-/* =========================================================
-   INITIALIZE FIREBASE
-   ========================================================= */
+/* ============================================================
+   FIREBASE INITIALIZATION
+   ============================================================ */
 
-if (!firebase.apps.length) {
+(function initializeResultFirebase() {
 
-    firebase.initializeApp(firebaseConfig);
+    try {
 
-}
+        if (!firebase.apps.length) {
 
-const db = firebase.firestore();
+            firebase.initializeApp(
+                RESULT_FIREBASE_CONFIG
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Firebase initialization error:",
+            error
+        );
+
+    }
+
+})();
 
 
-/* =========================================================
-   GLOBAL VARIABLES
-   ========================================================= */
+/* ============================================================
+   FIRESTORE
+   ============================================================ */
 
-let currentGradeSettings = null;
+const RESULT_DB =
+    firebase.firestore();
 
-let currentStudentData = null;
+
+/* ============================================================
+   GLOBAL STATE
+   ============================================================ */
+
+let currentGradeSettings =
+    null;
 
 
-/* =========================================================
+let currentStudentData =
+    null;
+
+
+/* ============================================================
    GRADE TITLES
-   ========================================================= */
+   ============================================================ */
 
-const gradeTitles = {
+const RESULT_GRADE_TITLES = {
 
     "1sec":
         "الصف الأول الثانوي",
@@ -81,13 +107,89 @@ const gradeTitles = {
 };
 
 
-/* =========================================================
-   PAGE START
-   ========================================================= */
+/* ============================================================
+   DOM READY
+   ============================================================ */
 
-window.addEventListener(
+document.addEventListener(
     "DOMContentLoaded",
     function () {
+
+        const searchForm =
+            document.getElementById("searchForm");
+
+
+        const gradeSelect =
+            document.getElementById("searchGrade");
+
+
+        const printButton =
+            document.getElementById("printBtn");
+
+
+        const resetButton =
+            document.getElementById("resetBtn");
+
+
+        /* ================================================
+           SEARCH FORM
+        ================================================= */
+
+        if (searchForm) {
+
+            searchForm.addEventListener(
+                "submit",
+                handleSearch
+            );
+
+        }
+
+
+        /* ================================================
+           GRADE CHANGE
+        ================================================= */
+
+        if (gradeSelect) {
+
+            gradeSelect.addEventListener(
+                "change",
+                checkGradeStatus
+            );
+
+        }
+
+
+        /* ================================================
+           PRINT
+        ================================================= */
+
+        if (printButton) {
+
+            printButton.addEventListener(
+                "click",
+                printStudentCertificate
+            );
+
+        }
+
+
+        /* ================================================
+           RESET
+        ================================================= */
+
+        if (resetButton) {
+
+            resetButton.addEventListener(
+                "click",
+                resetSearch
+            );
+
+        }
+
+
+        /* ================================================
+           INITIAL STATUS
+        ================================================= */
 
         checkGradeStatus();
 
@@ -95,17 +197,22 @@ window.addEventListener(
 );
 
 
-/* =========================================================
+/* ============================================================
    CHECK GRADE STATUS
-   ========================================================= */
+   ============================================================ */
 
 async function checkGradeStatus() {
 
     const gradeElement =
-        document.getElementById("searchGrade");
+        document.getElementById(
+            "searchGrade"
+        );
+
 
     if (!gradeElement) {
+
         return;
+
     }
 
 
@@ -116,80 +223,88 @@ async function checkGradeStatus() {
     resetViews();
 
 
+    currentGradeSettings =
+        null;
+
+
     try {
 
-        /*
-         * جلب إعدادات الصف
-         */
+        /* ================================================
+           GET SETTINGS
+        ================================================= */
 
         const configDoc =
-            await db
-                .collection(`config_${grade}`)
+            await RESULT_DB
+                .collection(
+                    `config_${grade}`
+                )
                 .doc("settings")
                 .get();
 
 
-        /*
-         * النتيجة غير موجودة أو غير منشورة
-         */
+        /* ================================================
+           NOT PUBLISHED
+        ================================================= */
 
         if (
             !configDoc.exists ||
+            !configDoc.data() ||
             !configDoc.data().isPublished
         ) {
 
-            currentGradeSettings = null;
+            currentGradeSettings =
+                null;
 
 
             showStatusNotice(
 
                 "النتيجة لم ترفع بعد",
 
-                `نتائج ${gradeTitles[grade]} غير متاحة حالياً. تجري الآن عمليات التصحيح والرصد، يرجى المتابعة لاحقاً.`
+                `نتائج ${
+                    RESULT_GRADE_TITLES[grade]
+                } غير متاحة حالياً. تجري الآن عمليات التصحيح والرصد، يرجى المتابعة لاحقاً.`
 
             );
+
+
+            return;
 
         }
 
 
-        /*
-         * النتيجة منشورة
-         */
+        /* ================================================
+           PUBLISHED
+        ================================================= */
 
-        else {
-
-            currentGradeSettings =
-                configDoc.data();
+        currentGradeSettings =
+            configDoc.data();
 
 
-            showStatusNotice(
+        showStatusNotice(
 
-                "النتائج معتمدة وجاهزة للاستعلام",
+            "النتائج معتمدة وجاهزة للاستعلام",
 
-                `تم اعتماد نتيجة ${gradeTitles[grade]} رسمياً. أدخل رقم الجلوس أو الكود السري للبحث.`,
+            `تم اعتماد نتيجة ${
+                RESULT_GRADE_TITLES[grade]
+            } رسمياً. أدخل رقم الجلوس أو الكود السري للبحث.`,
 
-                true
+            true
 
-            );
-
-        }
+        );
 
     }
 
 
-    /*
-     * Error
-     */
-
-    catch (err) {
+    catch (error) {
 
         console.error(
-            "CHECK GRADE STATUS ERROR:",
-            err
+            "Grade status error:",
+            error
         );
 
 
-        currentGradeSettings = null;
+        currentGradeSettings =
+            null;
 
 
         showStatusNotice(
@@ -205,31 +320,45 @@ async function checkGradeStatus() {
 }
 
 
-/* =========================================================
+/* ============================================================
    SEARCH
-   ========================================================= */
+   ============================================================ */
 
-async function handleSearch(e) {
+async function handleSearch(event) {
 
-    e.preventDefault();
+    event.preventDefault();
 
 
     const inputElement =
-        document.getElementById("searchInput");
+        document.getElementById(
+            "searchInput"
+        );
+
 
     const gradeElement =
-        document.getElementById("searchGrade");
+        document.getElementById(
+            "searchGrade"
+        );
 
-    const button =
-        document.getElementById("searchBtn");
+
+    const searchButton =
+        document.getElementById(
+            "searchBtn"
+        );
 
 
-    if (!inputElement || !gradeElement || !button) {
+    if (
+        !inputElement ||
+        !gradeElement ||
+        !searchButton
+    ) {
+
         return;
+
     }
 
 
-    const inputVal =
+    const inputValue =
         inputElement.value.trim();
 
 
@@ -237,14 +366,16 @@ async function handleSearch(e) {
         gradeElement.value;
 
 
-    if (!inputVal) {
+    if (!inputValue) {
+
         return;
+
     }
 
 
-    /*
-     * التأكد أن النتيجة منشورة
-     */
+    /* ================================================
+       CHECK PUBLISH STATUS
+    ================================================= */
 
     if (
         !currentGradeSettings ||
@@ -260,13 +391,15 @@ async function handleSearch(e) {
     }
 
 
-    /*
-     * Loading
-     */
+    /* ================================================
+       LOADING
+    ================================================= */
 
-    button.disabled = true;
+    searchButton.disabled =
+        true;
 
-    button.innerHTML =
+
+    searchButton.innerHTML =
         '<i class="fas fa-spinner fa-spin"></i> جاري البحث...';
 
 
@@ -275,88 +408,124 @@ async function handleSearch(e) {
 
     try {
 
-        let student = null;
+        let student =
+            null;
 
 
-        /* =================================================
-           STEP 1
-           SEARCH IN MAPPING
-           ================================================= */
+        /* ================================================
+           FIRST:
+           MAPPING
+        ================================================= */
 
-        const mapDoc =
-            await db
-                .collection(`mapping_${grade}`)
-                .doc(inputVal)
+        const mappingDocument =
+            await RESULT_DB
+                .collection(
+                    `mapping_${grade}`
+                )
+                .doc(inputValue)
                 .get();
 
 
-        if (mapDoc.exists) {
+        if (
+            mappingDocument.exists
+        ) {
 
             student =
-                mapDoc.data();
+                mappingDocument.data();
 
         }
 
 
-        /* =================================================
-           STEP 2
-           IF NOT FOUND SEARCH RESULTS
-           ================================================= */
+        /* ================================================
+           SECOND:
+           RESULTS
+        ================================================= */
 
         else {
 
-            const resDoc =
-                await db
-                    .collection(`results_${grade}`)
-                    .doc(inputVal)
+            const resultDocument =
+                await RESULT_DB
+                    .collection(
+                        `results_${grade}`
+                    )
+                    .doc(inputValue)
                     .get();
 
 
-            if (resDoc.exists) {
+            if (
+                resultDocument.exists
+            ) {
 
                 student =
-                    resDoc.data();
+                    resultDocument.data();
 
             }
 
         }
 
 
-        /* =================================================
+        /* ================================================
            NOT FOUND
-           ================================================= */
+        ================================================= */
 
         if (!student) {
 
-            document
-                .getElementById("notFoundNotice")
-                .classList
-                .remove("hidden");
+            const notFound =
+                document.getElementById(
+                    "notFoundNotice"
+                );
+
+
+            if (notFound) {
+
+                notFound.classList.remove(
+                    "hidden"
+                );
+
+            }
+
 
             return;
 
         }
 
 
-        /* =================================================
-           PAYMENT REQUIRED
-           ================================================= */
+        /* ================================================
+           PAYMENT
+        ================================================= */
 
         if (
-            student.paymentRequired &&
-            !student.isPaid
+            student.paymentRequired === true &&
+            student.isPaid !== true
         ) {
 
-            document
-                .getElementById("payAmount")
-                .innerText =
-                student.amount || "0";
+            const amount =
+                document.getElementById(
+                    "payAmount"
+                );
 
 
-            document
-                .getElementById("paymentNotice")
-                .classList
-                .remove("hidden");
+            if (amount) {
+
+                amount.innerText =
+                    student.amount || "0";
+
+            }
+
+
+            const payment =
+                document.getElementById(
+                    "paymentNotice"
+                );
+
+
+            if (payment) {
+
+                payment.classList.remove(
+                    "hidden"
+                );
+
+            }
 
 
             return;
@@ -364,21 +533,43 @@ async function handleSearch(e) {
         }
 
 
-        /* =================================================
+        /* ================================================
            SECRET CODE PROTECTION
-           ================================================= */
+        ================================================= */
+
+        const studentSecret =
+            student.secretID !== undefined &&
+            student.secretID !== null
+                ? String(
+                    student.secretID
+                ).trim()
+                : "";
+
+
+        const enteredValue =
+            String(
+                inputValue
+            ).trim();
+
 
         if (
-            student.secretID &&
-            String(student.secretID).trim() !== "" &&
-            String(inputVal).trim() !==
-            String(student.secretID).trim()
+            studentSecret !== "" &&
+            enteredValue !== studentSecret
         ) {
 
-            document
-                .getElementById("withheldNotice")
-                .classList
-                .remove("hidden");
+            const withheld =
+                document.getElementById(
+                    "withheldNotice"
+                );
+
+
+            if (withheld) {
+
+                withheld.classList.remove(
+                    "hidden"
+                );
+
+            }
 
 
             return;
@@ -386,45 +577,44 @@ async function handleSearch(e) {
         }
 
 
-        /* =================================================
+        /* ================================================
            DISPLAY RESULT
-           ================================================= */
+        ================================================= */
 
-        displayResult(student);
+        displayResult(
+            student
+        );
 
     }
 
 
-    /*
-     * ERROR
-     */
-
-    catch (err) {
+    catch (error) {
 
         console.error(
-            "SEARCH ERROR:",
-            err
+            "Search error:",
+            error
         );
 
 
         alert(
             "حدث خطأ أثناء جلب البيانات: " +
-            err.message
+            (
+                error && error.message
+                    ? error.message
+                    : "خطأ غير معروف"
+            )
         );
 
     }
 
 
-    /*
-     * FINALLY
-     */
-
     finally {
 
-        button.disabled = false;
+        searchButton.disabled =
+            false;
 
 
-        button.innerHTML =
+        searchButton.innerHTML =
             '<i class="fas fa-graduation-cap"></i> عرض النتيجة الان';
 
     }
@@ -432,9 +622,9 @@ async function handleSearch(e) {
 }
 
 
-/* =========================================================
+/* ============================================================
    DISPLAY RESULT
-   ========================================================= */
+   ============================================================ */
 
 function displayResult(student) {
 
@@ -442,87 +632,162 @@ function displayResult(student) {
         student;
 
 
-    /*
-     * تحديد الصف
-     */
+    const gradeElement =
+        document.getElementById(
+            "searchGrade"
+        );
+
 
     const gradeKey =
         student.grade ||
-        document.getElementById("searchGrade").value;
+        (
+            gradeElement
+                ? gradeElement.value
+                : ""
+        );
 
 
-    /*
-     * Student Name
-     */
+    /* ================================================
+       STUDENT NAME
+    ================================================= */
 
-    document
-        .getElementById("resStudentName")
-        .innerText =
-        student.name || "-";
-
-
-    /*
-     * Grade
-     */
-
-    document
-        .getElementById("resGradeTitle")
-        .innerText =
-        gradeTitles[gradeKey] || gradeKey;
+    const studentName =
+        document.getElementById(
+            "resStudentName"
+        );
 
 
-    /*
-     * Seat ID
-     */
+    if (studentName) {
 
-    document
-        .getElementById("resSeatID")
-        .innerText =
-        student.seatID || "-";
+        studentName.innerText =
+            student.name || "-";
+
+    }
 
 
-    /*
-     * Secret ID
-     */
+    /* ================================================
+       GRADE
+    ================================================= */
 
-    document
-        .getElementById("resSecretID")
-        .innerText =
-        student.secretID || "-";
+    const gradeTitle =
+        document.getElementById(
+            "resGradeTitle"
+        );
 
 
-    /*
-     * Scores Grid
-     */
+    if (gradeTitle) {
+
+        gradeTitle.innerText =
+            RESULT_GRADE_TITLES[gradeKey] ||
+            gradeKey ||
+            "-";
+
+    }
+
+
+    /* ================================================
+       SEAT
+    ================================================= */
+
+    const seat =
+        document.getElementById(
+            "resSeatID"
+        );
+
+
+    if (seat) {
+
+        seat.innerText =
+            student.seatID || "-";
+
+    }
+
+
+    /* ================================================
+       SECRET
+    ================================================= */
+
+    const secret =
+        document.getElementById(
+            "resSecretID"
+        );
+
+
+    if (secret) {
+
+        secret.innerText =
+            student.secretID || "-";
+
+    }
+
+
+    /* ================================================
+       SCORES
+    ================================================= */
 
     const grid =
-        document.getElementById("scoresGrid");
+        document.getElementById(
+            "scoresGrid"
+        );
 
 
-    grid.innerHTML = "";
+    if (!grid) {
+
+        return;
+
+    }
 
 
-    /*
-     * تحديد الأعمدة
-     */
-
-    const columns =
-        currentGradeSettings.displayColumns ||
-        Object.keys(student.scores || {});
+    grid.innerHTML =
+        "";
 
 
-    /*
-     * إذا لا توجد درجات
-     */
+    const scores =
+        student.scores &&
+        typeof student.scores === "object"
+            ? student.scores
+            : {};
+
+
+    let columns =
+        [];
+
+
+    if (
+        currentGradeSettings &&
+        Array.isArray(
+            currentGradeSettings.displayColumns
+        ) &&
+        currentGradeSettings.displayColumns.length
+    ) {
+
+        columns =
+            currentGradeSettings.displayColumns;
+
+    }
+
+    else {
+
+        columns =
+            Object.keys(
+                scores
+            );
+
+    }
+
+
+    /* ================================================
+       NO SCORES
+    ================================================= */
 
     if (!columns.length) {
 
         grid.innerHTML = `
 
-            <div class="col-span-full text-center text-slate-400 p-6">
-
+            <div
+                class="col-span-full text-center text-slate-400 p-6 font-bold"
+            >
                 لا توجد درجات مسجلة حالياً.
-
             </div>
 
         `;
@@ -530,66 +795,106 @@ function displayResult(student) {
     }
 
 
-    /*
-     * بناء المواد
-     */
+    /* ================================================
+       BUILD SCORES
+    ================================================= */
 
-    columns.forEach(function (col) {
+    columns.forEach(
+        function (column) {
 
-        const score =
-            student.scores
-                ? (
-                    student.scores[col] ||
-                    "-"
+            let score =
+                "-";
+
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    scores,
+                    column
                 )
-                : "-";
+            ) {
+
+                const value =
+                    scores[column];
 
 
-        grid.innerHTML += `
+                /*
+                 * مهم:
+                 * لا نستخدم || "-"
+                 * حتى لا تتحول الدرجة 0 إلى "-"
+                 */
 
-            <div
-                class="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 text-center space-y-1"
-            >
+                if (
+                    value !== null &&
+                    value !== undefined &&
+                    String(value).trim() !== ""
+                ) {
 
-                <span
-                    class="block text-[11px] font-bold text-slate-400 truncate"
+                    score =
+                        value;
+
+                }
+
+            }
+
+
+            grid.innerHTML += `
+
+                <div
+                    class="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 text-center space-y-1"
                 >
-                    ${escapeHTML(col)}
-                </span>
 
-                <span
-                    class="text-lg font-black text-amber-400 font-mono"
-                >
-                    ${escapeHTML(score)}
-                </span>
+                    <span
+                        class="block text-[11px] font-bold text-slate-400 truncate"
+                        title="${escapeHTML(column)}"
+                    >
+                        ${escapeHTML(column)}
+                    </span>
 
-            </div>
+                    <span
+                        class="text-lg font-black text-amber-400 font-mono"
+                    >
+                        ${escapeHTML(score)}
+                    </span>
 
-        `;
+                </div>
 
-    });
+            `;
+
+        }
+    );
 
 
-    /*
-     * Show Result
-     */
+    /* ================================================
+       SHOW RESULT
+    ================================================= */
 
-    document
-        .getElementById("resultCard")
-        .classList
-        .remove("hidden");
+    const resultCard =
+        document.getElementById(
+            "resultCard"
+        );
+
+
+    if (resultCard) {
+
+        resultCard.classList.remove(
+            "hidden"
+        );
+
+    }
 
 }
 
 
-/* =========================================================
-   PRINT CERTIFICATE
-   ========================================================= */
+/* ============================================================
+   PRINT
+   ============================================================ */
 
 function printStudentCertificate() {
 
     if (!currentStudentData) {
+
         return;
+
     }
 
 
@@ -597,145 +902,282 @@ function printStudentCertificate() {
         currentStudentData;
 
 
-    /*
-     * Grade
-     */
+    const gradeElement =
+        document.getElementById(
+            "searchGrade"
+        );
+
 
     const gradeKey =
         student.grade ||
-        document.getElementById("searchGrade").value;
+        (
+            gradeElement
+                ? gradeElement.value
+                : ""
+        );
 
 
-    /*
-     * Student information
-     */
+    /* ================================================
+       NAME
+    ================================================= */
 
-    document
-        .getElementById("pName")
-        .innerText =
-        student.name || "-";
-
-
-    document
-        .getElementById("pGrade")
-        .innerText =
-        gradeTitles[gradeKey] || gradeKey;
+    const pName =
+        document.getElementById(
+            "pName"
+        );
 
 
-    document
-        .getElementById("pSeat")
-        .innerText =
-        student.seatID || "-";
+    if (pName) {
+
+        pName.innerText =
+            student.name || "-";
+
+    }
 
 
-    document
-        .getElementById("pSecret")
-        .innerText =
-        student.secretID || "-";
+    /* ================================================
+       GRADE
+    ================================================= */
+
+    const pGrade =
+        document.getElementById(
+            "pGrade"
+        );
 
 
-    /*
-     * Table
-     */
+    if (pGrade) {
 
-    const tbody =
-        document.getElementById("pTableBody");
+        pGrade.innerText =
+            RESULT_GRADE_TITLES[gradeKey] ||
+            gradeKey ||
+            "-";
 
-
-    tbody.innerHTML = "";
-
-
-    /*
-     * Columns
-     */
-
-    const columns =
-        currentGradeSettings.displayColumns ||
-        Object.keys(student.scores || {});
+    }
 
 
-    /*
-     * Rows
-     */
+    /* ================================================
+       SEAT
+    ================================================= */
 
-    columns.forEach(function (col) {
+    const pSeat =
+        document.getElementById(
+            "pSeat"
+        );
 
-        const score =
-            student.scores
-                ? (
-                    student.scores[col] ||
-                    "-"
+
+    if (pSeat) {
+
+        pSeat.innerText =
+            student.seatID || "-";
+
+    }
+
+
+    /* ================================================
+       SECRET
+    ================================================= */
+
+    const pSecret =
+        document.getElementById(
+            "pSecret"
+        );
+
+
+    if (pSecret) {
+
+        pSecret.innerText =
+            student.secretID || "-";
+
+    }
+
+
+    /* ================================================
+       TABLE
+    ================================================= */
+
+    const tableBody =
+        document.getElementById(
+            "pTableBody"
+        );
+
+
+    if (!tableBody) {
+
+        return;
+
+    }
+
+
+    tableBody.innerHTML =
+        "";
+
+
+    const scores =
+        student.scores &&
+        typeof student.scores === "object"
+            ? student.scores
+            : {};
+
+
+    let columns =
+        [];
+
+
+    if (
+        currentGradeSettings &&
+        Array.isArray(
+            currentGradeSettings.displayColumns
+        ) &&
+        currentGradeSettings.displayColumns.length
+    ) {
+
+        columns =
+            currentGradeSettings.displayColumns;
+
+    }
+
+    else {
+
+        columns =
+            Object.keys(
+                scores
+            );
+
+    }
+
+
+    /* ================================================
+       TABLE ROWS
+    ================================================= */
+
+    columns.forEach(
+        function (column) {
+
+            let score =
+                "-";
+
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    scores,
+                    column
                 )
-                : "-";
+            ) {
+
+                const value =
+                    scores[column];
 
 
-        tbody.innerHTML += `
+                if (
+                    value !== null &&
+                    value !== undefined &&
+                    String(value).trim() !== ""
+                ) {
 
-            <tr>
+                    score =
+                        value;
 
-                <td style="font-weight:700;">
-                    ${escapeHTML(col)}
-                </td>
+                }
 
-                <td style="font-weight:900; color:#1e3a8a;">
-                    ${escapeHTML(score)}
-                </td>
-
-            </tr>
-
-        `;
-
-    });
+            }
 
 
-    /*
-     * Print
-     */
+            tableBody.innerHTML += `
 
-    window.print();
+                <tr>
+
+                    <td
+                        style="font-weight:700;"
+                    >
+                        ${escapeHTML(column)}
+                    </td>
+
+                    <td
+                        style="font-weight:900; color:#1e3a8a;"
+                    >
+                        ${escapeHTML(score)}
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    /* ================================================
+       PRINT
+    ================================================= */
+
+    setTimeout(
+        function () {
+
+            window.print();
+
+        },
+        100
+    );
 
 }
 
 
-/* =========================================================
-   SHOW STATUS
-   ========================================================= */
+/* ============================================================
+   STATUS NOTICE
+   ============================================================ */
 
 function showStatusNotice(
     title,
-    msg,
+    message,
     isReady = false
 ) {
 
     const notice =
-        document.getElementById("statusNotice");
+        document.getElementById(
+            "statusNotice"
+        );
 
 
     const titleElement =
-        document.getElementById("statusTitle");
+        document.getElementById(
+            "statusTitle"
+        );
 
 
-    const msgElement =
-        document.getElementById("statusMsg");
+    const messageElement =
+        document.getElementById(
+            "statusMsg"
+        );
+
+
+    if (
+        !notice ||
+        !titleElement ||
+        !messageElement
+    ) {
+
+        return;
+
+    }
 
 
     titleElement.innerText =
         title;
 
 
-    msgElement.innerText =
-        msg;
+    messageElement.innerText =
+        message;
 
 
-    /*
-     * Ready
-     */
+    /* ================================================
+       READY
+    ================================================= */
 
     if (isReady) {
 
-        notice
-            .classList
-            .add("border-emerald-500/30");
+        notice.classList.add(
+            "border-emerald-500/30"
+        );
 
 
         titleElement.className =
@@ -744,15 +1186,15 @@ function showStatusNotice(
     }
 
 
-    /*
-     * Not ready
-     */
+    /* ================================================
+       NOT READY
+    ================================================= */
 
     else {
 
-        notice
-            .classList
-            .remove("border-emerald-500/30");
+        notice.classList.remove(
+            "border-emerald-500/30"
+        );
 
 
         titleElement.className =
@@ -761,20 +1203,20 @@ function showStatusNotice(
     }
 
 
-    notice
-        .classList
-        .remove("hidden");
+    notice.classList.remove(
+        "hidden"
+    );
 
 }
 
 
-/* =========================================================
-   RESET VIEWS
-   ========================================================= */
+/* ============================================================
+   RESET ALL VIEWS
+   ============================================================ */
 
 function resetViews() {
 
-    const ids = [
+    const elements = [
 
         "statusNotice",
 
@@ -789,38 +1231,45 @@ function resetViews() {
     ];
 
 
-    ids.forEach(function (id) {
+    elements.forEach(
+        function (id) {
 
-        const element =
-            document.getElementById(id);
+            const element =
+                document.getElementById(
+                    id
+                );
 
 
-        if (element) {
+            if (element) {
 
-            element
-                .classList
-                .add("hidden");
+                element.classList.add(
+                    "hidden"
+                );
+
+            }
 
         }
-
-    });
+    );
 
 }
 
 
-/* =========================================================
+/* ============================================================
    RESET SEARCH
-   ========================================================= */
+   ============================================================ */
 
 function resetSearch() {
 
     const input =
-        document.getElementById("searchInput");
+        document.getElementById(
+            "searchInput"
+        );
 
 
     if (input) {
 
-        input.value = "";
+        input.value =
+            "";
 
     }
 
@@ -829,15 +1278,17 @@ function resetSearch() {
         null;
 
 
+    resetViews();
+
+
     checkGradeStatus();
 
 }
 
 
-/* =========================================================
-   HTML ESCAPE
-   حماية من إدخال HTML داخل البيانات
-   ========================================================= */
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
 
 function escapeHTML(value) {
 
@@ -853,19 +1304,58 @@ function escapeHTML(value) {
 
     return String(value)
 
-        .replace(/&/g, "&amp;")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
 
-        .replace(/</g, "&lt;")
+        .replace(
+            /</g,
+            "&lt;"
+        )
 
-        .replace(/>/g, "&gt;")
+        .replace(
+            />/g,
+            "&gt;"
+        )
 
-        .replace(/"/g, "&quot;")
+        .replace(
+            /"/g,
+            "&quot;"
+        )
 
-        .replace(/'/g, "&#039;");
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
-/* =========================================================
-   END
-   ========================================================= */
+/* ============================================================
+   EXPORT FUNCTIONS
+   احتياطي لو عندك أي كود خارجي يستدعيها
+   ============================================================ */
+
+window.checkGradeStatus =
+    checkGradeStatus;
+
+
+window.handleSearch =
+    handleSearch;
+
+
+window.displayResult =
+    displayResult;
+
+
+window.printStudentCertificate =
+    printStudentCertificate;
+
+
+window.resetViews =
+    resetViews;
+
+
+window.resetSearch =
+    resetSearch;
