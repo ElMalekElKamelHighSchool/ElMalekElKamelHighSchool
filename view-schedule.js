@@ -1,6 +1,7 @@
 /* ============================================================
    مدرسة الملك الكامل الثانوية
    OFFICIAL SCHEDULE VIEWER
+
    File:
    assets/js/view-schedule.js
 
@@ -73,18 +74,29 @@ function getElement(id) {
 
 function setText(id, value) {
 
-    const element = getElement(id);
+    const element =
+        getElement(id);
 
     if (!element) {
         return;
     }
 
-    element.textContent =
+
+    if (
         value !== undefined &&
         value !== null &&
         String(value).trim() !== ""
-            ? String(value)
-            : "................";
+    ) {
+
+        element.textContent =
+            String(value);
+
+    } else {
+
+        element.textContent =
+            "................";
+
+    }
 
 }
 
@@ -95,15 +107,26 @@ function setText(id, value) {
 
 function escapeHTML(value) {
 
-    if (value === undefined || value === null) {
+    if (
+        value === undefined ||
+        value === null
+    ) {
+
         return "";
+
     }
 
+
     return String(value)
+
         .replace(/&/g, "&amp;")
+
         .replace(/</g, "&lt;")
+
         .replace(/>/g, "&gt;")
+
         .replace(/"/g, "&quot;")
+
         .replace(/'/g, "&#039;");
 
 }
@@ -122,8 +145,10 @@ function setPrintDate() {
         return;
     }
 
+
     const now =
         new Date();
+
 
     const formatter =
         new Intl.DateTimeFormat(
@@ -135,6 +160,7 @@ function setPrintDate() {
             }
         );
 
+
     dateElement.textContent =
         formatter.format(now);
 
@@ -142,7 +168,7 @@ function setPrintDate() {
 
 
 /* ============================================================
-   GET URL PARAMETERS
+   URL PARAMETERS
 ============================================================ */
 
 function getURLParameters() {
@@ -152,13 +178,20 @@ function getURLParameters() {
             window.location.search
         );
 
+
     return {
 
         grade:
-            params.get("grade") || "",
+            (
+                params.get("grade") ||
+                ""
+            ).trim(),
 
         type:
-            params.get("type") || ""
+            (
+                params.get("type") ||
+                ""
+            ).trim()
 
     };
 
@@ -189,11 +222,24 @@ function getGradeName(grade) {
             "الصف الثاني الثانوي",
 
         "3":
+            "الصف الثالث الثانوي",
+
+        "1sec":
+            "الصف الأول الثانوي",
+
+        "2sec":
+            "الصف الثاني الثانوي",
+
+        "3sec":
             "الصف الثالث الثانوي"
 
     };
 
-    return grades[grade] || grade;
+
+    return (
+        grades[grade] ||
+        grade
+    );
 
 }
 
@@ -215,6 +261,12 @@ function getTypeName(type) {
         schedule:
             "جدول الحصص",
 
+        class:
+            "جدول الحصص",
+
+        classes:
+            "جدول الحصص",
+
         exams:
             "جدول الامتحانات",
 
@@ -224,12 +276,22 @@ function getTypeName(type) {
         امتحانات:
             "جدول الامتحانات",
 
+        امتحان:
+            "جدول الامتحانات",
+
         حصص:
+            "جدول الحصص",
+
+        حصة:
             "جدول الحصص"
 
     };
 
-    return types[type] || type;
+
+    return (
+        types[type] ||
+        type
+    );
 
 }
 
@@ -247,11 +309,18 @@ function setDocumentTitle() {
         return;
     }
 
+
     const gradeName =
-        getGradeName(currentGrade);
+        getGradeName(
+            currentGrade
+        );
+
 
     const typeName =
-        getTypeName(currentType);
+        getTypeName(
+            currentType
+        );
+
 
     titleElement.textContent =
         `${typeName} - ${gradeName}`;
@@ -271,6 +340,7 @@ function showLoading() {
     if (!container) {
         return;
     }
+
 
     container.innerHTML = `
 
@@ -306,6 +376,7 @@ function showError(message) {
         return;
     }
 
+
     container.innerHTML = `
 
         <div
@@ -316,11 +387,15 @@ function showError(message) {
                 class="fas fa-circle-exclamation text-4xl mb-3"
             ></i>
 
-            <p class="font-black text-lg">
+            <p
+                class="font-black text-lg"
+            >
                 تعذر تحميل البيانات
             </p>
 
-            <p class="text-sm mt-2 text-slate-500 text-center max-w-xl">
+            <p
+                class="text-sm mt-2 text-slate-500 text-center max-w-xl"
+            >
                 ${escapeHTML(message)}
             </p>
 
@@ -352,6 +427,7 @@ function showNotFound() {
         return;
     }
 
+
     container.innerHTML = `
 
         <div
@@ -362,11 +438,15 @@ function showNotFound() {
                 class="fas fa-calendar-xmark text-5xl mb-4"
             ></i>
 
-            <p class="font-black text-lg">
+            <p
+                class="font-black text-lg"
+            >
                 لا توجد بيانات للجدول
             </p>
 
-            <p class="text-sm mt-2">
+            <p
+                class="text-sm mt-2"
+            >
                 لم يتم العثور على بيانات لهذا الجدول.
             </p>
 
@@ -442,6 +522,7 @@ function initializeFirebase() {
             "Firebase initialized successfully."
         );
 
+
         return true;
 
     }
@@ -453,9 +534,11 @@ function initializeFirebase() {
             error
         );
 
+
         showError(
             "حدث خطأ أثناء الاتصال بقاعدة البيانات."
         );
+
 
         return false;
 
@@ -470,7 +553,9 @@ function initializeFirebase() {
 
 function getScheduleDocumentId() {
 
-    return `${currentGrade}_${currentType}`;
+    return (
+        `${currentGrade}_${currentType}`
+    );
 
 }
 
@@ -513,9 +598,9 @@ async function loadSchoolInformation() {
             snapshot.data() || {};
 
 
-        /* --------------------------------------------------------
+        /* ======================================================
            MANAGER
-        -------------------------------------------------------- */
+        ====================================================== */
 
         if (
             data.manager !== undefined &&
@@ -531,9 +616,9 @@ async function loadSchoolInformation() {
         }
 
 
-        /* --------------------------------------------------------
+        /* ======================================================
            AGENT
-        -------------------------------------------------------- */
+        ====================================================== */
 
         if (
             data.agent !== undefined &&
@@ -549,9 +634,9 @@ async function loadSchoolInformation() {
         }
 
 
-        /* --------------------------------------------------------
+        /* ======================================================
            CONTROL
-        -------------------------------------------------------- */
+        ====================================================== */
 
         if (
             data.control_name !== undefined &&
@@ -564,8 +649,12 @@ async function loadSchoolInformation() {
                 data.control_name
             );
 
+
             const controlSection =
-                getElement("controlSection");
+                getElement(
+                    "controlSection"
+                );
+
 
             if (controlSection) {
 
@@ -597,25 +686,32 @@ async function loadSchoolInformation() {
 
 function normalizeLessons(lessons) {
 
-    if (!lessons) {
+    if (
+        lessons === undefined ||
+        lessons === null
+    ) {
+
         return [];
+
     }
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        ARRAY
-    -------------------------------------------------------- */
+    ======================================================== */
 
-    if (Array.isArray(lessons)) {
+    if (
+        Array.isArray(lessons)
+    ) {
 
         return lessons;
 
     }
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        OBJECT
-    -------------------------------------------------------- */
+    ======================================================== */
 
     if (
         typeof lessons === "object"
@@ -634,10 +730,94 @@ function normalizeLessons(lessons) {
 
 
 /* ============================================================
-   RENDER TABLE
+   FORMAT FIRESTORE VALUE
 ============================================================ */
 
-function renderTable(data) {
+function formatCellValue(value) {
+
+    if (
+        value === undefined ||
+        value === null
+    ) {
+
+        return "";
+
+    }
+
+
+    /* --------------------------------------------------------
+       FIRESTORE TIMESTAMP
+    -------------------------------------------------------- */
+
+    if (
+        typeof value === "object" &&
+        typeof value.toDate === "function"
+    ) {
+
+        return value
+            .toDate()
+            .toLocaleDateString(
+                "ar-EG"
+            );
+
+    }
+
+
+    /* --------------------------------------------------------
+       ARRAY
+    -------------------------------------------------------- */
+
+    if (
+        Array.isArray(value)
+    ) {
+
+        return value
+            .map(
+                item =>
+                    formatCellValue(item)
+            )
+            .join(" - ");
+
+    }
+
+
+    /* --------------------------------------------------------
+       OBJECT
+    -------------------------------------------------------- */
+
+    if (
+        typeof value === "object"
+    ) {
+
+        try {
+
+            return JSON.stringify(
+                value
+            );
+
+        }
+
+        catch (error) {
+
+            return "";
+
+        }
+
+    }
+
+
+    return String(value);
+
+}
+
+
+/* ============================================================
+   RENDER HTML TABLE
+============================================================ */
+
+function renderHTMLTable(
+    lessons
+) {
 
     const container =
         getElement("tableContainer");
@@ -647,50 +827,16 @@ function renderTable(data) {
     }
 
 
-    if (!data) {
-
-        showNotFound();
-
-        return;
-
-    }
-
-
-    let lessons =
-        normalizeLessons(
-            data.lessons
-        );
-
-
-    if (!lessons.length) {
-
-        showNotFound();
-
-        return;
-
-    }
-
-
-    /* ========================================================
-       IF DATA ALREADY CONTAINS HTML TABLE
-    ======================================================== */
-
     if (
-        typeof data.lessons === "string" &&
-        data.lessons.trim().length > 0
+        !lessons.length
     ) {
 
-        container.innerHTML =
-            data.lessons;
+        showNotFound();
 
         return;
 
     }
 
-
-    /* ========================================================
-       FIND COLUMNS
-    ======================================================== */
 
     const firstRow =
         lessons[0];
@@ -698,7 +844,8 @@ function renderTable(data) {
 
     if (
         !firstRow ||
-        typeof firstRow !== "object"
+        typeof firstRow !== "object" ||
+        Array.isArray(firstRow)
     ) {
 
         showNotFound();
@@ -714,7 +861,9 @@ function renderTable(data) {
         );
 
 
-    if (!columns.length) {
+    if (
+        !columns.length
+    ) {
 
         showNotFound();
 
@@ -724,7 +873,7 @@ function renderTable(data) {
 
 
     /* ========================================================
-       COLUMN TITLES
+       COLUMN NAMES
     ======================================================== */
 
     const columnNames = {
@@ -742,6 +891,9 @@ function renderTable(data) {
             "الحصة",
 
         subject:
+            "المادة",
+
+        subject_name:
             "المادة",
 
         teacher:
@@ -769,13 +921,16 @@ function renderTable(data) {
             "إلى",
 
         notes:
+            "ملاحظات",
+
+        note:
             "ملاحظات"
 
     };
 
 
     /* ========================================================
-       BUILD TABLE
+       TABLE HEADER
     ======================================================== */
 
     let html = `
@@ -794,6 +949,7 @@ function renderTable(data) {
             const title =
                 columnNames[column] ||
                 column;
+
 
             html += `
 
@@ -818,88 +974,25 @@ function renderTable(data) {
     `;
 
 
+    /* ========================================================
+       TABLE ROWS
+    ======================================================== */
+
     lessons.forEach(
         row => {
 
-            html += `<tr>`;
+            html += `
+                <tr>
+            `;
 
 
             columns.forEach(
                 column => {
 
-                    let value =
-                        row[column];
-
-
-                    if (
-                        value === undefined ||
-                        value === null
-                    ) {
-
-                        value = "";
-
-                    }
-
-
-                    /*
-                       Firestore Timestamp
-                    */
-
-                    if (
-                        value &&
-                        typeof value === "object" &&
-                        typeof value.toDate === "function"
-                    ) {
-
-                        value =
-                            value
-                                .toDate()
-                                .toLocaleDateString(
-                                    "ar-EG"
-                                );
-
-                    }
-
-
-                    /*
-                       Array
-                    */
-
-                    if (
-                        Array.isArray(value)
-                    ) {
-
-                        value =
-                            value.join(" - ");
-
-                    }
-
-
-                    /*
-                       Object
-                    */
-
-                    if (
-                        typeof value === "object" &&
-                        value !== null
-                    ) {
-
-                        try {
-
-                            value =
-                                JSON.stringify(
-                                    value
-                                );
-
-                        }
-
-                        catch (e) {
-
-                            value = "";
-
-                        }
-
-                    }
+                    const value =
+                        formatCellValue(
+                            row[column]
+                        );
 
 
                     html += `
@@ -914,7 +1007,11 @@ function renderTable(data) {
             );
 
 
-            html += `</tr>`;
+            html += `
+
+                </tr>
+
+            `;
 
         }
     );
@@ -931,6 +1028,159 @@ function renderTable(data) {
 
     container.innerHTML =
         html;
+
+}
+
+
+/* ============================================================
+   RENDER TABLE
+============================================================ */
+
+function renderTable(data) {
+
+    const container =
+        getElement(
+            "tableContainer"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!data) {
+
+        showNotFound();
+
+        return;
+
+    }
+
+
+    /* ========================================================
+       SUPPORT MULTIPLE FIELD NAMES
+    ======================================================== */
+
+    let lessons =
+        data.lessons;
+
+
+    if (
+        lessons === undefined
+    ) {
+
+        lessons =
+            data.schedule;
+
+    }
+
+
+    if (
+        lessons === undefined
+    ) {
+
+        lessons =
+            data.table;
+
+    }
+
+
+    if (
+        lessons === undefined
+    ) {
+
+        lessons =
+            data.rows;
+
+    }
+
+
+    /* ========================================================
+       HTML STRING
+       
+       IMPORTANT:
+       يتم فحصها قبل normalizeLessons
+    ======================================================== */
+
+    if (
+        typeof lessons === "string" &&
+        lessons.trim() !== ""
+    ) {
+
+        const cleanHTML =
+            lessons.trim();
+
+
+        if (
+            cleanHTML.includes("<table") ||
+            cleanHTML.includes("<tr") ||
+            cleanHTML.includes("<tbody") ||
+            cleanHTML.includes("<thead")
+        ) {
+
+            container.innerHTML =
+                cleanHTML;
+
+            return;
+
+        }
+
+
+        /* ----------------------------------------------------
+           لو النص ليس HTML
+           نعرضه كصف واحد
+        ---------------------------------------------------- */
+
+        container.innerHTML = `
+
+            <table>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            ${escapeHTML(cleanHTML)}
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        `;
+
+        return;
+
+    }
+
+
+    /* ========================================================
+       ARRAY / OBJECT
+    ======================================================== */
+
+    lessons =
+        normalizeLessons(
+            lessons
+        );
+
+
+    if (
+        !lessons.length
+    ) {
+
+        showNotFound();
+
+        return;
+
+    }
+
+
+    renderHTMLTable(
+        lessons
+    );
 
 }
 
@@ -957,15 +1207,41 @@ async function loadSchedule() {
 
 
         console.log(
-            "Loading schedule:",
+            "================================"
+        );
+
+        console.log(
+            "Loading schedule document:"
+        );
+
+        console.log(
+            "Grade:",
+            currentGrade
+        );
+
+        console.log(
+            "Type:",
+            currentType
+        );
+
+        console.log(
+            "Document ID:",
             documentId
+        );
+
+        console.log(
+            "================================"
         );
 
 
         const scheduleRef =
             db
-                .collection("schedules")
-                .doc(documentId);
+                .collection(
+                    "schedules"
+                )
+                .doc(
+                    documentId
+                );
 
 
         const snapshot =
@@ -978,7 +1254,9 @@ async function loadSchedule() {
         );
 
 
-        if (!snapshot.exists) {
+        if (
+            !snapshot.exists
+        ) {
 
             showNotFound();
 
@@ -1001,9 +1279,9 @@ async function loadSchedule() {
         );
 
 
-        /* --------------------------------------------------------
-           CONTROL NAME
-        -------------------------------------------------------- */
+        /* ====================================================
+           CONTROL NAME FROM SCHEDULE
+        ==================================================== */
 
         if (
             data.control_name !== undefined &&
@@ -1018,7 +1296,9 @@ async function loadSchedule() {
 
 
             const controlSection =
-                getElement("controlSection");
+                getElement(
+                    "controlSection"
+                );
 
 
             if (controlSection) {
@@ -1032,18 +1312,18 @@ async function loadSchedule() {
         }
 
 
-        /* --------------------------------------------------------
-           TABLE
-        -------------------------------------------------------- */
+        /* ====================================================
+           RENDER TABLE
+        ==================================================== */
 
         renderTable(
             data
         );
 
 
-        /* --------------------------------------------------------
+        /* ====================================================
            SCHOOL INFORMATION
-        -------------------------------------------------------- */
+        ==================================================== */
 
         await loadSchoolInformation();
 
@@ -1073,7 +1353,7 @@ async function loadSchedule() {
         }
 
 
-        if (
+        else if (
             error &&
             error.code ===
             "failed-precondition"
@@ -1081,6 +1361,18 @@ async function loadSchedule() {
 
             message =
                 "هناك مشكلة في إعدادات قاعدة البيانات.";
+
+        }
+
+
+        else if (
+            error &&
+            error.code ===
+            "unavailable"
+        ) {
+
+            message =
+                "تعذر الاتصال بخدمة Firestore حالياً. تأكد من اتصال الإنترنت وحاول مرة أخرى.";
 
         }
 
@@ -1105,16 +1397,23 @@ async function initializePage() {
     );
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        DATE
-    -------------------------------------------------------- */
+    ======================================================== */
 
     setPrintDate();
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
+       LOADING
+    ======================================================== */
+
+    showLoading();
+
+
+    /* ========================================================
        URL
-    -------------------------------------------------------- */
+    ======================================================== */
 
     const params =
         getURLParameters();
@@ -1131,15 +1430,18 @@ async function initializePage() {
     console.log(
         "URL parameters:",
         {
-            grade: currentGrade,
-            type: currentType
+            grade:
+                currentGrade,
+
+            type:
+                currentType
         }
     );
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        VALIDATE
-    -------------------------------------------------------- */
+    ======================================================== */
 
     if (
         !currentGrade ||
@@ -1153,16 +1455,16 @@ async function initializePage() {
     }
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        TITLE
-    -------------------------------------------------------- */
+    ======================================================== */
 
     setDocumentTitle();
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        FIREBASE
-    -------------------------------------------------------- */
+    ======================================================== */
 
     const firebaseReady =
         initializeFirebase();
@@ -1175,9 +1477,9 @@ async function initializePage() {
     }
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        LOAD DATA
-    -------------------------------------------------------- */
+    ======================================================== */
 
     await loadSchedule();
 
@@ -1188,11 +1490,21 @@ async function initializePage() {
    START
 ============================================================ */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+if (
+    document.readyState ===
+    "loading"
+) {
 
-        initializePage();
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializePage,
+        {
+            once: true
+        }
+    );
 
-    }
-);
+} else {
+
+    initializePage();
+
+                }
