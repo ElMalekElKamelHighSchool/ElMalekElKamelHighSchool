@@ -1,545 +1,1198 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+/* ============================================================
+   مدرسة الملك الكامل الثانوية
+   OFFICIAL SCHEDULE VIEWER
+   File:
+   assets/js/view-schedule.js
 
-<head>
+   مسؤول عن:
+   Firebase
+   Firestore
+   قراءة الرابط
+   جلب الجدول
+   عرض الجدول
+   بيانات المدرسة
+   التوقيعات
+   التاريخ
+============================================================ */
 
-    <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+/* ============================================================
+   FIREBASE CONFIG
+============================================================ */
 
-    <title>
-        المستند الرسمي | مدرسة الملك الكامل
-    </title>
+const FIREBASE_CONFIG = {
 
+    apiKey:
+        "AIzaSyCSwNiOHDC0m6zoBx_BeAGyaE33Zmhuvi4",
 
-    <!-- ============================================================
-         EXTERNAL LIBRARIES
-    ============================================================ -->
+    authDomain:
+        "hazoma-60ed2.firebaseapp.com",
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    projectId:
+        "hazoma-60ed2",
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap"
-        rel="stylesheet"
-    >
+    storageBucket:
+        "hazoma-60ed2.firebasestorage.app",
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    >
+    messagingSenderId:
+        "962438384604",
 
+    appId:
+        "1:962438384604:web:52db16e5723a8f6d3bdd19"
 
-    <!-- ============================================================
-         PAGE STYLE
-    ============================================================ -->
+};
 
-    <style>
 
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: #f8fafc;
-            margin: 0;
-            padding: 0;
-        }
+/* ============================================================
+   GLOBAL VARIABLES
+============================================================ */
 
+let db = null;
 
-        /* ========================================================
-           PRINT PAGE
-        ======================================================== */
+let currentGrade = "";
 
-        .print-page {
+let currentType = "";
 
-            background: white;
+let currentScheduleData = null;
 
-            width: 210mm;
 
-            min-height: 296mm;
+/* ============================================================
+   DOM HELPERS
+============================================================ */
 
-            max-height: 296mm;
+function getElement(id) {
 
-            padding: 10mm;
+    return document.getElementById(id);
 
-            margin: 20px auto;
+}
 
-            box-shadow:
-                0 4px 15px rgba(0, 0, 0, 0.1);
 
-            position: relative;
+/* ============================================================
+   SET TEXT
+============================================================ */
 
-            border: 1px solid #334155;
+function setText(id, value) {
 
-            display: flex;
+    const element = getElement(id);
 
-            flex-direction: column;
+    if (!element) {
+        return;
+    }
 
-            overflow: hidden;
+    element.textContent =
+        value !== undefined &&
+        value !== null &&
+        String(value).trim() !== ""
+            ? String(value)
+            : "................";
 
-        }
+}
 
 
-        /* ========================================================
-           TABLE
-        ======================================================== */
+/* ============================================================
+   ESCAPE HTML
+============================================================ */
 
-        #tableContainer table {
+function escapeHTML(value) {
 
-            width: 100% !important;
+    if (value === undefined || value === null) {
+        return "";
+    }
 
-            border-collapse: collapse !important;
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
-            margin: 5px 0 !important;
+}
 
-            border: 2px solid #000 !important;
 
-        }
+/* ============================================================
+   DATE
+============================================================ */
 
+function setPrintDate() {
 
-        #tableContainer th,
-        #tableContainer td {
+    const dateElement =
+        getElement("printDate");
 
-            border: 1px solid #000 !important;
+    if (!dateElement) {
+        return;
+    }
 
-            padding: 6px 2px !important;
+    const now =
+        new Date();
 
-            text-align: center !important;
-
-            font-size: 12px !important;
-
-            font-weight: 700 !important;
-
-        }
-
-
-        #tableContainer th {
-
-            background-color: #1e3a8a !important;
-
-            color: white !important;
-
-            -webkit-print-color-adjust: exact;
-
-            print-color-adjust: exact;
-
-        }
-
-
-        #tableContainer tr:nth-child(even) {
-
-            background-color: #f8fafc;
-
-        }
-
-
-        /* ========================================================
-           WATERMARK
-        ======================================================== */
-
-        .watermark {
-
-            position: absolute;
-
-            top: 50%;
-
-            left: 50%;
-
-            transform:
-                translate(-50%, -50%)
-                rotate(-30deg);
-
-            font-size: 120px;
-
-            color: rgba(0, 0, 0, 0.02);
-
-            pointer-events: none;
-
-            white-space: nowrap;
-
-            font-weight: 900;
-
-        }
-
-
-        /* ========================================================
-           PRINT
-        ======================================================== */
-
-        @media print {
-
-            @page {
-
-                size: A4;
-
-                margin: 0;
-
+    const formatter =
+        new Intl.DateTimeFormat(
+            "ar-EG",
+            {
+                year: "numeric",
+                month: "long",
+                day: "numeric"
             }
+        );
+
+    dateElement.textContent =
+        formatter.format(now);
+
+}
 
 
-            body {
+/* ============================================================
+   GET URL PARAMETERS
+============================================================ */
 
-                background: white;
+function getURLParameters() {
 
-                padding: 0;
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-            }
+    return {
 
+        grade:
+            params.get("grade") || "",
 
-            .no-print {
+        type:
+            params.get("type") || ""
 
-                display: none !important;
+    };
 
-            }
-
-
-            .print-page {
-
-                margin: 0;
-
-                box-shadow: none;
-
-                width: 100%;
-
-                height: 100vh;
-
-                min-height: 0;
-
-                max-height: none;
-
-                border: none;
-
-                padding: 8mm;
-
-            }
+}
 
 
-            #tableContainer table {
+/* ============================================================
+   GRADE NAME
+============================================================ */
 
-                zoom: 0.95;
+function getGradeName(grade) {
 
-            }
+    const grades = {
+
+        grade1:
+            "الصف الأول الثانوي",
+
+        grade2:
+            "الصف الثاني الثانوي",
+
+        grade3:
+            "الصف الثالث الثانوي",
+
+        "1":
+            "الصف الأول الثانوي",
+
+        "2":
+            "الصف الثاني الثانوي",
+
+        "3":
+            "الصف الثالث الثانوي"
+
+    };
+
+    return grades[grade] || grade;
+
+}
 
 
-            #tableContainer th {
+/* ============================================================
+   TYPE NAME
+============================================================ */
 
-                background-color: #f1f5f9 !important;
+function getTypeName(type) {
 
-                color: black !important;
+    const types = {
 
-            }
+        lessons:
+            "جدول الحصص",
 
-        }
+        lesson:
+            "جدول الحصص",
 
-    </style>
+        schedule:
+            "جدول الحصص",
 
-</head>
+        exams:
+            "جدول الامتحانات",
+
+        exam:
+            "جدول الامتحانات",
+
+        امتحانات:
+            "جدول الامتحانات",
+
+        حصص:
+            "جدول الحصص"
+
+    };
+
+    return types[type] || type;
+
+}
 
 
-<body>
+/* ============================================================
+   DOCUMENT TITLE
+============================================================ */
+
+function setDocumentTitle() {
+
+    const titleElement =
+        getElement("mainTitle");
+
+    if (!titleElement) {
+        return;
+    }
+
+    const gradeName =
+        getGradeName(currentGrade);
+
+    const typeName =
+        getTypeName(currentType);
+
+    titleElement.textContent =
+        `${typeName} - ${gradeName}`;
+
+}
 
 
-    <!-- ============================================================
-         CONTROL BAR
-    ============================================================ -->
+/* ============================================================
+   LOADING
+============================================================ */
 
-    <div
-        class="no-print sticky top-0 z-50 bg-white border-b p-4 shadow-sm"
-    >
+function showLoading() {
+
+    const container =
+        getElement("tableContainer");
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = `
 
         <div
-            class="max-w-[210mm] mx-auto flex justify-between items-center"
+            class="flex flex-col items-center justify-center py-20 text-slate-300"
         >
 
-            <div
-                class="flex items-center gap-4"
-            >
-
-                <a
-                    href="index.html"
-                    class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold hover:bg-slate-200 transition flex items-center gap-2"
-                >
-
-                    <i class="fas fa-arrow-right"></i>
-
-                    الرئيسية
-
-                </a>
-
-
-                <h3
-                    class="font-black text-blue-900 hidden md:block"
-                >
-                    معاينة الطباعة الرسمية
-                </h3>
-
-            </div>
-
-
-            <button
-                type="button"
-                onclick="window.print()"
-                class="bg-blue-700 text-white px-10 py-2 rounded-lg font-black shadow-lg hover:bg-blue-800 transition flex items-center gap-2"
-            >
-
-                <i class="fas fa-print"></i>
-
-                طباعة الجدول
-
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- ============================================================
-         OFFICIAL DOCUMENT
-    ============================================================ -->
-
-    <div
-        class="print-page"
-        id="mainDocument"
-    >
-
-
-        <!-- WATERMARK -->
-
-        <div class="watermark">
-            الملك الكامل
-        </div>
-
-
-        <!-- ========================================================
-             OFFICIAL HEADER
-        ======================================================== -->
-
-        <div
-            class="flex justify-between items-start border-b-2 border-slate-800 pb-2 mb-4"
-        >
-
-
-            <!-- RIGHT -->
-
-            <div
-                class="text-right text-[12px] font-bold leading-tight"
-            >
-
-                <p>
-                    وزارة التربية والتعليم
-                </p>
-
-                <p>
-                    مديرية التربية والتعليم بالدقهلية
-                </p>
-
-                <p>
-                    إدارة شرق المنصورة التعليمية
-                </p>
-
-                <p>
-                    مدرسة الملك الكامل الثانوية العسكرية
-                </p>
-
-            </div>
-
-
-            <!-- CENTER -->
-
-            <div class="text-center">
-
-                <h1
-                    class="text-xl font-black text-slate-900"
-                >
-                    مستخرج رسمي
-                </h1>
-
-                <p
-                    class="text-[12px] font-bold mt-1"
-                >
-                    العام الدراسي 2025 / 2026
-                </p>
-
-            </div>
-
-
-            <!-- LEFT -->
-
-            <div
-                class="text-left text-[11px] font-bold"
-            >
-
-                <p id="printDate">
-                    جاري التحميل...
-                </p>
-
-                <p>
-                    الجمهورية الجديدة
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- ========================================================
-             DOCUMENT TITLE
-        ======================================================== -->
-
-        <div
-            class="text-center mb-2"
-        >
-
-            <h2
-                id="mainTitle"
-                class="text-xl font-black text-blue-900 border-b-2 border-blue-900 inline-block px-6"
-            >
-                جاري التحميل...
-            </h2>
-
-        </div>
-
-
-        <!-- ========================================================
-             TABLE CONTAINER
-        ======================================================== -->
-
-        <div
-            id="tableContainer"
-            class="overflow-hidden flex-grow"
-        >
-
-            <div
-                class="flex flex-col items-center justify-center py-20 text-slate-300"
-            >
-
-                <i
-                    class="fas fa-spinner fa-spin text-3xl mb-2"
-                ></i>
-
-                <p>
-                    جاري جلب البيانات...
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- ========================================================
-             SIGNATURES
-        ======================================================== -->
-
-        <div
-            id="signatureArea"
-            class="grid grid-cols-3 mt-4 text-center font-bold text-[13px] border-t border-slate-200 pt-4 mb-4"
-        >
-
-
-            <!-- CONTROL -->
-
-            <div
-                id="controlSection"
-                class="hidden"
-            >
-
-                <p class="mb-8">
-                    رئيس الكنترول
-                </p>
-
-                <p
-                    id="sign-control"
-                    class="text-md"
-                >
-                    ................
-                </p>
-
-            </div>
-
-
-            <!-- AGENT -->
-
-            <div id="agentSection">
-
-                <p class="mb-8">
-                    وكيل شؤون الطلاب
-                </p>
-
-                <p
-                    id="sign-agent"
-                    class="text-md"
-                >
-                    ................
-                </p>
-
-            </div>
-
-
-            <!-- MANAGER -->
-
-            <div id="managerSection">
-
-                <p class="mb-8">
-                    مدير المدرسة
-                </p>
-
-                <p
-                    id="sign-manager"
-                    class="text-md font-black text-blue-900"
-                >
-                    ................
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- ========================================================
-             FOOTER
-        ======================================================== -->
-
-        <div
-            class="text-center mt-auto"
-        >
-
-            <p
-                class="text-[9px] text-slate-400 border-t pt-1 italic"
-            >
-                * يعتمد هذا الجدول كنسخة رسمية من البوابة الإلكترونية للمدرسة
+            <i
+                class="fas fa-spinner fa-spin text-3xl mb-2"
+            ></i>
+
+            <p>
+                جاري جلب البيانات...
             </p>
 
         </div>
 
-    </div>
+    `;
+
+}
 
 
-    <!-- ============================================================
-         FIREBASE LIBRARIES
-         
-         موجودة هنا قبل ملف البيانات لأن view-schedule.js يحتاجها.
-    ============================================================ -->
+/* ============================================================
+   ERROR
+============================================================ */
 
-    <script
-        src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"
-    ></script>
+function showError(message) {
 
-    <script
-        src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"
-    ></script>
+    const container =
+        getElement("tableContainer");
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = `
+
+        <div
+            class="flex flex-col items-center justify-center py-20 text-red-600"
+        >
+
+            <i
+                class="fas fa-circle-exclamation text-4xl mb-3"
+            ></i>
+
+            <p class="font-black text-lg">
+                تعذر تحميل البيانات
+            </p>
+
+            <p class="text-sm mt-2 text-slate-500 text-center max-w-xl">
+                ${escapeHTML(message)}
+            </p>
+
+            <button
+                type="button"
+                onclick="location.reload()"
+                class="mt-5 bg-blue-700 text-white px-6 py-2 rounded-lg font-bold"
+            >
+                إعادة المحاولة
+            </button>
+
+        </div>
+
+    `;
+
+}
 
 
-    <!-- ============================================================
-         DATA ENGINE
-         
-         كل Firebase والمنطق موجود في هذا الملف.
-    ============================================================ -->
+/* ============================================================
+   NOT FOUND
+============================================================ */
 
-    <script
-        src="./view-schedule.js"
-        defer
-    ></script>
+function showNotFound() {
 
-</body>
+    const container =
+        getElement("tableContainer");
 
-</html>
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = `
+
+        <div
+            class="flex flex-col items-center justify-center py-20 text-slate-400"
+        >
+
+            <i
+                class="fas fa-calendar-xmark text-5xl mb-4"
+            ></i>
+
+            <p class="font-black text-lg">
+                لا توجد بيانات للجدول
+            </p>
+
+            <p class="text-sm mt-2">
+                لم يتم العثور على بيانات لهذا الجدول.
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   INVALID URL
+============================================================ */
+
+function showInvalidURL() {
+
+    showError(
+        "رابط الجدول غير مكتمل. يجب أن يحتوي الرابط على grade و type."
+    );
+
+}
+
+
+/* ============================================================
+   FIREBASE INITIALIZATION
+============================================================ */
+
+function initializeFirebase() {
+
+    try {
+
+        if (
+            typeof firebase === "undefined"
+        ) {
+
+            throw new Error(
+                "Firebase Library لم يتم تحميلها."
+            );
+
+        }
+
+
+        if (
+            firebase.apps &&
+            firebase.apps.length > 0
+        ) {
+
+            db =
+                firebase.firestore();
+
+        } else {
+
+            firebase.initializeApp(
+                FIREBASE_CONFIG
+            );
+
+            db =
+                firebase.firestore();
+
+        }
+
+
+        if (!db) {
+
+            throw new Error(
+                "تعذر إنشاء اتصال Firestore."
+            );
+
+        }
+
+
+        console.log(
+            "Firebase initialized successfully."
+        );
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Firebase initialization error:",
+            error
+        );
+
+        showError(
+            "حدث خطأ أثناء الاتصال بقاعدة البيانات."
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* ============================================================
+   GET SCHEDULE DOCUMENT ID
+============================================================ */
+
+function getScheduleDocumentId() {
+
+    return `${currentGrade}_${currentType}`;
+
+}
+
+
+/* ============================================================
+   LOAD SCHOOL INFORMATION
+============================================================ */
+
+async function loadSchoolInformation() {
+
+    try {
+
+        if (!db) {
+            return;
+        }
+
+
+        const docRef =
+            db
+                .collection("settings")
+                .doc("school_info");
+
+
+        const snapshot =
+            await docRef.get();
+
+
+        if (!snapshot.exists) {
+
+            console.warn(
+                "settings/school_info not found."
+            );
+
+            return;
+
+        }
+
+
+        const data =
+            snapshot.data() || {};
+
+
+        /* --------------------------------------------------------
+           MANAGER
+        -------------------------------------------------------- */
+
+        if (
+            data.manager !== undefined &&
+            data.manager !== null &&
+            String(data.manager).trim() !== ""
+        ) {
+
+            setText(
+                "sign-manager",
+                data.manager
+            );
+
+        }
+
+
+        /* --------------------------------------------------------
+           AGENT
+        -------------------------------------------------------- */
+
+        if (
+            data.agent !== undefined &&
+            data.agent !== null &&
+            String(data.agent).trim() !== ""
+        ) {
+
+            setText(
+                "sign-agent",
+                data.agent
+            );
+
+        }
+
+
+        /* --------------------------------------------------------
+           CONTROL
+        -------------------------------------------------------- */
+
+        if (
+            data.control_name !== undefined &&
+            data.control_name !== null &&
+            String(data.control_name).trim() !== ""
+        ) {
+
+            setText(
+                "sign-control",
+                data.control_name
+            );
+
+            const controlSection =
+                getElement("controlSection");
+
+            if (controlSection) {
+
+                controlSection.classList.remove(
+                    "hidden"
+                );
+
+            }
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.warn(
+            "School information could not be loaded:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   NORMALIZE LESSON DATA
+============================================================ */
+
+function normalizeLessons(lessons) {
+
+    if (!lessons) {
+        return [];
+    }
+
+
+    /* --------------------------------------------------------
+       ARRAY
+    -------------------------------------------------------- */
+
+    if (Array.isArray(lessons)) {
+
+        return lessons;
+
+    }
+
+
+    /* --------------------------------------------------------
+       OBJECT
+    -------------------------------------------------------- */
+
+    if (
+        typeof lessons === "object"
+    ) {
+
+        return Object.values(
+            lessons
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+/* ============================================================
+   RENDER TABLE
+============================================================ */
+
+function renderTable(data) {
+
+    const container =
+        getElement("tableContainer");
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!data) {
+
+        showNotFound();
+
+        return;
+
+    }
+
+
+    let lessons =
+        normalizeLessons(
+            data.lessons
+        );
+
+
+    if (!lessons.length) {
+
+        showNotFound();
+
+        return;
+
+    }
+
+
+    /* ========================================================
+       IF DATA ALREADY CONTAINS HTML TABLE
+    ======================================================== */
+
+    if (
+        typeof data.lessons === "string" &&
+        data.lessons.trim().length > 0
+    ) {
+
+        container.innerHTML =
+            data.lessons;
+
+        return;
+
+    }
+
+
+    /* ========================================================
+       FIND COLUMNS
+    ======================================================== */
+
+    const firstRow =
+        lessons[0];
+
+
+    if (
+        !firstRow ||
+        typeof firstRow !== "object"
+    ) {
+
+        showNotFound();
+
+        return;
+
+    }
+
+
+    const columns =
+        Object.keys(
+            firstRow
+        );
+
+
+    if (!columns.length) {
+
+        showNotFound();
+
+        return;
+
+    }
+
+
+    /* ========================================================
+       COLUMN TITLES
+    ======================================================== */
+
+    const columnNames = {
+
+        day:
+            "اليوم",
+
+        date:
+            "التاريخ",
+
+        period:
+            "الحصة",
+
+        lesson:
+            "الحصة",
+
+        subject:
+            "المادة",
+
+        teacher:
+            "المدرس",
+
+        teacher_name:
+            "المدرس",
+
+        class:
+            "الفصل",
+
+        classroom:
+            "الفصل",
+
+        room:
+            "الفصل",
+
+        time:
+            "الوقت",
+
+        start:
+            "من",
+
+        end:
+            "إلى",
+
+        notes:
+            "ملاحظات"
+
+    };
+
+
+    /* ========================================================
+       BUILD TABLE
+    ======================================================== */
+
+    let html = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+    `;
+
+
+    columns.forEach(
+        column => {
+
+            const title =
+                columnNames[column] ||
+                column;
+
+            html += `
+
+                    <th>
+                        ${escapeHTML(title)}
+                    </th>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+    `;
+
+
+    lessons.forEach(
+        row => {
+
+            html += `<tr>`;
+
+
+            columns.forEach(
+                column => {
+
+                    let value =
+                        row[column];
+
+
+                    if (
+                        value === undefined ||
+                        value === null
+                    ) {
+
+                        value = "";
+
+                    }
+
+
+                    /*
+                       Firestore Timestamp
+                    */
+
+                    if (
+                        value &&
+                        typeof value === "object" &&
+                        typeof value.toDate === "function"
+                    ) {
+
+                        value =
+                            value
+                                .toDate()
+                                .toLocaleDateString(
+                                    "ar-EG"
+                                );
+
+                    }
+
+
+                    /*
+                       Array
+                    */
+
+                    if (
+                        Array.isArray(value)
+                    ) {
+
+                        value =
+                            value.join(" - ");
+
+                    }
+
+
+                    /*
+                       Object
+                    */
+
+                    if (
+                        typeof value === "object" &&
+                        value !== null
+                    ) {
+
+                        try {
+
+                            value =
+                                JSON.stringify(
+                                    value
+                                );
+
+                        }
+
+                        catch (e) {
+
+                            value = "";
+
+                        }
+
+                    }
+
+
+                    html += `
+
+                        <td>
+                            ${escapeHTML(value)}
+                        </td>
+
+                    `;
+
+                }
+            );
+
+
+            html += `</tr>`;
+
+        }
+    );
+
+
+    html += `
+
+            </tbody>
+
+        </table>
+
+    `;
+
+
+    container.innerHTML =
+        html;
+
+}
+
+
+/* ============================================================
+   LOAD SCHEDULE
+============================================================ */
+
+async function loadSchedule() {
+
+    try {
+
+        if (!db) {
+
+            throw new Error(
+                "قاعدة البيانات غير متاحة."
+            );
+
+        }
+
+
+        const documentId =
+            getScheduleDocumentId();
+
+
+        console.log(
+            "Loading schedule:",
+            documentId
+        );
+
+
+        const scheduleRef =
+            db
+                .collection("schedules")
+                .doc(documentId);
+
+
+        const snapshot =
+            await scheduleRef.get();
+
+
+        console.log(
+            "Schedule exists:",
+            snapshot.exists
+        );
+
+
+        if (!snapshot.exists) {
+
+            showNotFound();
+
+            return;
+
+        }
+
+
+        const data =
+            snapshot.data() || {};
+
+
+        currentScheduleData =
+            data;
+
+
+        console.log(
+            "Schedule data:",
+            data
+        );
+
+
+        /* --------------------------------------------------------
+           CONTROL NAME
+        -------------------------------------------------------- */
+
+        if (
+            data.control_name !== undefined &&
+            data.control_name !== null &&
+            String(data.control_name).trim() !== ""
+        ) {
+
+            setText(
+                "sign-control",
+                data.control_name
+            );
+
+
+            const controlSection =
+                getElement("controlSection");
+
+
+            if (controlSection) {
+
+                controlSection.classList.remove(
+                    "hidden"
+                );
+
+            }
+
+        }
+
+
+        /* --------------------------------------------------------
+           TABLE
+        -------------------------------------------------------- */
+
+        renderTable(
+            data
+        );
+
+
+        /* --------------------------------------------------------
+           SCHOOL INFORMATION
+        -------------------------------------------------------- */
+
+        await loadSchoolInformation();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Schedule loading error:",
+            error
+        );
+
+
+        let message =
+            "حدث خطأ أثناء جلب بيانات الجدول.";
+
+
+        if (
+            error &&
+            error.code ===
+            "permission-denied"
+        ) {
+
+            message =
+                "ليس لديك صلاحية لقراءة بيانات هذا الجدول. راجع قواعد Firestore.";
+
+        }
+
+
+        if (
+            error &&
+            error.code ===
+            "failed-precondition"
+        ) {
+
+            message =
+                "هناك مشكلة في إعدادات قاعدة البيانات.";
+
+        }
+
+
+        showError(
+            message
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   INITIALIZE PAGE
+============================================================ */
+
+async function initializePage() {
+
+    console.log(
+        "Official schedule viewer started."
+    );
+
+
+    /* --------------------------------------------------------
+       DATE
+    -------------------------------------------------------- */
+
+    setPrintDate();
+
+
+    /* --------------------------------------------------------
+       URL
+    -------------------------------------------------------- */
+
+    const params =
+        getURLParameters();
+
+
+    currentGrade =
+        params.grade;
+
+
+    currentType =
+        params.type;
+
+
+    console.log(
+        "URL parameters:",
+        {
+            grade: currentGrade,
+            type: currentType
+        }
+    );
+
+
+    /* --------------------------------------------------------
+       VALIDATE
+    -------------------------------------------------------- */
+
+    if (
+        !currentGrade ||
+        !currentType
+    ) {
+
+        showInvalidURL();
+
+        return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       TITLE
+    -------------------------------------------------------- */
+
+    setDocumentTitle();
+
+
+    /* --------------------------------------------------------
+       FIREBASE
+    -------------------------------------------------------- */
+
+    const firebaseReady =
+        initializeFirebase();
+
+
+    if (!firebaseReady) {
+
+        return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       LOAD DATA
+    -------------------------------------------------------- */
+
+    await loadSchedule();
+
+}
+
+
+/* ============================================================
+   START
+============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        initializePage();
+
+    }
+);
