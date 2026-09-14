@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        المستند الرسمي | مدرسة الملك الكامل
+    </title>
+
+
+    <!-- ============================================================
+         EXTERNAL LIBRARIES
+    ============================================================ -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+
+    <!-- ============================================================
+         PAGE STYLE
+    ============================================================ -->
+
+    <style>
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        /* ========================================================
+           PRINT PAGE
+        ======================================================== */
+
+        .print-page {
+
+            background: white;
+
+            width: 210mm;
+
+            min-height: 296mm;
+
+            max-height: 296mm;
+
+            padding: 10mm;
+
+            margin: 20px auto;
+
+            box-shadow:
+                0 4px 15px rgba(0, 0, 0, 0.1);
+
+            position: relative;
+
+            border: 1px solid #334155;
+
+            display: flex;
+
+            flex-direction: column;
+
+            overflow: hidden;
+
+        }
+
+
+        /* ========================================================
+           TABLE
+        ======================================================== */
+
+        #tableContainer table {
+
+            width: 100% !important;
+
+            border-collapse: collapse !important;
+
+            margin: 5px 0 !important;
+
+            border: 2px solid #000 !important;
+
+        }
+
+
+        #tableContainer th,
+        #tableContainer td {
+
+            border: 1px solid #000 !important;
+
+            padding: 6px 2px !important;
+
+            text-align: center !important;
+
+            font-size: 12px !important;
+
+            font-weight: 700 !important;
+
+        }
+
+
+        #tableContainer th {
+
+            background-color: #1e3a8a !important;
+
+            color: white !important;
+
+            -webkit-print-color-adjust: exact;
+
+            print-color-adjust: exact;
+
+        }
+
+
+        #tableContainer tr:nth-child(even) {
+
+            background-color: #f8fafc;
+
+        }
+
+
+        /* ========================================================
+           WATERMARK
+        ======================================================== */
+
+        .watermark {
+
+            position: absolute;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform:
+                translate(-50%, -50%)
+                rotate(-30deg);
+
+            font-size: 120px;
+
+            color: rgba(0, 0, 0, 0.02);
+
+            pointer-events: none;
+
+            white-space: nowrap;
+
+            font-weight: 900;
+
+        }
+
+
+        /* ========================================================
+           PRINT
+        ======================================================== */
+
+        @media print {
+
+            @page {
+
+                size: A4;
+
+                margin: 0;
+
+            }
+
+
+            body {
+
+                background: white;
+
+                padding: 0;
+
+            }
+
+
+            .no-print {
+
+                display: none !important;
+
+            }
+
+
+            .print-page {
+
+                margin: 0;
+
+                box-shadow: none;
+
+                width: 100%;
+
+                height: 100vh;
+
+                min-height: 0;
+
+                max-height: none;
+
+                border: none;
+
+                padding: 8mm;
+
+            }
+
+
+            #tableContainer table {
+
+                zoom: 0.95;
+
+            }
+
+
+            #tableContainer th {
+
+                background-color: #f1f5f9 !important;
+
+                color: black !important;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ============================================================
+         CONTROL BAR
+    ============================================================ -->
+
+    <div
+        class="no-print sticky top-0 z-50 bg-white border-b p-4 shadow-sm"
+    >
+
+        <div
+            class="max-w-[210mm] mx-auto flex justify-between items-center"
+        >
+
+            <div
+                class="flex items-center gap-4"
+            >
+
+                <a
+                    href="index.html"
+                    class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold hover:bg-slate-200 transition flex items-center gap-2"
+                >
+
+                    <i class="fas fa-arrow-right"></i>
+
+                    الرئيسية
+
+                </a>
+
+
+                <h3
+                    class="font-black text-blue-900 hidden md:block"
+                >
+                    معاينة الطباعة الرسمية
+                </h3>
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="window.print()"
+                class="bg-blue-700 text-white px-10 py-2 rounded-lg font-black shadow-lg hover:bg-blue-800 transition flex items-center gap-2"
+            >
+
+                <i class="fas fa-print"></i>
+
+                طباعة الجدول
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================================
+         OFFICIAL DOCUMENT
+    ============================================================ -->
+
+    <div
+        class="print-page"
+        id="mainDocument"
+    >
+
+
+        <!-- WATERMARK -->
+
+        <div class="watermark">
+            الملك الكامل
+        </div>
+
+
+        <!-- ========================================================
+             OFFICIAL HEADER
+        ======================================================== -->
+
+        <div
+            class="flex justify-between items-start border-b-2 border-slate-800 pb-2 mb-4"
+        >
+
+
+            <!-- RIGHT -->
+
+            <div
+                class="text-right text-[12px] font-bold leading-tight"
+            >
+
+                <p>
+                    وزارة التربية والتعليم
+                </p>
+
+                <p>
+                    مديرية التربية والتعليم بالدقهلية
+                </p>
+
+                <p>
+                    إدارة شرق المنصورة التعليمية
+                </p>
+
+                <p>
+                    مدرسة الملك الكامل الثانوية العسكرية
+                </p>
+
+            </div>
+
+
+            <!-- CENTER -->
+
+            <div class="text-center">
+
+                <h1
+                    class="text-xl font-black text-slate-900"
+                >
+                    مستخرج رسمي
+                </h1>
+
+                <p
+                    class="text-[12px] font-bold mt-1"
+                >
+                    العام الدراسي 2025 / 2026
+                </p>
+
+            </div>
+
+
+            <!-- LEFT -->
+
+            <div
+                class="text-left text-[11px] font-bold"
+            >
+
+                <p id="printDate">
+                    جاري التحميل...
+                </p>
+
+                <p>
+                    الجمهورية الجديدة
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================
+             DOCUMENT TITLE
+        ======================================================== -->
+
+        <div
+            class="text-center mb-2"
+        >
+
+            <h2
+                id="mainTitle"
+                class="text-xl font-black text-blue-900 border-b-2 border-blue-900 inline-block px-6"
+            >
+                جاري التحميل...
+            </h2>
+
+        </div>
+
+
+        <!-- ========================================================
+             TABLE CONTAINER
+        ======================================================== -->
+
+        <div
+            id="tableContainer"
+            class="overflow-hidden flex-grow"
+        >
+
+            <div
+                class="flex flex-col items-center justify-center py-20 text-slate-300"
+            >
+
+                <i
+                    class="fas fa-spinner fa-spin text-3xl mb-2"
+                ></i>
+
+                <p>
+                    جاري جلب البيانات...
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================
+             SIGNATURES
+        ======================================================== -->
+
+        <div
+            id="signatureArea"
+            class="grid grid-cols-3 mt-4 text-center font-bold text-[13px] border-t border-slate-200 pt-4 mb-4"
+        >
+
+
+            <!-- CONTROL -->
+
+            <div
+                id="controlSection"
+                class="hidden"
+            >
+
+                <p class="mb-8">
+                    رئيس الكنترول
+                </p>
+
+                <p
+                    id="sign-control"
+                    class="text-md"
+                >
+                    ................
+                </p>
+
+            </div>
+
+
+            <!-- AGENT -->
+
+            <div id="agentSection">
+
+                <p class="mb-8">
+                    وكيل شؤون الطلاب
+                </p>
+
+                <p
+                    id="sign-agent"
+                    class="text-md"
+                >
+                    ................
+                </p>
+
+            </div>
+
+
+            <!-- MANAGER -->
+
+            <div id="managerSection">
+
+                <p class="mb-8">
+                    مدير المدرسة
+                </p>
+
+                <p
+                    id="sign-manager"
+                    class="text-md font-black text-blue-900"
+                >
+                    ................
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================
+             FOOTER
+        ======================================================== -->
+
+        <div
+            class="text-center mt-auto"
+        >
+
+            <p
+                class="text-[9px] text-slate-400 border-t pt-1 italic"
+            >
+                * يعتمد هذا الجدول كنسخة رسمية من البوابة الإلكترونية للمدرسة
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================================
+         FIREBASE LIBRARIES
+         
+         موجودة هنا قبل ملف البيانات لأن view-schedule.js يحتاجها.
+    ============================================================ -->
+
+    <script
+        src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"
+    ></script>
+
+    <script
+        src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"
+    ></script>
+
+
+    <!-- ============================================================
+         DATA ENGINE
+         
+         كل Firebase والمنطق موجود في هذا الملف.
+    ============================================================ -->
+
+    <script
+        src="./view-schedule.js"
+        defer
+    ></script>
+
+</body>
+
+</html>
