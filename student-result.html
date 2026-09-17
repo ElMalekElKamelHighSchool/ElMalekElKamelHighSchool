@@ -249,9 +249,7 @@
                     class="grid grid-cols-1 md:grid-cols-3 gap-4"
                 >
 
-                    <!-- ==================================================
-                         GRADE
-                    ================================================== -->
+                    <!-- GRADE -->
 
                     <div>
 
@@ -284,9 +282,7 @@
                     </div>
 
 
-                    <!-- ==================================================
-                         SEARCH INPUT
-                    ================================================== -->
+                    <!-- SEARCH INPUT -->
 
                     <div class="md:col-span-2">
 
@@ -318,9 +314,7 @@
                 </div>
 
 
-                <!-- ======================================================
-                     SEARCH BUTTON
-                ====================================================== -->
+                <!-- SEARCH BUTTON -->
 
                 <button
                     type="submit"
@@ -345,10 +339,7 @@
 
         <div id="displayArea">
 
-
-            <!-- ========================================================
-                 STATUS
-            ======================================================== -->
+            <!-- STATUS -->
 
             <div
                 id="statusNotice"
@@ -392,16 +383,12 @@
             </div>
 
 
-            <!-- ========================================================
-                 RESULT CARD
-            ======================================================== -->
+            <!-- RESULT CARD -->
 
             <div
                 id="resultCard"
                 class="hidden glass-card p-6 md:p-8 rounded-[3rem] border border-emerald-500/30 space-y-6"
             >
-
-                <!-- STUDENT INFO -->
 
                 <div
                     class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-slate-800 pb-6 text-center md:text-right"
@@ -534,9 +521,7 @@
             </div>
 
 
-            <!-- ========================================================
-                 PAYMENT
-            ======================================================== -->
+            <!-- PAYMENT -->
 
             <div
                 id="paymentNotice"
@@ -593,9 +578,7 @@
             </div>
 
 
-            <!-- ========================================================
-                 NOT FOUND
-            ======================================================== -->
+            <!-- NOT FOUND -->
 
             <div
                 id="notFoundNotice"
@@ -626,9 +609,7 @@
             </div>
 
 
-            <!-- ========================================================
-                 WITHHELD
-            ======================================================== -->
+            <!-- WITHHELD -->
 
             <div
                 id="withheldNotice"
@@ -673,7 +654,6 @@
     >
 
         <div class="print-card">
-
 
             <!-- SCHOOL HEADER -->
 
@@ -783,13 +763,27 @@
 
 
     <!-- ============================================================
-         RESULT DATA 
-         
-         IMPORTANT:
-       
+         RESULT ENGINE
+         يتم تحميل ملف المحرك بطريقة غير مباشرة
+         حتى لا يظهر اسم الملف كرابط مباشر في View Source
     ============================================================ -->
 
-    <script src="result-data.js" defer></script>
+    <script>
+    (() => {
+
+        const a = 'result';
+        const b = 'data';
+        const c = 'js';
+
+        const loader = document.createElement('script');
+
+        loader.src = a + '-' + b + '.' + c;
+        loader.defer = true;
+
+        document.body.appendChild(loader);
+
+    })();
+    </script>
 
 </body>
 </html>
